@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"7e5e01ca662646d4961c87963a852307","collectionName":"lesson-course-relations","type":"collection"}
