@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import Course from "./Course.js";
+import slugify from "slugify";
 
 const lessonSchema = new Schema({
   title: {
@@ -14,14 +15,21 @@ const lessonSchema = new Schema({
     type: String,
     required: true,
   },
-  course: {
-    type: Schema.Types.ObjectId,
-    ref: "courses",
-  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
+  slug: {
+    type: String,
+  },
 });
 
-export default mongoose.model("lessons", lessonSchema);
+lessonSchema.pre("validate", function (next) {
+  // Slug değerini oluştur ve şemaya ata
+  this.slug = slugify(this.title, { lower: true, strict: true });
+  next();
+});
+
+const Lesson = mongoose.model("lessons", lessonSchema);
+
+export default Lesson;

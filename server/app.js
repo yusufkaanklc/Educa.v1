@@ -3,8 +3,9 @@ import cors from "cors";
 import dbConnect from "../server/db/dbConnect.js";
 import userRouters from "./routes/userRouters.js";
 import courseRouters from "./routes/courseRouters.js";
+import adminRouters from "./routes/adminRouters.js";
 import categoryRouters from "./routes/categoryRouters.js";
-// import adminRoutes from "./routes/adminRoutes.js";
+import adminMiddlewares from "./middlewares/adminMiddlewares.js";
 import session from "express-session";
 import connectMongo from "connect-mongodb-session";
 import helmet from "helmet";
@@ -51,10 +52,10 @@ app.use(
 );
 
 // Routes
-// app.use("/", adminRoutes);
-app.use("/users", userRouters); // /users endpoint'ine sahip rotaları kullanma
-app.use("/courses", courseRouters); // /courses endpoint'ine sahip rotaları kullanma
-app.use("/categories", categoryRouters); // /categories endpoint'ine sahip rotaları kullanma
+app.use("/admin", adminMiddlewares.isAdmin, adminRouters);
+app.use("/users", userRouters);
+app.use("/courses", courseRouters);
+app.use("/categories", categoryRouters);
 
 app.listen(5000, () => {
   console.log("Server is running on port 5000");

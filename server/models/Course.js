@@ -26,7 +26,6 @@ const courseSchema = new Schema({
   },
   slug: {
     type: String,
-    required: true,
   },
 });
 
@@ -36,4 +35,6 @@ courseSchema.pre("validate", function (next) {
   next();
 });
 
-export default mongoose.model("courses", courseSchema);
+const Course = mongoose.model("courses", courseSchema);
+
+export default Course;

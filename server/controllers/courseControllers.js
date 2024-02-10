@@ -155,6 +155,10 @@ const deleteCourse = async (req, res) => {
 
     const course = await Course.findOneAndDelete({ slug: courseSlug });
 
+    if (!course) {
+      throw new Error("Course could not be deleted");
+    }
+
     // Kullanıcının sahipliğini güncelle
     const updatedOwnership = await Ownership.findOneAndUpdate(
       { user: req.session.userID },

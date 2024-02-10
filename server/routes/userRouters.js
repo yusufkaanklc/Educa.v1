@@ -1,32 +1,32 @@
 import express from "express";
 import userControllers from "../controllers/userControllers.js";
-import userMiddlewares from "../middlewares/userMiddlewares.js";
+import authMiddlewares from "../middlewares/authMiddlewares.js";
 const router = express.Router();
 
 // Kullanıcı kaydı için POST isteği
 router
   .route("/register")
-  .post(userMiddlewares.isLoggedOut, userControllers.register);
+  .post(authMiddlewares.isLoggedOut, userControllers.register);
 
 // Kullanıcı girisinde POST isteği
-router.route("/login").post(userMiddlewares.isLoggedOut, userControllers.login);
+router.route("/login").post(authMiddlewares.isLoggedOut, userControllers.login);
 
 // Kullanıcı çıkış işlemi
-router.route("/logout").get(userMiddlewares.isLoggedIn, userControllers.logout);
+router.route("/logout").get(authMiddlewares.isLoggedIn, userControllers.logout);
 
 // Kullanıcı bilgileri için GET isteği
 router
   .route("/account")
-  .get(userMiddlewares.isLoggedIn, userControllers.accountDetails);
+  .get(authMiddlewares.isLoggedIn, userControllers.accountDetails);
 
 // Kullanıcı bilgilerini güncelleme
 router
   .route("/account")
-  .put(userMiddlewares.isLoggedIn, userControllers.accountUpdate);
+  .put(authMiddlewares.isLoggedIn, userControllers.accountUpdate);
 
 // Kullanıcıyı silme
 router
   .route("/account")
-  .delete(userMiddlewares.isLoggedIn, userControllers.deleteAccount);
+  .delete(authMiddlewares.isLoggedIn, userControllers.deleteAccount);
 
 export default router;

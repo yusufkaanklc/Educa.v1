@@ -19,4 +19,6 @@ const ownershipSchema = new Schema({
   },
 });
 
-export default mongoose.model("ownerships", ownershipSchema);
+const Ownership = mongoose.model("ownerships", ownershipSchema);
+
+export default Ownership;

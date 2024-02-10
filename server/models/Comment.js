@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 import User from "./User.js";
-import Course from "./Course.js";
 
 const commentSchema = new Schema({
   text: {
@@ -11,14 +10,19 @@ const commentSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "users",
   },
-  course: {
-    type: Schema.Types.ObjectId,
-    ref: "courses",
-  },
+  replies: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "comments",
+    },
+  ],
+
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-export default mongoose.model("comments", commentSchema);
+const Comment = mongoose.model("comments", commentSchema);
+
+export default Comment;

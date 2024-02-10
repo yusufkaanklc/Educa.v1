@@ -20,11 +20,14 @@ const isLoggedOut = (req, res, next) => {
   }
 };
 
-const isAdmin = async (req, res, next) => {
+const authControl = async (req, res, next) => {
   try {
     const user = await User.findById(req.session.userID);
-    if (user.role !== "admin" && user.role !== "superadmin") {
-      return res.status(403).send("you are not an admin");
+    if (!user) {
+      throw new Error("User not found");
+    }
+    if (user.role !== "teacher") {
+      throw new Error("Unauthorized");
     }
     next();
   } catch (error) {
@@ -32,4 +35,4 @@ const isAdmin = async (req, res, next) => {
   }
 };
 
-export default { isLoggedIn, isLoggedOut, isAdmin };
+export default { isLoggedIn, isLoggedOut, authControl };

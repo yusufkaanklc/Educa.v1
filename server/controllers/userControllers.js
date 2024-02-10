@@ -74,7 +74,6 @@ const logout = async (req, res) => {
 
 const accountDetails = async (req, res) => {
   try {
-    console.log(req.session.userID);
     const user = await User.findById(req.session.userID);
     if (!user) return res.status(400).json({ message: "User not found" });
     res.status(200).json({ user });
@@ -156,6 +155,8 @@ const enrollCourse = async (req, res) => {
 
 const getEnrollments = async (req, res) => {
   try {
+    if (!req.session.userID) throw new Error("User not found");
+
     const enrollments = await Enrollment.find({
       user: req.session.userID,
     }).populate({ path: "courses", select: "title description" });
@@ -171,14 +172,15 @@ const getEnrollments = async (req, res) => {
 
 const disenrollCourse = async (req, res) => {
   try {
-    const courseId = req.params.courseId;
+    const courseSlug = req.params.courseSlug;
+    const course = await Course.findOne({ slug: courseSlug });
     const enrollments = await Enrollment.findOneAndUpdate({
       user: req.session.userID,
     });
     if (!enrollments) throw new Error("Enrollments not found");
-    if (enrollments.courses.includes(courseId)) {
+    if (enrollments.courses.includes(course._id)) {
       enrollments.courses = enrollments.courses.filter(
-        (course) => course !== courseId
+        (course) => course !== course._id
       );
       await enrollments.save();
     }
