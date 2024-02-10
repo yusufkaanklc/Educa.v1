@@ -5,6 +5,7 @@ import User from "../models/User.js";
 import Enrollment from "../models/Enrollment.js";
 import { Types } from "mongoose";
 import Ownership from "../models/Ownership.js";
+import CommentCourseRelation from "../models/commentCourseRelations.js";
 
 const getAllUsers = async (req, res) => {
   try {
@@ -47,6 +48,27 @@ const removeUsers = async (req, res) => {
       // Kullanıcıya ait yorumları silme
       await Comment.deleteMany({ user: userId });
 
+      for (const userComment of userComments) {
+        const commentCourseRelations = await CommentCourseRelation.findOne({
+          comments: userComment._id,
+        });
+
+        let relationId = commentCourseRelations._id;
+
+        await CommentCourseRelation.updateMany(
+          { comments: userComment._id },
+          { $pull: { comments: userComment._id } },
+          { multi: true }
+        );
+
+        const findRelation = await CommentCourseRelation.findById(relationId);
+
+        console.log(findRelation.comments.length);
+        if (findRelation && findRelation.comments.length === 0) {
+          await CommentCourseRelation.findByIdAndDelete(relationId);
+        }
+      }
+
       // Kullanıcıya ait enrollments'ları silme
       await Enrollment.deleteMany({ user: userId });
 
@@ -63,6 +85,8 @@ const removeUsers = async (req, res) => {
     if (deletedUserCount.length === 0) {
       throw new Error("No users could be deleted");
     }
+
+    req.session.destroy();
 
     res
       .status(200)

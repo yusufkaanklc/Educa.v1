@@ -2,8 +2,10 @@ import User from "../models/User.js";
 import Ownership from "../models/Ownership.js";
 import Enrollment from "../models/Enrollment.js";
 import Category from "../models/Category.js";
+import Comment from "../models/Comment.js";
 import bcrypt from "bcrypt";
 import Course from "../models/Course.js";
+import CommentCourseRelation from "../models/commentCourseRelations.js";
 
 const register = async (req, res) => {
   try {
@@ -99,19 +101,53 @@ const accountUpdate = async (req, res) => {
 
 const deleteAccount = async (req, res) => {
   try {
-    // Kullanıcıyı bul ve sil
-    const user = await User.findByIdAndDelete(req.session.userID);
-    if (!user) {
-      return res.status(404).json({ message: "Account not found" });
+    // Kullanıcıyı bulma
+    const user = await User.findById(req.session.userID);
+    if (!user) throw new Error("User not found");
+
+    // Kullanıcının yaptığı tüm yorumları bulma
+    const userComments = await Comment.find({ user: user?._id });
+
+    // Yorumlara ait yanıtları silme
+    const replyIds = userComments.flatMap((comment) => comment.replies);
+    await Comment.deleteMany({ _id: { $in: replyIds } });
+
+    // Kullanıcının yaptığı tüm yorumları silme
+    await Comment.deleteMany({ user: user?._id });
+
+    // Kullanıcının yaptığı yorumların ilişkilerini güncelleme
+    for (const userComment of userComments) {
+      const commentCourseRelations = await CommentCourseRelation.findOne({
+        comments: userComment._id,
+      });
+
+      let relationId = commentCourseRelations._id;
+
+      await CommentCourseRelation.updateMany(
+        { comments: userComment._id },
+        { $pull: { comments: userComment._id } },
+        { multi: true }
+      );
+
+      const findRelation = await CommentCourseRelation.findById(relationId);
+
+      console.log(findRelation.comments.length);
+      if (findRelation && findRelation.comments.length === 0) {
+        await CommentCourseRelation.findByIdAndDelete(relationId);
+      }
     }
 
-    // Kullanıcının sahip olduğu kayıtları bul ve sil
-    await Ownership.deleteMany({ owner: req.session.userID });
+    // Kullanıcının enrollments'larını silme
+    await Enrollment.deleteMany({ user: user?._id });
 
-    // Kullanıcının kayıtlı olduğu dersleri bul ve sil
-    await Enrollment.deleteMany({ user: req.session.userID });
+    // Kullanıcının ownerships'larını silme
+    await Ownership.deleteMany({ user: user?._id });
 
-    // Oturumu sonlandır
+    // Kullanıcıyı silme
+    const deletedUser = await User.findByIdAndDelete(user?._id);
+    if (!deletedUser) throw new Error("Failed to delete user");
+
+    // Oturumu sonlandırma
     req.session.destroy();
 
     res.status(200).json({ message: "Account deleted successfully" });
