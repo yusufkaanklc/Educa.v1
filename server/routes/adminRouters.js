@@ -4,9 +4,9 @@ import authMiddlewares from "../middlewares/authMiddlewares.js";
 const router = express.Router();
 
 // Bir kullanıcı oluşturma
-router
-  .route("/users/create-user")
-  .post(authMiddlewares.isLoggedIn, adminControllers.createUser);
+// router
+//   .route("/users/create-user")
+//   .post(authMiddlewares.isLoggedIn, adminControllers.createUser);
 
 // Bütün kullanıcıları getiren GET isteği
 router
@@ -19,10 +19,10 @@ router
   .get(authMiddlewares.isLoggedIn, adminControllers.getUser);
 
 // Bir kullanıcıyı güncelleme
-router
-  .route("/users/:userId")
-  .put(authMiddlewares.isLoggedIn, adminControllers.updateUser);
-1;
+// router
+//   .route("/users/:userId")
+//   .put(authMiddlewares.isLoggedIn, adminControllers.updateUser);
+// ;
 
 // kullanıcıyı silme işlemi
 router
