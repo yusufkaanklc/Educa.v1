@@ -75,8 +75,12 @@ const logout = async (req, res) => {
 };
 
 const accountDetails = async (req, res) => {
+  accountDetailsFunc(req.session.userID, req, res);
+};
+
+const accountDetailsFunc = async (userId, req, res) => {
   try {
-    const user = await User.findById(req.session.userID);
+    const user = await User.findById(userId);
     if (!user) return res.status(400).json({ message: "User not found" });
     res.status(200).json({ user });
   } catch (error) {
@@ -84,67 +88,85 @@ const accountDetails = async (req, res) => {
   }
 };
 
-const accountUpdate = async (req, res) => {
+const accountUpdate = (req, res) => {
+  accountUpdateFunc(req.session.userID, req, res);
+};
+
+const accountUpdateFunc = async (userId, req, res) => {
   try {
-    const { username, password, email, avatar } = req.body;
-    if (!username || !password || !email)
+    const { username, password, email, avatar, role } = req.body;
+    if (!username && !password && !email && !avatar && !role)
       return res.status(400).json("fields are required");
-    const userFindAndUpdate = await User.findByIdAndUpdate(req.session.userID, {
+    const userFindAndUpdate = await User.findByIdAndUpdate(userId, {
       username,
       password,
       email,
       avatar,
+      role,
     });
     if (!userFindAndUpdate) return res.status(400).json("Account not found");
-  } catch (error) {}
+    res.status(201).json({ "updated user": userFindAndUpdate });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 const deleteAccount = async (req, res) => {
   try {
-    // Kullanıcıyı bulma
-    const user = await User.findById(req.session.userID);
-    if (!user) throw new Error("User not found");
+    const userComments = await Comment.find({ user: req.session.userID });
 
-    // Kullanıcının yaptığı tüm yorumları bulma
-    const userComments = await Comment.find({ user: user?._id });
-
-    // Yorumlara ait yanıtları silme
     const replyIds = userComments.flatMap((comment) => comment.replies);
+
     await Comment.deleteMany({ _id: { $in: replyIds } });
 
     // Kullanıcının yaptığı tüm yorumları silme
-    await Comment.deleteMany({ user: user?._id });
+    await Comment.deleteMany({ user: req.session.userID });
 
     // Kullanıcının yaptığı yorumların ilişkilerini güncelleme
     for (const userComment of userComments) {
+      await Comment.findOneAndUpdate(
+        {
+          replies: userComment._id,
+        },
+        { $pull: { replies: userComment?._id } },
+        { new: true }
+      );
+
+      await Comment.findByIdAndUpdate(userComment?._id, {
+        $pull: {
+          replies: { $in: replyIds },
+        },
+      });
+
       const commentCourseRelations = await CommentCourseRelation.findOne({
         comments: userComment._id,
       });
 
-      let relationId = commentCourseRelations._id;
+      if (commentCourseRelations) {
+        let relationId = commentCourseRelations._id;
 
-      await CommentCourseRelation.updateMany(
-        { comments: userComment._id },
-        { $pull: { comments: userComment._id } },
-        { multi: true }
-      );
+        await CommentCourseRelation.updateMany(
+          { comments: userComment._id },
+          { $pull: { comments: userComment._id } },
+          { multi: true }
+        );
 
-      const findRelation = await CommentCourseRelation.findById(relationId);
+        const findRelation = await CommentCourseRelation.findById(relationId);
 
-      console.log(findRelation.comments.length);
-      if (findRelation && findRelation.comments.length === 0) {
-        await CommentCourseRelation.findByIdAndDelete(relationId);
+        if (findRelation && findRelation.comments.length === 0) {
+          await CommentCourseRelation.findByIdAndDelete(relationId);
+        }
       }
     }
 
     // Kullanıcının enrollments'larını silme
-    await Enrollment.deleteMany({ user: user?._id });
+    await Enrollment.deleteMany({ user: req.session.userID });
 
     // Kullanıcının ownerships'larını silme
-    await Ownership.deleteMany({ user: user?._id });
+    await Ownership.deleteMany({ user: req.session.userID });
 
     // Kullanıcıyı silme
-    const deletedUser = await User.findByIdAndDelete(user?._id);
+    const deletedUser = await User.findByIdAndDelete(req.session.userID);
     if (!deletedUser) throw new Error("Failed to delete user");
 
     // Oturumu sonlandırma
@@ -274,7 +296,9 @@ export default {
   login,
   logout,
   accountDetails,
+  accountDetailsFunc,
   accountUpdate,
+  accountUpdateFunc,
   deleteAccount,
   enrollCourse,
   getEnrollments,

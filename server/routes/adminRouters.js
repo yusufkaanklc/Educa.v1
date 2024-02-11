@@ -1,52 +1,115 @@
 import express from "express";
 import adminControllers from "../controllers/adminControllers.js";
 import authMiddlewares from "../middlewares/authMiddlewares.js";
+import courseControllers from "../controllers/courseControllers.js";
+import lessonControllers from "../controllers/lessonControllers.js";
+import commentControllers from "../controllers/commentControllers.js";
 const router = express.Router();
 
-// Bir kullanıcı oluşturma
-// router
-//   .route("/users/create-user")
-//   .post(authMiddlewares.isLoggedIn, adminControllers.createUser);
-
 // Bütün kullanıcıları getiren GET isteği
-router
-  .route("/users")
-  .get(authMiddlewares.isLoggedIn, adminControllers.getAllUsers);
+router.route("/users").get(adminControllers.getAllUsers);
 
 // Bir kullanıcıyı getirmek için GET isteği
-router
-  .route("/users/:userId")
-  .get(authMiddlewares.isLoggedIn, adminControllers.getUser);
+router.route("/users/:userId").get(adminControllers.getUser);
 
 // Bir kullanıcıyı güncelleme
-// router
-//   .route("/users/:userId")
-//   .put(authMiddlewares.isLoggedIn, adminControllers.updateUser);
-// ;
+router.route("/users/:userId").put(adminControllers.updateUser);
 
 // kullanıcıyı silme işlemi
+router.route("/remove-users").delete(adminControllers.removeUsers);
+
+// Bir kurs oluşturmak için POST isteği
+router.route("/add-course").post(courseControllers.createCourse);
+
+// Kursları getiren GET isteği
+router.route("/courses").get(courseControllers.getAllCourses);
+
+// Bir kursu getiren GET isteği
+router.route("/courses/:courseSlug").get(courseControllers.getCourse);
+
+//Bir kursu güncellemek için PUT isteği
+router.route("/courses/:courseSlug").put(courseControllers.updateCourse);
+
+//Bir kursu silmek için DELETE isteği
+router.route("/courses/:courseSlug").delete(courseControllers.deleteCourse);
+
+// Bir kursa yorum yapmak için POST isteği
 router
-  .route("/users/remove-users")
-  .delete(authMiddlewares.isLoggedIn, adminControllers.removeUsers);
+  .route("/courses/:courseSlug/add-comment")
+  .post(commentControllers.addComment);
+
+// Bir kursun yorumlarını getirmek için GET isteği
+router
+  .route("/courses/:courseSlug/comments")
+  .get(commentControllers.getComments);
+
+// Bir kursun yorumunu güncellemek için PUT isteği
+router
+  .route("/courses/:courseSlug/comments/:commentId")
+  .put(commentControllers.updateComment);
+
+// Bir kursun yorumunu silmek için DELETE isteği
+router
+  .route("/courses/:courseSlug/comments/:commentId")
+  .delete(commentControllers.deleteComment);
+
+// Bir yorume cevap vermek için POST isteği
+router
+  .route("/courses/:courseSlug/comments/:commentId/add-reply")
+  .post(commentControllers.addReply);
+
+// Cevapları getirmek için GET isteği
+router
+  .route("/courses/:courseSlug/comments/:commentId/replies")
+  .get(commentControllers.getReplies);
+
+// Cevabı güncellemek için PUT isteği
+router
+  .route("/courses/:courseSlug/comments/:commentId/replies/:replyId")
+  .put(commentControllers.updateReply);
+
+// Bir cevabı silmek için DELETE isteği
+router
+  .route("/courses/:courseSlug/comments/:commentId/replies/:replyId")
+  .delete(commentControllers.deleteReply);
+
+// Ders eklemek için POST isteği
+router
+  .route("/courses/:courseSlug/add-lesson")
+  .post(lessonControllers.createLesson);
+
+// Dersleri getirmek için GET isteği
+router.route("/courses/:courseSlug/lessons").get(lessonControllers.getLessons);
+
+// Bir dersi getirmek için GET isteği
+router
+  .route("/courses/:courseSlug/lessons/:lessonSlug")
+  .get(lessonControllers.getLesson);
+
+// Bir dersi güncellemek için PUT isteği
+router
+  .route("/courses/:courseSlug/lessons/:lessonSlug")
+  .put(lessonControllers.updateLesson);
+
+// Bir dersi silmek için DELETE isteği
+router
+  .route("/courses/:courseSlug/lessons/:lessonSlug")
+  .delete(lessonControllers.deleteLesson);
 
 // Bütün kategorileri getiren GET isteği
 router.route("/categories").get(adminControllers.getAllCategories);
 
 // Yeni bir kategori oluşturmak için POST isteği
-router
-  .route("/add-category")
-  .post(authMiddlewares.isLoggedIn, adminControllers.createCategory);
+router.route("/add-category").post(adminControllers.createCategory);
 
 // Bir kategoriyi getiren GET isteği
 router.route("/categories/:categorySlug").get(adminControllers.getCategory);
 
 // Bir kategoriyi güncellemek için PUT isteği
-router
-  .route("/categories/:categorySlug")
-  .put(authMiddlewares.isLoggedIn, adminControllers.updateCategory);
+router.route("/categories/:categorySlug").put(adminControllers.updateCategory);
 // Bir kategoriyi silmek için DELETE isteği
 router
   .route("/categories/:categorySlug")
-  .delete(authMiddlewares.isLoggedIn, adminControllers.deleteCategory);
+  .delete(adminControllers.deleteCategory);
 
 export default router;

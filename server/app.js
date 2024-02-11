@@ -5,10 +5,10 @@ import userRouters from "./routes/userRouters.js";
 import courseRouters from "./routes/courseRouters.js";
 import adminRouters from "./routes/adminRouters.js";
 import categoryRouters from "./routes/categoryRouters.js";
-import adminMiddlewares from "./middlewares/adminMiddlewares.js";
 import session from "express-session";
 import connectMongo from "connect-mongodb-session";
 import helmet from "helmet";
+import authMiddlewares from "./middlewares/authMiddlewares.js";
 
 const app = express();
 
@@ -52,7 +52,12 @@ app.use(
 );
 
 // Routes
-app.use("/admin", adminMiddlewares.isAdmin, adminRouters);
+app.use(
+  "/admin",
+  authMiddlewares.isLoggedIn,
+  authMiddlewares.isAdmin,
+  adminRouters
+);
 app.use("/users", userRouters);
 app.use("/courses", courseRouters);
 app.use("/categories", categoryRouters);

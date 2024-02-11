@@ -127,8 +127,14 @@ const deleteComment = async (req, res) => {
 
 const addReply = async (req, res) => {
   try {
-    const { commentId } = req.params;
-    if (commentId === "") throw new Error("commentId required");
+    const { commentId, courseSlug } = req.params;
+    const course = await Course.findOne({ slug: courseSlug });
+    const commentCourseRelation = await CommentCourseRelation.findOne({
+      course: course?._id,
+      comments: commentId,
+    });
+    if (!commentCourseRelation)
+      throw new Error("This course does not have this review ");
     const { text } = req.body;
     if (text === "") throw new Error("Text cannot be empty");
     const newReply = new Comment({

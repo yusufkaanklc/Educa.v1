@@ -1,3 +1,4 @@
+import slugify from "slugify";
 import Course from "../models/Course.js";
 import Lesson from "../models/Lesson.js";
 import LessonCourseRelation from "../models/lessonCourseRelations.js";
@@ -120,12 +121,14 @@ const updateLesson = async (req, res) => {
     if (!course || !lesson || !lessonRelation)
       throw new Error("Invalid course or lesson");
 
+    const newSlug = slugify(title, { lower: true, strict: true });
     const updatedLesson = await Lesson.findByIdAndUpdate(
       lesson?._id,
       {
         title,
         description,
         videoUrl,
+        slug: newSlug,
       },
       { new: true }
     );

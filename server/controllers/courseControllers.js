@@ -1,7 +1,12 @@
 import Category from "../models/Category.js";
 import Course from "../models/Course.js";
 import Enrollment from "../models/Enrollment.js";
+import Lesson from "../models/Lesson.js";
 import Ownership from "../models/Ownership.js";
+import LessonCourseRelation from "../models/lessonCourseRelations.js";
+import CommentCourseRelation from "../models/commentCourseRelations.js";
+import Comment from "../models/Comment.js";
+import slugify from "slugify";
 
 const createCourse = async (req, res) => {
   try {
@@ -112,6 +117,8 @@ const updateCourse = async (req, res) => {
       imageUrl === ""
     )
       throw new Error("fields cannot be empty");
+
+    const newSlug = slugify(title, { lower: true, strict: true });
     const course = await Course.findOneAndUpdate(
       { slug: courseSlug },
       {
@@ -120,7 +127,9 @@ const updateCourse = async (req, res) => {
         category,
         imageUrl,
         price,
-      }
+        slug: newSlug,
+      },
+      { new: true }
     );
     if (!course) {
       throw new Error("Course could not be updated");
@@ -135,49 +144,43 @@ const deleteCourse = async (req, res) => {
   try {
     const courseSlug = req.params.courseSlug;
 
-    // Kursu bul ve sil
+    const course = await Course.findOneAndDelete({ slug: courseSlug });
+    if (!course) throw new Error("Course not found");
 
-    const findCourse = await Course.findOne({ slug: courseSlug });
+    const enrollment = await Enrollment.findOne({ courses: course._id });
+    if (enrollment)
+      throw new Error("Course has enrolled users, cannot be deleted");
 
-    if (!findCourse) {
-      throw new Error("Course not found");
+    const lessonCourseRelation = await LessonCourseRelation.findOneAndDelete({
+      course: course._id,
+    });
+    if (lessonCourseRelation)
+      await Lesson.deleteMany({ _id: { $in: lessonCourseRelation.lessons } });
+
+    const commentCourseRelation = await CommentCourseRelation.findOneAndDelete({
+      course: course._id,
+    });
+    if (commentCourseRelation) {
+      const repliesIds = commentCourseRelation.comments.flatMap(
+        (comment) => comment.replies
+      );
+      await Comment.deleteMany({
+        _id: { $in: repliesIds.concat(commentCourseRelation.comments) }, // burada comments ve replies birleştririlip toplu siliniyor
+      });
     }
 
-    // Kullanıcıların kursa kaydını kontrol et
-    const enrollment = await Enrollment.findOne({
-      courses: { $in: [findCourse._id] },
+    const existingCourse = await Ownership.findOneAndUpdate(
+      { courses: { $in: course._id } },
+      { $pull: { courses: course._id } }
+    );
+
+    await Ownership.deleteOne({
+      _id: existingCourse._id,
+      courses: { $exists: true, $size: 0 },
     });
 
-    // Eğer kursa kayıtlı kullanıcı varsa silme işlemini gerçekleştirme
-    if (enrollment) {
-      throw new Error("Course has enrolled users, cannot be deleted");
-    }
-
-    const course = await Course.findOneAndDelete({ slug: courseSlug });
-
-    if (!course) {
-      throw new Error("Course could not be deleted");
-    }
-
-    // Kullanıcının sahipliğini güncelle
-    const updatedOwnership = await Ownership.findOneAndUpdate(
-      { user: req.session.userID },
-      { $pull: { courses: findCourse._id } },
-      { new: true }
-    );
-    if (!updatedOwnership) {
-      throw new Error("Ownership not found or updated");
-    }
-
-    // Eğer kullanıcının başka bir kursu yoksa sahipliği sil
-    if (updatedOwnership.courses.length === 0) {
-      await Ownership.deleteOne({ user: req.session.userID });
-    }
-
-    // Başarılı yanıt
     res.status(200).json({ message: "Course deleted" });
   } catch (error) {
-    // Hata durumunda
     res.status(500).json({ message: error.message });
   }
 };

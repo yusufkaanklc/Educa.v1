@@ -79,6 +79,7 @@ router
   .put(
     authMiddlewares.isLoggedIn,
     courseMiddlewares.ownershipAndEnrollControl,
+    courseMiddlewares.ownershipControlForComment,
     commentControllers.updateComment
   );
 
@@ -88,6 +89,7 @@ router
   .delete(
     authMiddlewares.isLoggedIn,
     courseMiddlewares.ownershipAndEnrollControl,
+    courseMiddlewares.ownershipControlForComment,
     commentControllers.deleteComment
   );
 
@@ -111,6 +113,7 @@ router
   .put(
     authMiddlewares.isLoggedIn,
     courseMiddlewares.ownershipAndEnrollControl,
+    courseMiddlewares.ownershipControlForReply,
     commentControllers.updateReply
   );
 
@@ -120,6 +123,7 @@ router
   .delete(
     authMiddlewares.isLoggedIn,
     courseMiddlewares.ownershipAndEnrollControl,
+    courseMiddlewares.ownershipControlForReply,
     commentControllers.deleteReply
   );
 

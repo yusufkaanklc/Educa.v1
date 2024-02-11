@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import Ownership from "../models/Ownership.js";
 import Course from "../models/Course.js";
 import Enrollment from "../models/Enrollment.js";
+import Comment from "../models/Comment.js";
 
 const ownershipControl = async (req, res, next) => {
   try {
@@ -58,8 +59,30 @@ const ownershipAndEnrollControl = async (req, res, next) => {
   }
 };
 
+const ownershipControlForCommentFunc = async (commentId, req, res, next) => {
+  try {
+    const comment = await Comment.findById(commentId);
+    if (comment.user !== req.session.userId) throw new Error("Unauthorized");
+    next();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const ownershipControlForComment = (req, res, next) => {
+  const { commentId } = req.params;
+  ownershipControlForCommentFunc(commentId, req, res, next);
+};
+
+const ownershipControlForReply = (req, res, next) => {
+  const { replyId } = req.params;
+  ownershipControlForCommentFunc(replyId, req, res, next);
+};
+
 export default {
   ownershipControl,
   enrollControl,
   ownershipAndEnrollControl,
+  ownershipControlForReply,
+  ownershipControlForComment,
 };

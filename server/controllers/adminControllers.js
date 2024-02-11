@@ -3,29 +3,51 @@ import Course from "../models/Course.js";
 import Comment from "../models/Comment.js";
 import User from "../models/User.js";
 import Enrollment from "../models/Enrollment.js";
-import { Types } from "mongoose";
 import Ownership from "../models/Ownership.js";
 import CommentCourseRelation from "../models/commentCourseRelations.js";
+import userControllers from "./userControllers.js";
+import slugify from "slugify";
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
-    if (!users || users.length === 0) throw new Error("Users not found");
-    res.status(200).json({ "users :": users });
+    const { role, username } = req.query;
+    // Filtreleme için boş filtre oluşturma
+    let filter = {};
+    // Eğer role parametresi varsa ve boş değilse filtreye ekle
+    if (role && role !== "") {
+      filter.role = role;
+    }
+    // Eğer username parametresi varsa ve boş değilse filtreye eklemek için regex kullan
+    if (username && username !== "") {
+      const regexPattern = new RegExp(username, "i");
+      filter.username = regexPattern;
+    }
+    // Kullanıcı adı ve rol boş ise tüm kullanıcıları getir
+    if (!role && !username) {
+      filter = {};
+    }
+    // Veritabanından kullanıcıları bul
+    const users = await User.find(filter);
+    // Kullanıcı bulunamadığında hata fırlat
+    if (!users || users.length === 0) {
+      throw new Error("Kullanıcılar bulunamadı");
+    }
+    // Kullanıcıları başarıyla bulduğunda 200 OK yanıtı gönder
+    res.status(200).json({ users: users });
   } catch (error) {
+    // Hata durumunda 500 hatası gönder
     res.status(500).json({ message: error.message });
   }
 };
 
 const getUser = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const user = await User.findById(userId);
-    if (!user) throw new Error("User not found");
-    res.status(200).json({ "user : ": user });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const { userId } = req.params;
+  userControllers.accountDetailsFunc(userId, req, res);
+};
+
+const updateUser = (req, res) => {
+  const { userId } = req.params;
+  userControllers.accountUpdateFunc(userId, req, res);
 };
 
 const removeUsers = async (req, res) => {
@@ -49,23 +71,32 @@ const removeUsers = async (req, res) => {
       await Comment.deleteMany({ user: userId });
 
       for (const userComment of userComments) {
+        await Comment.findOneAndUpdate(
+          {
+            replies: userComment._id,
+          },
+          { $pull: { replies: userComment?._id } },
+          { new: true }
+        );
+
         const commentCourseRelations = await CommentCourseRelation.findOne({
           comments: userComment._id,
         });
 
-        let relationId = commentCourseRelations._id;
+        if (commentCourseRelations) {
+          // Null değeri kontrolü
+          let relationId = commentCourseRelations._id;
 
-        await CommentCourseRelation.updateMany(
-          { comments: userComment._id },
-          { $pull: { comments: userComment._id } },
-          { multi: true }
-        );
+          await CommentCourseRelation.updateMany(
+            { comments: userComment._id },
+            { $pull: { comments: userComment._id } },
+            { multi: true }
+          );
 
-        const findRelation = await CommentCourseRelation.findById(relationId);
-
-        console.log(findRelation.comments.length);
-        if (findRelation && findRelation.comments.length === 0) {
-          await CommentCourseRelation.findByIdAndDelete(relationId);
+          const findRelation = await CommentCourseRelation.findById(relationId);
+          if (findRelation && findRelation.comments.length === 0) {
+            await CommentCourseRelation.findByIdAndDelete(relationId);
+          }
         }
       }
 
@@ -98,12 +129,27 @@ const removeUsers = async (req, res) => {
 
 const getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
-    if (!categories || categories.length === 0) {
-      throw new Error("Categories not found");
+    const categoryName = req.query.categoryName;
+    let filter = {};
+
+    // Eğer categoryName parametresi varsa ve boş değilse filtreye ekle
+    if (categoryName && categoryName.trim() !== "") {
+      const regexPattern = new RegExp(categoryName, "i");
+      filter.title = regexPattern;
     }
+
+    // Kategori adı parametresi boşsa, tüm kategorileri getirmek için filtre oluşturulmaz
+    const categories = await Category.find(filter);
+
+    // Kategoriler bulunamadığında hata fırlat
+    if (!categories || categories.length === 0) {
+      throw new Error("Kategoriler bulunamadı");
+    }
+
+    // Kategorileri başarıyla bulduğunda 200 OK yanıtı gönder
     res.status(200).json(categories);
   } catch (error) {
+    // Hata durumunda 500 hatası gönder
     res.status(500).json({ message: error.message });
   }
 };
@@ -148,11 +194,14 @@ const updateCategory = async (req, res) => {
     if (title === "" || description === "") {
       throw new Error("Fields cannot be empty");
     }
+
+    const newSlug = slugify(title, { lower: true, strict: true });
     const category = await Category.findOneAndUpdate(
       { slug: categorySlug },
       {
         title,
         description,
+        slug: newSlug,
       },
       { new: true }
     );
@@ -195,6 +244,7 @@ const deleteCategory = async (req, res) => {
 export default {
   getAllUsers,
   getUser,
+  updateUser,
   removeUsers,
   getAllCategories,
   createCategory,
