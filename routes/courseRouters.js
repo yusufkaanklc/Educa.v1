@@ -5,6 +5,7 @@ import commentControllers from "../controllers/commentControllers.js";
 import lessonControllers from "../controllers/lessonControllers.js";
 import authMiddlewares from "../middlewares/authMiddlewares.js";
 import courseMiddlewares from "../middlewares/courseMiddlewares.js";
+import multerFunc from "../middlewares/multerMiddlewares.js";
 
 const router = express.Router();
 
@@ -14,6 +15,7 @@ router
   .post(
     authMiddlewares.isLoggedIn,
     authMiddlewares.authControl,
+    multerFunc("course"),
     courseControllers.createCourse
   );
 
