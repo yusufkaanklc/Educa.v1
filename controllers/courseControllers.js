@@ -1,19 +1,13 @@
 import Category from "../models/Category.js";
 import Course from "../models/Course.js";
-import Enrollment from "../models/Enrollment.js";
 import Lesson from "../models/Lesson.js";
-import Ownership from "../models/Ownership.js";
-import LessonCourseRelation from "../models/lessonCourseRelations.js";
-import CommentCourseRelation from "../models/commentCourseRelations.js";
 import Comment from "../models/Comment.js";
 import slugify from "slugify";
+import fs from "node:fs/promises";
 
 const createCourse = async (req, res) => {
   try {
     const { title, description, category, price } = req.body;
-    const image = req.file; // multer tarafından yüklenen dosya
-
-    console.log(title, description, category, image);
 
     // Gelen verilerin boş olup olmadığını kontrol edin
     if (!title || !description || !price) {
@@ -25,29 +19,14 @@ const createCourse = async (req, res) => {
       title,
       description,
       price,
+      ownership: req.session.userID,
     };
 
     if (category) newCourseData.category = category;
-    if (image) {
-      newCourseData.imageUrl = image.path;
-    }
+    if (req.uploadedImageUrl) newCourseData.imageUrl = req.uploadedImageUrl;
 
     const newCourse = new Course(newCourseData);
     await newCourse.save();
-
-    // Kurs sahipliğini kontrol edin veya oluşturun
-    let ownership = await Ownership.findOne({ user: req.session.userID });
-    if (!ownership) {
-      ownership = new Ownership({ user: req.session.userID, courses: [] });
-    }
-
-    // Kursu sahipliğe ekleyin ve kaydedin
-    if (!ownership.courses.includes(newCourse._id)) {
-      ownership.courses.push(newCourse._id);
-      await ownership.save();
-    } else {
-      throw new Error("Ownership already exists");
-    }
 
     // Başarılı yanıtı döndürün
     res.status(201).json({ message: "Created course", course: newCourse });
@@ -155,37 +134,24 @@ const deleteCourse = async (req, res) => {
     const course = await Course.findOneAndDelete({ slug: courseSlug });
     if (!course) throw new Error("Course not found");
 
-    const enrollment = await Enrollment.findOne({ courses: course._id });
-    if (enrollment)
-      throw new Error("Course has enrolled users, cannot be deleted");
-
-    const lessonCourseRelation = await LessonCourseRelation.findOneAndDelete({
-      course: course._id,
-    });
-    if (lessonCourseRelation)
-      await Lesson.deleteMany({ _id: { $in: lessonCourseRelation.lessons } });
-
-    const commentCourseRelation = await CommentCourseRelation.findOneAndDelete({
-      course: course._id,
-    });
-    if (commentCourseRelation) {
-      const repliesIds = commentCourseRelation.comments.flatMap(
-        (comment) => comment.replies
-      );
-      await Comment.deleteMany({
-        _id: { $in: repliesIds.concat(commentCourseRelation.comments) }, // burada comments ve replies birleştririlip toplu siliniyor
+    if (course.imageUrl) {
+      fs.unlink(course.imageUrl, (err) => {
+        if (err) throw err;
       });
     }
+    // Kursa ait yorumları al
+    const comments = await Comment.find({ _id: { $in: course.comments } });
 
-    const existingCourse = await Ownership.findOneAndUpdate(
-      { courses: { $in: course._id } },
-      { $pull: { courses: course._id } }
-    );
+    // Her yorum için
+    for (const comment of comments) {
+      // Yorumu sil
+      await Comment.findByIdAndDelete(comment._id);
 
-    await Ownership.deleteOne({
-      _id: existingCourse._id,
-      courses: { $exists: true, $size: 0 },
-    });
+      // Yoruma ait cevapları sil
+      for (const replyId of comment.replies) {
+        await Comment.findByIdAndDelete(replyId);
+      }
+    }
 
     res.status(200).json({ message: "Course deleted" });
   } catch (error) {

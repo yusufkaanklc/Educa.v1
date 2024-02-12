@@ -1,11 +1,8 @@
 import User from "../models/User.js";
-import Ownership from "../models/Ownership.js";
-import Enrollment from "../models/Enrollment.js";
 import Category from "../models/Category.js";
 import Comment from "../models/Comment.js";
 import bcrypt from "bcrypt";
 import Course from "../models/Course.js";
-import CommentCourseRelation from "../models/commentCourseRelations.js";
 
 const register = async (req, res) => {
   try {
@@ -132,38 +129,28 @@ const deleteAccount = async (req, res) => {
         { new: true }
       );
 
-      await Comment.findByIdAndUpdate(userComment?._id, {
-        $pull: {
-          replies: { $in: replyIds },
-        },
-      });
-
-      const commentCourseRelations = await CommentCourseRelation.findOne({
-        comments: userComment._id,
-      });
-
-      if (commentCourseRelations) {
-        let relationId = commentCourseRelations._id;
-
-        await CommentCourseRelation.updateMany(
-          { comments: userComment._id },
-          { $pull: { comments: userComment._id } },
-          { multi: true }
-        );
-
-        const findRelation = await CommentCourseRelation.findById(relationId);
-
-        if (findRelation && findRelation.comments.length === 0) {
-          await CommentCourseRelation.findByIdAndDelete(relationId);
+      await Course.findOneAndUpdate(
+        { comments: userComment._id },
+        {
+          $pull: { comments: userComment?._id },
         }
-      }
+      );
     }
 
-    // Kullanıcının enrollments'larını silme
-    await Enrollment.deleteMany({ user: req.session.userID });
+    const ownership = Course.updateMany(
+      { ownership: req.session.userID },
+      { $pull: { ownership: null } }
+    );
+    if (!ownership) throw new Error("ownership could not delete");
 
-    // Kullanıcının ownerships'larını silme
-    await Ownership.deleteMany({ user: req.session.userID });
+    const enrollment = Course.updateMany(
+      { enrollments: req.session.userId },
+      {
+        $pull: { enrollments: req.session.userID },
+      }
+    );
+
+    if (!enrollment) throw new Error("enrollment could not delete");
 
     // Kullanıcıyı silme
     const deletedUser = await User.findByIdAndDelete(req.session.userID);
@@ -182,26 +169,10 @@ const enrollCourse = async (req, res) => {
   try {
     const courseSlug = req.params.courseSlug;
 
-    const findCourse = await Course.findOne({ slug: courseSlug });
-
-    // Kullanıcının kaydını kontrol et
-    let enrollment = await Enrollment.findOne({ user: req.session.userID });
-    if (!enrollment) {
-      // Kayıt yoksa yeni bir kayıt oluştur
-      enrollment = new Enrollment({
-        user: req.session.userID,
-        courses: [findCourse._id],
-      });
-      await enrollment.save();
-    } else {
-      // Kullanıcı zaten kayıtlıysa ve kurs zaten kayıtlı değilse kursu kaydet
-      if (!enrollment.courses.includes(findCourse._id)) {
-        enrollment.courses.push(findCourse._id);
-        await enrollment.save();
-      } else {
-        throw new Error("Course is already enrolled");
-      }
-    }
+    await Course.findOneAndUpdate(
+      { slug: courseSlug },
+      { $push: { enrollments: req.session.userID } }
+    );
 
     // Başarılı yanıt
     res.status(200).json({ message: "Course enrolled" });
@@ -213,15 +184,7 @@ const enrollCourse = async (req, res) => {
 
 const getEnrollments = async (req, res) => {
   try {
-    if (!req.session.userID) throw new Error("User not found");
-
-    const enrollments = await Enrollment.find({
-      user: req.session.userID,
-    }).populate({ path: "courses", select: "title description" });
-
-    if (!enrollments || enrollments.length === 0) {
-      throw new Error("Enrollments not found");
-    }
+    const enrollments = Course.find({ enrollments: req.session.userID });
     res.status(200).json(enrollments);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -231,20 +194,13 @@ const getEnrollments = async (req, res) => {
 const disenrollCourse = async (req, res) => {
   try {
     const courseSlug = req.params.courseSlug;
-    const course = await Course.findOne({ slug: courseSlug });
-    const enrollments = await Enrollment.findOneAndUpdate({
-      user: req.session.userID,
-    });
-    if (!enrollments) throw new Error("Enrollments not found");
-    if (enrollments.courses.includes(course._id)) {
-      enrollments.courses = enrollments.courses.filter(
-        (course) => course !== course._id
-      );
-      await enrollments.save();
-    }
-    if (enrollments.courses.length === 0) {
-      await Enrollment.deleteOne({ user: req.session.userID });
-    }
+    const course = await Course.findOneAndUpdate(
+      { slug: courseSlug },
+      { $pull: { enrollments: req.session.userID } }
+    );
+
+    if (!course) throw new Error("registration could not be canceled");
+
     res.status(200).json({ message: "Course disenrolled" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -268,24 +224,9 @@ const getOwnedCourses = async (req, res) => {
       filter.title = { $regex: regexPattern, $options: "i" };
     }
 
-    const ownership = await Ownership.findOne({
-      user: req.session.userID,
-    }).populate({
-      path: "courses",
-      match: filter,
-    });
+    const courses = await Course.find({ ownership: req.session.userID });
 
-    if (!ownership || !ownership.courses || ownership.courses.length === 0) {
-      throw new Error("Owned courses not found");
-    }
-
-    const courseInfo = ownership.courses.map((course) => ({
-      title: course.title,
-      description: course.description,
-      id: course._id,
-    }));
-
-    res.status(200).json(courseInfo);
+    res.status(200).json(courses);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

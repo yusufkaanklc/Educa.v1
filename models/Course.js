@@ -1,5 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import Category from "./Category.js";
+import Comment from "./Comment.js";
+import User from "./User.js";
+import Lesson from "./Lesson.js";
 import slugify from "slugify";
 
 const courseSchema = new Schema({
@@ -12,18 +15,40 @@ const courseSchema = new Schema({
     type: String,
     required: true,
   },
-  category: {
-    type: Schema.Types.ObjectId,
-    ref: "categories",
-  },
+
   imageUrl: {
     type: String,
-    required: true,
   },
   price: {
     type: Number,
     required: true,
   },
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: "categories",
+  },
+  comments: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "comments",
+    },
+  ],
+  ownership: {
+    type: Schema.Types.ObjectId,
+    ref: "users",
+  },
+  enrollments: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "users",
+    },
+  ],
+  lessons: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "lessons",
+    },
+  ],
   slug: {
     type: String,
   },

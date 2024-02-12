@@ -1,6 +1,5 @@
 import express from "express";
 import adminControllers from "../controllers/adminControllers.js";
-import authMiddlewares from "../middlewares/authMiddlewares.js";
 import courseControllers from "../controllers/courseControllers.js";
 import lessonControllers from "../controllers/lessonControllers.js";
 import commentControllers from "../controllers/commentControllers.js";

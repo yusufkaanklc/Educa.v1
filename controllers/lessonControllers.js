@@ -1,7 +1,6 @@
 import slugify from "slugify";
 import Course from "../models/Course.js";
 import Lesson from "../models/Lesson.js";
-import LessonCourseRelation from "../models/lessonCourseRelations.js";
 
 const createLesson = async (req, res) => {
   try {
@@ -17,12 +16,6 @@ const createLesson = async (req, res) => {
       throw new Error("Fields cannot be empty");
     }
 
-    const course = await Course.findOne({ slug: courseSlug });
-
-    if (!course) {
-      throw new Error("Course not found");
-    }
-
     const newLesson = new Lesson({
       title,
       description,
@@ -35,20 +28,12 @@ const createLesson = async (req, res) => {
 
     await newLesson.save();
 
-    let existingLessonCourseRelation = await LessonCourseRelation.findOne({
-      course: course._id,
-    });
+    const course = await Course.findOneAndUpdate(
+      { slug: courseSlug },
+      { $push: { lessons: newLesson?._id } }
+    );
 
-    if (!existingLessonCourseRelation) {
-      existingLessonCourseRelation = new LessonCourseRelation({
-        course: course._id,
-        lessons: [newLesson._id],
-      });
-    } else {
-      existingLessonCourseRelation.lessons.push(newLesson._id);
-    }
-
-    await existingLessonCourseRelation.save();
+    if (!course) throw new Error("Lessons could not add");
 
     res.status(200).json({ "created lesson": newLesson });
   } catch (error) {
@@ -59,20 +44,19 @@ const createLesson = async (req, res) => {
 const getLessons = async (req, res) => {
   try {
     const { courseSlug } = req.params;
+
+    // Kursu bulun
     const course = await Course.findOne({ slug: courseSlug });
-    if (!course) throw new Error("Course not found");
 
-    const lessonRelation = await LessonCourseRelation.findOne({
-      course: course._id,
-    });
-    if (!lessonRelation) throw new Error("Lessons not found");
+    // Kurs bulunamazsa 404 hatası dön
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
 
-    const lessonIds = lessonRelation.lessons; // Tüm derslerin kimliklerini al
+    // Kursun derslerini bul ve liste oluştur
+    const lessonList = await Lesson.find({ _id: { $in: course.lessons } });
 
-    // Tüm dersleri tek bir sorgu ile al
-    const lessons = await Lesson.find({ _id: { $in: lessonIds } });
-
-    res.status(200).json({ lessons });
+    res.status(200).json(lessonList);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -81,23 +65,27 @@ const getLessons = async (req, res) => {
 const getLesson = async (req, res) => {
   try {
     const { courseSlug, lessonSlug } = req.params;
-    const course = await Course.findOne({ slug: courseSlug });
-    if (!course) throw new Error("Course not found");
 
-    const lesson = await Lesson.findOne({ slug: lessonSlug });
-    if (!lesson) throw new Error("Lesson not found");
+    // Kursu ve dersi bul
+    const [course, lesson] = await Promise.all([
+      Course.findOne({ slug: courseSlug }),
+      Lesson.findOne({ slug: lessonSlug }),
+    ]);
 
-    const lessonRelation = await LessonCourseRelation.findOne({
-      course: course._id,
-    });
-    if (!lessonRelation) throw new Error("Lesson not found");
-
-    // Dersin kursla ilişkilendirilip ilişkilendirilmediğini kontrol et
-    const lessonIds = lessonRelation.lessons.map((lesson) => lesson.toString());
-    if (!lessonIds.includes(lesson._id.toString())) {
-      throw new Error("This course does not include this lesson");
+    // Kurs veya ders bulunamazsa 404 hatası dön
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+    if (!lesson) {
+      return res.status(404).json({ message: "Lesson not found" });
     }
 
+    // Ders kursa ait değilse 404 hatası dön
+    if (!course.lessons.includes(lesson._id)) {
+      return res.status(404).json({ message: "Lesson not found" });
+    }
+
+    // Hata yoksa dersi döndür
     res.status(200).json(lesson);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -109,16 +97,15 @@ const updateLesson = async (req, res) => {
     const { courseSlug, lessonSlug } = req.params;
     const { title, description, videoUrl } = req.body;
 
-    const course = await Course.findOne({ slug: courseSlug });
-    const lesson = await Lesson.findOne({ slug: lessonSlug });
-    const lessonRelation = await LessonCourseRelation.findOne({
-      course: course?._id,
-    });
+    const [course, lesson] = await Promise.all([
+      Course.findOne({ slug: courseSlug }),
+      Lesson.findOne({ slug: lessonSlug }),
+    ]);
 
     if (title === "" || description === "" || videoUrl === "")
       throw new Error("All fields required");
 
-    if (!course || !lesson || !lessonRelation)
+    if (!course || !lesson || !course.lessons.includes(lesson?._id))
       throw new Error("Invalid course or lesson");
 
     const newSlug = slugify(title, { lower: true, strict: true });
@@ -143,41 +130,32 @@ const deleteLesson = async (req, res) => {
   try {
     const { courseSlug, lessonSlug } = req.params;
 
-    const course = await Course.findOne({ slug: courseSlug });
-    const lesson = await Lesson.findOne({ slug: lessonSlug });
-    const lessonRelation = await LessonCourseRelation.findOne({
-      course: course?._id,
-    });
+    // Kursu ve dersi bul
+    const [course, lesson] = await Promise.all([
+      Course.findOne({ slug: courseSlug }),
+      Lesson.findOne({ slug: lessonSlug }),
+    ]);
 
-    if (
-      !course ||
-      !lesson ||
-      !lessonRelation ||
-      !lessonRelation.lessons.includes(lesson._id)
-    )
+    // Kurs ve dersin mevcut olup olmadığını ve dersin kursa ait olup olmadığını kontrol et
+    if (!course || !lesson || !course.lessons.includes(lesson._id)) {
       throw new Error("Invalid course or lesson");
-
-    const deletedLesson = await Lesson.findByIdAndDelete(lesson._id);
-    const lessonRelationUpdate = await LessonCourseRelation.findByIdAndUpdate(
-      lessonRelation?._id,
-      { $pull: { lessons: lesson._id } },
-      { new: true } // Güncellenmiş belgeyi döndür
-    );
-
-    if (!deletedLesson || !lessonRelationUpdate)
-      throw new Error("Failed to delete lesson");
-
-    // Eğer ders ilişkisi boş ise, ilişki belgesini sil
-    if (lessonRelationUpdate.lessons.length === 0) {
-      const lessonRelationDelete = await LessonCourseRelation.findByIdAndDelete(
-        lessonRelationUpdate._id
-      );
-      if (!lessonRelationDelete)
-        throw new Error("Lesson Course relations delete failed");
     }
 
-    res.status(200).json({ deletedLesson: deletedLesson });
+    // Dersi sil ve kursun dersler listesinden çıkar
+    const deletedLesson = await Lesson.findByIdAndDelete(lesson._id);
+    await Course.findByIdAndUpdate(course._id, {
+      $pull: { lessons: lesson._id },
+    });
+
+    // Silinen dersi kontrol et
+    if (!deletedLesson) {
+      throw new Error("Failed to delete lesson");
+    }
+
+    // Başarılı yanıtı döndür
+    res.status(200).json({ deletedLesson });
   } catch (error) {
+    // Hata durumunda uygun bir hata yanıtı döndür
     res.status(500).json({ message: error.message });
   }
 };

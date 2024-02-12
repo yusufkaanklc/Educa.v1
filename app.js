@@ -9,6 +9,7 @@ import session from "express-session";
 import connectMongo from "connect-mongodb-session";
 import helmet from "helmet";
 import authMiddlewares from "./middlewares/authMiddlewares.js";
+import fileUpload from "express-fileupload";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(cors()); // Cross-Origin Resource Sharing (CORS) izinleri
 app.use(helmet());
 app.use(express.json()); // JSON veri analizi middleware
 app.use(express.urlencoded({ extended: true })); // URL-encoded veri analizi middleware
+app.use(fileUpload());
 
 // Session middleware
 const store = new MongoDBStore(

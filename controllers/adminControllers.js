@@ -2,9 +2,6 @@ import Category from "../models/Category.js";
 import Course from "../models/Course.js";
 import Comment from "../models/Comment.js";
 import User from "../models/User.js";
-import Enrollment from "../models/Enrollment.js";
-import Ownership from "../models/Ownership.js";
-import CommentCourseRelation from "../models/commentCourseRelations.js";
 import userControllers from "./userControllers.js";
 import slugify from "slugify";
 
@@ -79,25 +76,10 @@ const removeUsers = async (req, res) => {
           { new: true }
         );
 
-        const commentCourseRelations = await CommentCourseRelation.findOne({
-          comments: userComment._id,
-        });
-
-        if (commentCourseRelations) {
-          // Null değeri kontrolü
-          let relationId = commentCourseRelations._id;
-
-          await CommentCourseRelation.updateMany(
-            { comments: userComment._id },
-            { $pull: { comments: userComment._id } },
-            { multi: true }
-          );
-
-          const findRelation = await CommentCourseRelation.findById(relationId);
-          if (findRelation && findRelation.comments.length === 0) {
-            await CommentCourseRelation.findByIdAndDelete(relationId);
-          }
-        }
+        await Course.findOneAndUpdate(
+          { comments: userComment?._id },
+          { $pull: { comments: userComment?._id } }
+        );
       }
 
       // Kullanıcıya ait enrollments'ları silme

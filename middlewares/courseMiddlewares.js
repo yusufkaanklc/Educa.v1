@@ -1,61 +1,57 @@
-import User from "../models/User.js";
-import Ownership from "../models/Ownership.js";
 import Course from "../models/Course.js";
-import Enrollment from "../models/Enrollment.js";
 import Comment from "../models/Comment.js";
 
+// Ortak hata işleme fonksiyonu
+const handleError = (res, error) => {
+  const errorMessage = error.message || "Internal Server Error";
+  const statusCode = error.statusCode || 500;
+  res.status(statusCode).json({ message: errorMessage });
+};
+
+// Kurs sahipliği kontrolü middleware'i
 const ownershipControl = async (req, res, next) => {
   try {
     const courseSlug = req.params.courseSlug;
-    const ownership = await Ownership.findOne({ user: req.session.userID });
-    if (!ownership) {
-      throw new Error("Unauthorized");
-    }
-    const course = await Course.findOne({ slug: courseSlug });
-    if (!ownership.courses.includes(course._id)) {
-      throw new Error("Course not found");
-    }
-    next(); // Hata yoksa next() kullanarak işlemi geçir
+    console.log(req.session.userID);
+    const ownership = await Course.findOne({
+      slug: courseSlug,
+      ownership: req.session.userID,
+    });
+    if (!ownership) throw { message: "Unauthorized", statusCode: 403 };
+    next();
   } catch (error) {
-    next(error); // Hata olursa next ile hatayı işleyin
+    handleError(res, error);
   }
 };
 
+// Kurs kaydı kontrolü middleware'i
 const enrollControl = async (req, res, next) => {
   try {
     const courseSlug = req.params.courseSlug;
-    const course = await Course.findOne({ slug: courseSlug });
-    const enrollment = await Enrollment.findOne({
-      user: req.session.userID,
-      courses: { $in: [course._id] },
+    const enrollment = await Course.findOne({
+      slug: courseSlug,
+      enrollments: req.session.userID,
     });
-    if (!enrollment) {
-      throw new Error("Unauthorized");
-    }
-    next(); // Hata yoksa next() kullanarak işlemi geçir
+    if (!enrollment) throw { message: "Unauthorized", statusCode: 403 };
+    next();
   } catch (error) {
-    next(error); // Hata olursa next ile hatayı işleyin
+    handleError(res, error);
   }
 };
 
+// Kurs sahipliği ve kaydı kontrolü middleware'i
 const ownershipAndEnrollControl = async (req, res, next) => {
   try {
     const courseSlug = req.params.courseSlug;
-    const course = await Course.findOne({ slug: courseSlug });
-    const ownership = await Ownership.findOne({
-      user: req.session.userID,
-      courses: { $in: [course._id] },
-    });
-    const enrollment = await Enrollment.findOne({
-      user: req.session.userID,
-      courses: { $in: [course._id] },
-    });
-    if (!ownership && !enrollment) {
-      throw new Error("Unauthorized");
-    }
+    const [ownership, enrollment] = await Promise.all([
+      Course.findOne({ slug: courseSlug, ownership: req.session.userID }),
+      Course.findOne({ slug: courseSlug, enrollments: req.session.userID }),
+    ]);
+    if (!ownership && !enrollment)
+      throw { message: "Unauthorized", statusCode: 403 };
     next();
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
