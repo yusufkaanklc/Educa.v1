@@ -7,42 +7,60 @@ import LessonCourseRelation from "../models/lessonCourseRelations.js";
 import CommentCourseRelation from "../models/commentCourseRelations.js";
 import Comment from "../models/Comment.js";
 import slugify from "slugify";
+import multerModule from "./multer.js";
 
 const createCourse = async (req, res) => {
   try {
-    const { title, description, category, imageUrl, price } = req.body;
+    multerModule(req, res, async function (err) {
+      if (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ message: "Dosya yüklenirken bir hata oluştu" });
+      }
 
-    // Gelen verilerin boş olup olmadığını kontrol edin
-    if (!title || !description || !price) {
-      throw new Error("Fields cannot be empty");
-    }
+      const { title, description, category, price } = req.body;
+      const image = req.file; // multer tarafından yüklenen dosya
 
-    // Yeni bir kurs oluşturun ve kaydedin
-    const newCourse = new Course({
-      title,
-      description,
-      category,
-      imageUrl,
-      price,
+      console.log(title, description, category, image);
+
+      // Gelen verilerin boş olup olmadığını kontrol edin
+      if (!title || !description || !price) {
+        throw new Error("Fields cannot be empty");
+      }
+
+      // Yeni bir kurs oluşturun ve kaydedin
+      const newCourseData = {
+        title,
+        description,
+        price,
+      };
+
+      if (category) newCourseData.category = category;
+      if (image) {
+        newCourseData.imageUrl = image.path;
+      }
+
+      const newCourse = new Course(newCourseData);
+      await newCourse.save();
+
+      // Kurs sahipliğini kontrol edin veya oluşturun
+      let ownership = await Ownership.findOne({ user: req.session.userID });
+      if (!ownership) {
+        ownership = new Ownership({ user: req.session.userID, courses: [] });
+      }
+
+      // Kursu sahipliğe ekleyin ve kaydedin
+      if (!ownership.courses.includes(newCourse._id)) {
+        ownership.courses.push(newCourse._id);
+        await ownership.save();
+      } else {
+        throw new Error("Ownership already exists");
+      }
+
+      // Başarılı yanıtı döndürün
+      res.status(201).json({ message: "Created course", course: newCourse });
     });
-    await newCourse.save();
-
-    // Kurs sahipliğini kontrol edin veya oluşturun
-    let ownership = await Ownership.findOne({ user: req.session.userID });
-    if (!ownership) {
-      ownership = new Ownership({ user: req.session.userID, courses: [] });
-    }
-
-    // Kursu sahipliğe ekleyin ve kaydedin
-    if (!ownership.courses.includes(newCourse._id)) {
-      ownership.courses.push(newCourse._id);
-      await ownership.save();
-    } else {
-      throw new Error("Ownership already exists");
-    }
-
-    // Başarılı yanıtı döndürün
-    res.status(201).json({ message: "Created course", course: newCourse });
   } catch (error) {
     // Hata durumunda uygun bir hata yanıtı döndürün
     res.status(500).json({ message: error.message });

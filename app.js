@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import dbConnect from "../server/db/dbConnect.js";
+import dbConnect from "./db/dbConnect.js";
 import userRouters from "./routes/userRouters.js";
 import courseRouters from "./routes/courseRouters.js";
 import adminRouters from "./routes/adminRouters.js";
@@ -19,8 +19,8 @@ const MongoDBStore = connectMongo(session);
 dbConnect(); // MongoDB veritabanına bağlantıyı oluşturan fonksiyon
 
 // Middlewares
-app.use(helmet());
 app.use(cors()); // Cross-Origin Resource Sharing (CORS) izinleri
+app.use(helmet());
 app.use(express.json()); // JSON veri analizi middleware
 app.use(express.urlencoded({ extended: true })); // URL-encoded veri analizi middleware
 
@@ -53,14 +53,14 @@ app.use(
 
 // Routes
 app.use(
-  "/admin",
+  "/api/admin",
   authMiddlewares.isLoggedIn,
   authMiddlewares.isAdmin,
   adminRouters
 );
-app.use("/users", userRouters);
-app.use("/courses", courseRouters);
-app.use("/categories", categoryRouters);
+app.use("/api/users", userRouters);
+app.use("/api/courses", courseRouters);
+app.use("/api/categories", categoryRouters);
 
 app.listen(5000, () => {
   console.log("Server is running on port 5000");
