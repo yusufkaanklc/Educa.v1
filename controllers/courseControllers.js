@@ -4,6 +4,7 @@ import Lesson from "../models/Lesson.js";
 import Comment from "../models/Comment.js";
 import slugify from "slugify";
 import fs from "node:fs/promises";
+import errorHandling from "../middlewares/errorHandling.js";
 
 const createCourse = async (req, res) => {
   try {

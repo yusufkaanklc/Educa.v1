@@ -7,10 +7,9 @@ import adminRouters from "./routes/adminRouters.js";
 import categoryRouters from "./routes/categoryRouters.js";
 import session from "express-session";
 import connectMongo from "connect-mongodb-session";
-import helmet from "helmet";
 import authMiddlewares from "./middlewares/authMiddlewares.js";
 import fileUpload from "express-fileupload";
-import { dirname, join, resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 
 import { fileURLToPath } from "node:url";
 
@@ -25,11 +24,8 @@ const MongoDBStore = connectMongo(session);
 // Database connection
 dbConnect(); // MongoDB veritabanına bağlantıyı oluşturan fonksiyon
 
-app.use(express.static(join(__dirname, "public")));
-
 // Middlewares
 app.use(cors()); // Cross-Origin Resource Sharing (CORS) izinleri
-
 app.use(express.json()); // JSON veri analizi middleware
 app.use(express.urlencoded({ extended: true })); // URL-encoded veri analizi middleware
 app.use(fileUpload());
@@ -72,7 +68,6 @@ app.use("/api/users", userRouters);
 app.use("/api/courses", courseRouters);
 app.use("/api/categories", categoryRouters);
 app.get("/public/uploads/courses/:file", (req, res) => {
-  console.log(req.params.file);
   res.sendFile(resolve(__dirname, "public/uploads/courses", req.params.file));
 });
 

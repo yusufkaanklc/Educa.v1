@@ -9,7 +9,7 @@ const fileUpload = (filePath) => {
     try {
       if (req.files && req.files.image) {
         const uploadedImage = req.files.image;
-        const uploadDir = join(`/public/uploads/${filePath}`);
+        const uploadDir = join("public", "uploads", filePath);
         const uploadPath = join(uploadDir, uploadedImage.name);
 
         // Dosya yolu kontrol ediliyor, eğer yoksa oluşturuluyor
@@ -24,6 +24,7 @@ const fileUpload = (filePath) => {
           }
         }
 
+        console.log("uploadPath", uploadPath);
         // Dosyayı taşı
         await uploadedImage.mv(uploadPath);
 

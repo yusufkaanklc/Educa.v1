@@ -130,7 +130,7 @@ function App() {
           <div key={index}>
             <div>{course.title}</div>
             <div>{course.description}</div>
-            <img src={"http://localhost:5000/" + course.imageUrl} alt="" />
+            <img src={"http://192.168.1.107:5000/" + course.imageUrl} alt="" />
           </div>
         ))
       )}
