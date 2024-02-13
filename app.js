@@ -10,6 +10,12 @@ import connectMongo from "connect-mongodb-session";
 import helmet from "helmet";
 import authMiddlewares from "./middlewares/authMiddlewares.js";
 import fileUpload from "express-fileupload";
+import { dirname, join, resolve } from "node:path";
+
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 
@@ -19,9 +25,11 @@ const MongoDBStore = connectMongo(session);
 // Database connection
 dbConnect(); // MongoDB veritabanına bağlantıyı oluşturan fonksiyon
 
+app.use(express.static(join(__dirname, "public")));
+
 // Middlewares
 app.use(cors()); // Cross-Origin Resource Sharing (CORS) izinleri
-app.use(helmet());
+
 app.use(express.json()); // JSON veri analizi middleware
 app.use(express.urlencoded({ extended: true })); // URL-encoded veri analizi middleware
 app.use(fileUpload());
@@ -63,6 +71,10 @@ app.use(
 app.use("/api/users", userRouters);
 app.use("/api/courses", courseRouters);
 app.use("/api/categories", categoryRouters);
+app.get("/public/uploads/courses/:file", (req, res) => {
+  console.log(req.params.file);
+  res.sendFile(resolve(__dirname, "public/uploads/courses", req.params.file));
+});
 
 app.listen(5000, () => {
   console.log("Server is running on port 5000");

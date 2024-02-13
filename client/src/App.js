@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 function App() {
   const [courseData, setCourseData] = useState({
     title: "",
     description: "",
-    image: null, // Dosya verisini saklamak için null olarak başlatıyoruz
+    image: null,
     price: "",
   });
 
@@ -13,6 +13,8 @@ function App() {
     email: "",
     password: "",
   });
+
+  const [courses, setCourses] = useState([]);
 
   const handleChangeForCourse = (e) => {
     const { name, value } = e.target;
@@ -60,6 +62,20 @@ function App() {
     }
   };
 
+  const getCourses = async () => {
+    try {
+      const response = await axios.get("/api/courses");
+      console.log("get courses success");
+      setCourses(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    console.log(courses);
+  }, [courses]);
+
   return (
     <>
       <form onSubmit={authFormSubmit}>
@@ -105,6 +121,19 @@ function App() {
         />
         <button type="submit">Gönder</button>
       </form>
+      <div onClick={() => getCourses()}>Kursları getir</div>
+      <hr></hr>
+      {courses.length === 0 ? (
+        <div>Course not found</div>
+      ) : (
+        courses.map((course, index) => (
+          <div key={index}>
+            <div>{course.title}</div>
+            <div>{course.description}</div>
+            <img src={"http://localhost:5000/" + course.imageUrl} alt="" />
+          </div>
+        ))
+      )}
     </>
   );
 }
