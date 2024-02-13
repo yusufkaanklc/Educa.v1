@@ -4,6 +4,7 @@ import Comment from "../models/Comment.js";
 import User from "../models/User.js";
 import userControllers from "./userControllers.js";
 import slugify from "slugify";
+import errorHandling from "../middlewares/errorHandling.js";
 
 const getAllUsers = async (req, res) => {
   try {
@@ -27,13 +28,16 @@ const getAllUsers = async (req, res) => {
     const users = await User.find(filter);
     // Kullanıcı bulunamadığında hata fırlat
     if (!users || users.length === 0) {
-      throw new Error("Kullanıcılar bulunamadı");
+      throw {
+        code: 1,
+        message: "No user found",
+      };
     }
     // Kullanıcıları başarıyla bulduğunda 200 OK yanıtı gönder
     res.status(200).json({ users: users });
   } catch (error) {
     // Hata durumunda 500 hatası gönder
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -51,7 +55,7 @@ const removeUsers = async (req, res) => {
   try {
     const { userList } = req.body;
     if (!userList || userList.length === 0) {
-      throw new Error("No user selected");
+      throw { code: 1, message: "User list cannot be empty" };
     }
 
     const deletedUserCount = [];
@@ -96,7 +100,7 @@ const removeUsers = async (req, res) => {
     }
 
     if (deletedUserCount.length === 0) {
-      throw new Error("No users could be deleted");
+      throw { code: 1, message: "No user deleted" };
     }
 
     req.session.destroy();
@@ -105,7 +109,7 @@ const removeUsers = async (req, res) => {
       .status(200)
       .json({ message: `${deletedUserCount.length} users deleted` });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -140,19 +144,19 @@ const createCategory = async (req, res) => {
   try {
     const { title, description } = req.body;
     if (!title || !description) {
-      throw new Error("Fields cannot be empty");
+      throw { code: 1, message: "Fields cannot be empty" };
     }
     const newCategory = new Category({
       title,
       description,
     });
     if (!newCategory) {
-      throw new Error("Category could not be created");
+      throw { code: 2, message: "Category not created" };
     }
     await newCategory.save();
     res.status(200).json(newCategory);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -161,11 +165,11 @@ const getCategory = async (req, res) => {
     const { categorySlug } = req.params;
     const category = await Category.findOne({ slug: categorySlug });
     if (!category) {
-      throw new Error("Category not found");
+      throw { code: 2, message: "Category not found" };
     }
     res.status(200).json(category);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -174,7 +178,7 @@ const updateCategory = async (req, res) => {
     const categorySlug = req.params.categorySlug;
     const { title, description } = req.body;
     if (title === "" || description === "") {
-      throw new Error("Fields cannot be empty");
+      throw { code: 1, message: "Fields cannot be empty" };
     }
 
     const newSlug = slugify(title, { lower: true, strict: true });
@@ -188,11 +192,11 @@ const updateCategory = async (req, res) => {
       { new: true }
     );
     if (!category) {
-      throw new Error("Category could not be updated");
+      throw { code: 2, message: "Category could not be updated" };
     }
     res.status(200).json({ "updated category :": category });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -202,7 +206,7 @@ const deleteCategory = async (req, res) => {
     const category = await Category.findOne({ slug: categorySlug });
     const deleteCategory = await Category.findByIdAndDelete(category._id);
     if (!deleteCategory) {
-      throw new Error("Category could not be deleted");
+      throw { code: 2, message: "Category could not be deleted" };
     }
 
     // Kategorisi, silinen kategoriyi referans alan kursların kategorilerini temizle
@@ -212,14 +216,14 @@ const deleteCategory = async (req, res) => {
     );
 
     if (updateResult.modifiedCount === 0) {
-      throw new Error("No courses found with the given category");
+      throw { code: 2, message: "Category courses could not be deleted" };
     }
 
     res.status(200).json({
       message: "Category courses deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 

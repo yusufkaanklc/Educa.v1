@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-import Course from "./Course.js";
 import slugify from "slugify";
 
 const lessonSchema = new Schema({

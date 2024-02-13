@@ -10,9 +10,8 @@ const createCourse = async (req, res) => {
     const { title, description, category, price } = req.body;
 
     // Gelen verilerin boş olup olmadığını kontrol edin
-    if (!title || !description || !price) {
-      throw new Error("Fields cannot be empty");
-    }
+    if (!title || !description || !price)
+      throw { code: 1, message: "Fields cannot be empty" };
 
     // Yeni bir kurs oluşturun ve kaydedin
     const newCourseData = {
@@ -32,7 +31,7 @@ const createCourse = async (req, res) => {
     res.status(201).json({ message: "Created course", course: newCourse });
   } catch (error) {
     // Hata durumunda uygun bir hata yanıtı döndürün
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -70,25 +69,23 @@ const getCourse = async (req, res) => {
     const courseSlug = req.params.courseSlug;
     const course = await Course.findOne({ slug: courseSlug });
     if (!course) {
-      throw new Error("Course not found");
+      throw { code: 2, message: "Course not found" };
     }
     res.status(200).json(course);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
 const getOwnedCourses = async (req, res) => {
   try {
-    const ownership = await Ownership.findOne({
-      user: req.session.userID,
-    }).populate({ path: "courses", select: "title description" });
-    if (!ownership) {
-      throw new Error("Ownership not found");
+    const ownership = await Course.find({ ownership: req.session.userID });
+    if (!ownership || ownership.length === 0) {
+      throw { code: 2, message: "Courses not found" };
     }
-    res.status(200).json(ownership.courses);
+    res.status(200).json(ownership);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -103,7 +100,7 @@ const updateCourse = async (req, res) => {
       category === "" &&
       imageUrl === ""
     )
-      throw new Error("fields cannot be empty");
+      throw { code: 1, message: "Fields cannot be empty" };
 
     const newSlug = slugify(title, { lower: true, strict: true });
     const course = await Course.findOneAndUpdate(
@@ -119,11 +116,11 @@ const updateCourse = async (req, res) => {
       { new: true }
     );
     if (!course) {
-      throw new Error("Course could not be updated");
+      throw { code: 2, message: "Course couldnt be updated" };
     }
     res.status(200).json({ message: "Course updated" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -132,15 +129,19 @@ const deleteCourse = async (req, res) => {
     const courseSlug = req.params.courseSlug;
 
     const course = await Course.findOneAndDelete({ slug: courseSlug });
-    if (!course) throw new Error("Course not found");
+    if (!course) throw { code: 2, message: "Course couldnt be deleted" };
 
     if (course.imageUrl) {
       fs.unlink(course.imageUrl, (err) => {
-        if (err) throw err;
+        if (err) throw { code: 2, message: "Course image couldnt be deleted" };
       });
     }
     // Kursa ait yorumları al
     const comments = await Comment.find({ _id: { $in: course.comments } });
+
+    await Lesson.deleteMany({
+      _id: { $in: course.lessons },
+    });
 
     // Her yorum için
     for (const comment of comments) {
@@ -155,7 +156,7 @@ const deleteCourse = async (req, res) => {
 
     res.status(200).json({ message: "Course deleted" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 

@@ -1,3 +1,4 @@
+import errorHandling from "../middlewares/errorHandling.js";
 import Comment from "../models/Comment.js";
 import Course from "../models/Course.js";
 
@@ -5,12 +6,12 @@ const addComment = async (req, res) => {
   try {
     const { courseSlug } = req.params;
     const { text } = req.body;
-    if (text === "") throw new Error("Text cannot be empty");
+    if (text === "") throw { code: 1, message: "Text cannot be empty" };
     const newComment = new Comment({
       text,
       user: req.session.userID,
     });
-    if (!newComment) throw new Error("Comment could not be created");
+    if (!newComment) throw { code: 2, message: "Comment could not be created" };
     await newComment.save();
 
     const course = await Course.findOneAndUpdate(
@@ -20,11 +21,11 @@ const addComment = async (req, res) => {
       }
     );
 
-    if (!course) throw new Error("Course could not updated");
+    if (!course) throw { code: 2, message: "Course could not be updated" };
 
     res.status(200).json({ message: "Comment created successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -41,11 +42,11 @@ const getComments = async (req, res) => {
       }
     }
 
-    if (commentList.length === 0) throw new Error("Comment not found");
+    if (commentList.length === 0) throw { code: 2, message: "No comments" };
 
     res.status(200).json(commentList);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -53,7 +54,7 @@ const updateComment = async (req, res) => {
   try {
     const { commentId } = req.params;
     const { text } = req.body;
-    if (text === "") throw new Error("Text cannot be empty");
+    if (text === "") throw { code: 1, message: "Text cannot be empty" };
     const commment = await Comment.findByIdAndUpdate(
       commentId,
       { text },
@@ -61,11 +62,11 @@ const updateComment = async (req, res) => {
         new: true,
       }
     );
-    if (!commment) throw new Error("Comment not found or updated");
+    if (!commment) throw { code: 2, message: "Comment could not be updated" };
 
     res.status(200).json({ message: "Comment updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -80,11 +81,11 @@ const deleteComment = async (req, res) => {
         $pull: { comments: commentId },
       }
     );
-    if (!course) throw new Error("Comment could not deleted");
+    if (!course) throw { code: 2, message: "Course could not be updated" };
 
     // Yorumu bul ve sil
     const comment = await Comment.findById(commentId);
-    if (!comment) throw new Error("Comment not found or already deleted");
+    if (!comment) throw { code: 2, message: "Comment could not be found" };
 
     // Yanıtları sil
     const replies = comment.replies;
@@ -97,7 +98,7 @@ const deleteComment = async (req, res) => {
 
     res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -105,12 +106,12 @@ const addReply = async (req, res) => {
   try {
     const { commentId } = req.params;
     const { text } = req.body;
-    if (text === "") throw new Error("Text cannot be empty");
+    if (text === "") throw { code: 1, message: "Text cannot be empty" };
     const newReply = new Comment({
       text,
       user: req.session.userID,
     });
-    if (!newReply) throw new Error("Reply could not be created");
+    if (!newReply) throw { code: 2, message: "Reply could not be created" };
     await newReply.save();
     const comment = await Comment.findByIdAndUpdate(
       commentId,
@@ -123,10 +124,10 @@ const addReply = async (req, res) => {
         new: true,
       }
     );
-    if (!comment) throw new Error("Comment not found or updated");
+    if (!comment) throw { code: 2, message: "Comment could not be updated" };
     res.status(200).json({ message: "Reply created successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -134,7 +135,7 @@ const getReplies = async (req, res) => {
   try {
     const { commentId } = req.params;
     const comment = await Comment.findById(commentId);
-    if (!comment) throw new Error("Comment not found");
+    if (!comment) throw { code: 2, message: "Comment not found" };
 
     const replies = [];
     for (const replyId of comment.replies) {
@@ -149,7 +150,7 @@ const getReplies = async (req, res) => {
 
     res.status(200).json({ replies });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -157,17 +158,17 @@ const updateReply = async (req, res) => {
   try {
     const { replyId } = req.params;
     const { text } = req.body;
-    if (text === "") throw new Error("Text cannot be empty");
+    if (text === "") throw { code: 1, message: "Text cannot be empty" };
     const reply = await Comment.findByIdAndUpdate(
       replyId,
       { text },
       { new: true }
     );
-    if (!reply) throw new Error("Reply not found or updated");
+    if (!reply) throw { code: 2, message: "Reply could not be updated" };
 
     res.status(200).json({ message: "Reply updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -177,7 +178,7 @@ const deleteReply = async (req, res) => {
 
     // Yanıtı bul ve sil
     const reply = await Comment.findByIdAndDelete(replyId);
-    if (!reply) throw new Error("Reply not found or already deleted");
+    if (!reply) throw { code: 2, message: "Reply could not be found" };
 
     // Yanıta sahip yorumu bul ve yanıtı çıkar
     const comment = await Comment.findOneAndUpdate(
@@ -186,11 +187,11 @@ const deleteReply = async (req, res) => {
       { new: true } // Güncellenmiş belgeyi döndürmek için { new: true } kullanın
     );
 
-    if (!comment) throw new Error("Comment not found or not updated");
+    if (!comment) throw { code: 2, message: "Comment could not be updated" };
 
     res.status(200).json({ message: "Reply deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 

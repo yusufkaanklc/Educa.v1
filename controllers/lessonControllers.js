@@ -1,6 +1,7 @@
 import slugify from "slugify";
 import Course from "../models/Course.js";
 import Lesson from "../models/Lesson.js";
+import errorHandling from "../middlewares/errorHandling.js";
 
 const createLesson = async (req, res) => {
   try {
@@ -13,7 +14,7 @@ const createLesson = async (req, res) => {
       videoUrl === "" ||
       courseSlug === ""
     ) {
-      throw new Error("Fields cannot be empty");
+      throw { code: 1, message: "All fields required" };
     }
 
     const newLesson = new Lesson({
@@ -22,9 +23,7 @@ const createLesson = async (req, res) => {
       videoUrl,
     });
 
-    if (!newLesson) {
-      throw new Error("Lesson could not be created");
-    }
+    if (!newLesson) throw { code: 2, message: "Lesson could not created" };
 
     await newLesson.save();
 
@@ -33,11 +32,11 @@ const createLesson = async (req, res) => {
       { $push: { lessons: newLesson?._id } }
     );
 
-    if (!course) throw new Error("Lessons could not add");
+    if (!course) throw { code: 3, message: "Lesson could not add" };
 
     res.status(200).json({ "created lesson": newLesson });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -49,16 +48,14 @@ const getLessons = async (req, res) => {
     const course = await Course.findOne({ slug: courseSlug });
 
     // Kurs bulunamazsa 404 hatası dön
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
+    if (!course) throw { code: 2, message: "Course not found" };
 
     // Kursun derslerini bul ve liste oluştur
     const lessonList = await Lesson.find({ _id: { $in: course.lessons } });
 
     res.status(200).json(lessonList);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -73,22 +70,17 @@ const getLesson = async (req, res) => {
     ]);
 
     // Kurs veya ders bulunamazsa 404 hatası dön
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
-    if (!lesson) {
-      return res.status(404).json({ message: "Lesson not found" });
-    }
+    if (!course) throw { code: 2, message: "Course not found" };
+    if (!lesson) throw { code: 2, message: "Lesson not found" };
 
     // Ders kursa ait değilse 404 hatası dön
-    if (!course.lessons.includes(lesson._id)) {
-      return res.status(404).json({ message: "Lesson not found" });
-    }
+    if (!course.lessons.includes(lesson._id))
+      throw { code: 2, message: "Course could not have this lesson" };
 
     // Hata yoksa dersi döndür
     res.status(200).json(lesson);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -102,27 +94,32 @@ const updateLesson = async (req, res) => {
       Lesson.findOne({ slug: lessonSlug }),
     ]);
 
-    if (title === "" || description === "" || videoUrl === "")
-      throw new Error("All fields required");
+    if (!title || !description || !videoUrl)
+      throw { code: 1, message: "All fields required" };
 
     if (!course || !lesson || !course.lessons.includes(lesson?._id))
-      throw new Error("Invalid course or lesson");
+      throw { code: 2, message: "Invalid course or lesson" };
 
-    const newSlug = slugify(title, { lower: true, strict: true });
+    let newSlug;
+
+    if (title !== undefined) {
+      newSlug = slugify(title, { lower: true, strict: true });
+    }
+
     const updatedLesson = await Lesson.findByIdAndUpdate(
       lesson?._id,
       {
         title,
         description,
         videoUrl,
-        slug: newSlug,
+        slug: title !== "" ? newSlug : lessonSlug,
       },
       { new: true }
     );
-    if (!updatedLesson) throw new Error("Lesson update failed");
+    if (!updatedLesson) throw { code: 2, message: "Lesson could not updated" };
     res.status(200).json({ "updated lesson": updatedLesson });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -137,9 +134,11 @@ const deleteLesson = async (req, res) => {
     ]);
 
     // Kurs ve dersin mevcut olup olmadığını ve dersin kursa ait olup olmadığını kontrol et
-    if (!course || !lesson || !course.lessons.includes(lesson._id)) {
-      throw new Error("Invalid course or lesson");
-    }
+    if (!course || !lesson || !course.lessons.includes(lesson._id))
+      throw {
+        code: 2,
+        message: "Course or lesson not found",
+      };
 
     // Dersi sil ve kursun dersler listesinden çıkar
     const deletedLesson = await Lesson.findByIdAndDelete(lesson._id);
@@ -148,15 +147,13 @@ const deleteLesson = async (req, res) => {
     });
 
     // Silinen dersi kontrol et
-    if (!deletedLesson) {
-      throw new Error("Failed to delete lesson");
-    }
+    if (!deletedLesson) throw { code: 2, message: "Lesson could not deleted" };
 
     // Başarılı yanıtı döndür
     res.status(200).json({ deletedLesson });
   } catch (error) {
     // Hata durumunda uygun bir hata yanıtı döndür
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 

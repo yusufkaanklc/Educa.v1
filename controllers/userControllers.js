@@ -3,22 +3,21 @@ import Category from "../models/Category.js";
 import Comment from "../models/Comment.js";
 import bcrypt from "bcrypt";
 import Course from "../models/Course.js";
+import errorHandling from "../middlewares/errorHandling.js";
 
 const register = async (req, res) => {
   try {
     const { username, password, email, avatar, role } = req.body;
     if (!username || !password || !email) {
-      return res.status(400).json({ message: "fields are required" });
+      throw { code: 1, message: "All fields are required" };
     }
     if (role === "admin") {
-      return res.status(400).json({ message: "Admin cannot be created" });
+      throw { code: 4, message: "Admin cannot be created" };
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ error: "User with this email already exists" });
+      throw { code: 5, message: "User already exists" };
     }
 
     const newUser = new User({
@@ -33,42 +32,48 @@ const register = async (req, res) => {
 
     res.status(200).json({ "Created user ": newUser });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
+
+    if (!email || !password) {
+      throw { code: 1, message: "Email and password are required" };
+    }
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Email not found" });
+    if (!user) {
+      throw { code: 2, message: "Email not found" };
+    }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      return res.status(400).json({ message: "Wrong password" });
+      throw { code: 3, message: "incorrect password" };
     }
 
     req.session.userID = user._id;
     res.status(200).json({ message: "Login successful" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
 const logout = async (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Error destroying session:", err);
-      res.status(500).send("Internal Server Error");
-    } else {
-      res.status(200).send("Logged out successfully");
-    }
-  });
+  try {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Error destroying session:", err);
+        throw { code: 0, message: "Error logging out" };
+      } else {
+        res.status(200).send("Logged out successfully");
+      }
+    });
+  } catch (error) {
+    errorHandling(error, req, res);
+  }
 };
 
 const accountDetails = async (req, res) => {
@@ -78,10 +83,10 @@ const accountDetails = async (req, res) => {
 const accountDetailsFunc = async (userId, req, res) => {
   try {
     const user = await User.findById(userId);
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) throw { code: 2, message: "User not found" };
     res.status(200).json({ user });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -93,7 +98,7 @@ const accountUpdateFunc = async (userId, req, res) => {
   try {
     const { username, password, email, avatar, role } = req.body;
     if (!username && !password && !email && !avatar && !role)
-      return res.status(400).json("fields are required");
+      throw { code: 1, message: "No field to update" };
     const userFindAndUpdate = await User.findByIdAndUpdate(userId, {
       username,
       password,
@@ -101,10 +106,10 @@ const accountUpdateFunc = async (userId, req, res) => {
       avatar,
       role,
     });
-    if (!userFindAndUpdate) return res.status(400).json("Account not found");
+    if (!userFindAndUpdate) throw { code: 2, message: "User not found" };
     res.status(201).json({ "updated user": userFindAndUpdate });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -141,7 +146,7 @@ const deleteAccount = async (req, res) => {
       { ownership: req.session.userID },
       { $pull: { ownership: null } }
     );
-    if (!ownership) throw new Error("ownership could not delete");
+    if (!ownership) throw { code: 2, message: "ownership could not delete" };
 
     const enrollment = Course.updateMany(
       { enrollments: req.session.userId },
@@ -150,18 +155,18 @@ const deleteAccount = async (req, res) => {
       }
     );
 
-    if (!enrollment) throw new Error("enrollment could not delete");
+    if (!enrollment) throw { code: 2, message: "enrollment could not delete" };
 
     // Kullanıcıyı silme
     const deletedUser = await User.findByIdAndDelete(req.session.userID);
-    if (!deletedUser) throw new Error("Failed to delete user");
+    if (!deletedUser) throw { code: 2, message: "User not found" };
 
     // Oturumu sonlandırma
     req.session.destroy();
 
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -169,16 +174,18 @@ const enrollCourse = async (req, res) => {
   try {
     const courseSlug = req.params.courseSlug;
 
-    await Course.findOneAndUpdate(
+    const course = await Course.findOneAndUpdate(
       { slug: courseSlug },
       { $push: { enrollments: req.session.userID } }
     );
+
+    if (!course) throw { code: 2, message: "Course not found" };
 
     // Başarılı yanıt
     res.status(200).json({ message: "Course enrolled" });
   } catch (error) {
     // Hata durumunda
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -199,11 +206,11 @@ const disenrollCourse = async (req, res) => {
       { $pull: { enrollments: req.session.userID } }
     );
 
-    if (!course) throw new Error("registration could not be canceled");
+    if (!course) throw { code: 2, message: "Course not found" };
 
     res.status(200).json({ message: "Course disenrolled" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
