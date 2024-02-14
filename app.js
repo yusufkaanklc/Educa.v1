@@ -67,8 +67,9 @@ app.use(
 app.use("/api/users", userRouters);
 app.use("/api/courses", courseRouters);
 app.use("/api/categories", categoryRouters);
-app.get("/public/uploads/courses/:file", (req, res) => {
-  res.sendFile(resolve(__dirname, "public/uploads/courses", req.params.file));
+app.get("/public/uploads/:file", (req, res) => {
+  console.log(req.params.file);
+  res.sendFile(resolve(__dirname, "public/uploads/", req.params.file));
 });
 
 app.listen(5000, () => {

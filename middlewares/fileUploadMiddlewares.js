@@ -1,41 +1,53 @@
 import { access, constants, mkdir } from "node:fs/promises";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, extname } from "node:path";
 
-const __filename = fileURLToPath(import.meta.url);
+const uploadFile = async (file, fileType) => {
+  const uploadDir = join("public", "uploads");
+  const ext = extname(file.name);
+  const uploadPath = join(uploadDir, `${fileType}_${Date.now()}${ext}`);
 
-const fileUpload = (filePath) => {
+  // Dosya yolu kontrol ediliyor, eğer yoksa oluşturuluyor
+  try {
+    await access(uploadDir, constants.F_OK);
+  } catch (err) {
+    // Dosya yolu zaten varsa ve oluşturulamazsa, bir hata döndür
+    if (err.code === "ENOENT") {
+      await mkdir(uploadDir, { recursive: true });
+    } else {
+      throw new Error("Direction could not create", err);
+    }
+  }
+
+  console.log("uploadPath", uploadPath);
+  // Dosyayı taşı
+  await file.mv(uploadPath);
+
+  return uploadPath;
+};
+
+const fileUpload = () => {
   return async (req, res, next) => {
     try {
-      if (req.files && req.files.image) {
-        const uploadedImage = req.files.image;
-        const uploadDir = join("public", "uploads", filePath);
-        const uploadPath = join(uploadDir, uploadedImage.name);
+      if (req.files && (req.files.image || req.files.video)) {
+        let uploadedFile;
+        let fileType;
 
-        // Dosya yolu kontrol ediliyor, eğer yoksa oluşturuluyor
-        try {
-          await access(uploadDir, constants.F_OK);
-        } catch (err) {
-          // Dosya yolu zaten varsa ve oluşturulamazsa, bir hata döndür
-          if (err.code === "ENOENT") {
-            await mkdir(uploadDir, { recursive: true });
-          } else {
-            throw new Error("Direction could not create", err);
-          }
+        if (req.files.image) {
+          uploadedFile = req.files.image;
+          fileType = "image";
+        } else {
+          uploadedFile = req.files.video;
+          fileType = "video";
         }
 
-        console.log("uploadPath", uploadPath);
-        // Dosyayı taşı
-        await uploadedImage.mv(uploadPath);
+        const uploadPath = await uploadFile(uploadedFile, fileType);
 
         // Middleware'den sonraki fonksiyona dosya yolu bilgisini ekleyin
-        req.uploadedImageUrl = uploadPath;
-
-        // Sonraki middleware veya route handler'ını çağırın
-        next();
-      } else {
-        next();
+        req[fileType === "image" ? "uploadedImageUrl" : "uploadedVideoUrl"] =
+          uploadPath;
       }
+
+      next();
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

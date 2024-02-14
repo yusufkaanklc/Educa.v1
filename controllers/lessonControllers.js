@@ -5,36 +5,33 @@ import errorHandling from "../middlewares/errorHandling.js";
 
 const createLesson = async (req, res) => {
   try {
-    const { title, description, videoUrl } = req.body;
+    const { title, description } = req.body;
     const { courseSlug } = req.params;
 
-    if (
-      title === "" ||
-      description === "" ||
-      videoUrl === "" ||
-      courseSlug === ""
-    ) {
+    if (title === "" || description === "" || courseSlug === "") {
       throw { code: 1, message: "All fields required" };
     }
 
-    const newLesson = new Lesson({
+    const newLesson = {
       title,
       description,
-      videoUrl,
-    });
+    };
+    if (req.uploadedVideoUrl) newLesson.videoUrl = req.uploadedVideoUrl;
+    const newLessonCreate = new Lesson(newLesson);
 
-    if (!newLesson) throw { code: 2, message: "Lesson could not created" };
+    if (!newLessonCreate)
+      throw { code: 2, message: "Lesson could not created" };
 
-    await newLesson.save();
+    await newLessonCreate.save();
 
     const course = await Course.findOneAndUpdate(
       { slug: courseSlug },
-      { $push: { lessons: newLesson?._id } }
+      { $push: { lessons: newLessonCreate?._id } }
     );
 
     if (!course) throw { code: 3, message: "Lesson could not add" };
 
-    res.status(200).json({ "created lesson": newLesson });
+    res.status(200).json({ "created lesson": newLessonCreate });
   } catch (error) {
     errorHandling(error, req, res);
   }

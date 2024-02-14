@@ -12,7 +12,6 @@ const lessonSchema = new Schema({
   },
   videoUrl: {
     type: String,
-    required: true,
   },
   createdAt: {
     type: Date,

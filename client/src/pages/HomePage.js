@@ -9,16 +9,28 @@ function App() {
     price: "",
   });
 
+  const [lessonData, setLessonData] = useState({
+    title: "",
+    description: "",
+    video: null,
+  });
+
   const [authData, setAuthData] = useState({
     email: "",
     password: "",
   });
 
   const [courses, setCourses] = useState([]);
+  const [lessons, setLessons] = useState([]);
 
   const handleChangeForCourse = (e) => {
     const { name, value } = e.target;
     setCourseData({ ...courseData, [name]: value });
+  };
+
+  const handleChangeForLesson = (e) => {
+    const { name, value } = e.target;
+    setLessonData({ ...lessonData, [name]: value });
   };
 
   const handleChangeForAuth = (e) => {
@@ -28,6 +40,10 @@ function App() {
 
   const handleFileChange = (e) => {
     setCourseData({ ...courseData, image: e.target.files[0] });
+  };
+
+  const handleFileChangeForLesson = (e) => {
+    setLessonData({ ...lessonData, video: e.target.files[0] });
   };
 
   const courseFormSubmit = async (e) => {
@@ -41,6 +57,26 @@ function App() {
       formData.append("image", courseData.image);
 
       await axios.post("/api/courses/add-course", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Form data submitted");
+    } catch (error) {
+      console.error("Error submitting form data:", error);
+    }
+  };
+
+  const lessonFormSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const formData = new FormData();
+      formData.append("title", lessonData.title);
+      formData.append("description", lessonData.description);
+      formData.append("video", lessonData.video);
+
+      await axios.post("/api/courses/deneme/add-lesson", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -72,9 +108,23 @@ function App() {
     }
   };
 
+  const getLesson = async () => {
+    try {
+      const response = await axios.get("/api/courses/deneme/lessons");
+      console.log("get lesson success");
+      setLessons(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     console.log(courses);
   }, [courses]);
+
+  useEffect(() => {
+    console.log(lessons);
+  }, [lessons]);
 
   return (
     <>
@@ -122,7 +172,29 @@ function App() {
         <button type="submit">Gönder</button>
       </form>
       <div onClick={() => getCourses()}>Kursları getir</div>
-      <hr></hr>
+      <hr />
+
+      <form onSubmit={lessonFormSubmit}>
+        <input
+          type="text"
+          name="title"
+          placeholder="title"
+          value={lessonData.title}
+          onChange={handleChangeForLesson}
+        />
+        <input
+          type="text"
+          name="description"
+          placeholder="description"
+          value={lessonData.description}
+          onChange={handleChangeForLesson}
+        />
+        <input type="file" name="video" onChange={handleFileChangeForLesson} />
+        <button type="submit">Gönder</button>
+      </form>
+      <div onClick={() => getLesson()}>Dersleri getir</div>
+      <hr />
+
       {courses.length === 0 ? (
         <div>Course not found</div>
       ) : (
@@ -130,7 +202,19 @@ function App() {
           <div key={index}>
             <div>{course.title}</div>
             <div>{course.description}</div>
-            <img src={"http://192.168.1.107:5000/" + course.imageUrl} alt="" />
+            <img src={"http://localhost:5000/" + course.imageUrl} alt="" />
+          </div>
+        ))
+      )}
+
+      {lessons.length === 0 ? (
+        <div>Course not found</div>
+      ) : (
+        lessons.map((lesson, index) => (
+          <div key={index}>
+            <div>{lesson.title}</div>
+            <div>{lesson.description}</div>
+            <iframe src={"http://localhost:5000/" + lesson.videoUrl}></iframe>
           </div>
         ))
       )}

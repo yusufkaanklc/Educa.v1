@@ -15,7 +15,7 @@ router
   .post(
     authMiddlewares.isLoggedIn,
     authMiddlewares.authControl,
-    fileUploadMiddlewares("courses"),
+    fileUploadMiddlewares(),
     courseControllers.createCourse
   );
 
@@ -135,6 +135,7 @@ router
   .post(
     authMiddlewares.isLoggedIn,
     courseMiddlewares.ownershipControl,
+    fileUploadMiddlewares(),
     lessonControllers.createLesson
   );
 
