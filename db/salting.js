@@ -31,7 +31,7 @@ const createAdmin = async (username, email, password) => {
 };
 
 createAdmin(
-  "Yusuf Kağan Kılıç",
-  "yusufkaankilic.yk@gmail.com",
-  "39647217762Yk."
+  "superadmin",
+  "superadmin@email.com",
+  "12345Ab."
 );
