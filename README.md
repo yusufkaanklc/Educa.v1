@@ -25,10 +25,14 @@ This is an online education platform trial.
 - React
 
 ## Configuration
-- Go to file path and download npm packages
+- Go to main directory and download npm packages
 ```
 npm i 
-``` 
+```
+- Go to /client directory and download npm packages
+```
+npm i
+```
 - Go to the main directory and run the server
 ```
 npm start
