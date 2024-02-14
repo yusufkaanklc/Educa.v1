@@ -9,6 +9,8 @@ This is an online education platform trial.
 - Express
 - MongoDb
 ## Library Stack
+- axios
+- react router
 - express-fileupload
 - cors
 - express-session
