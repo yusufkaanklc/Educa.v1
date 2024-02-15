@@ -140,10 +140,6 @@ const deleteCourse = async (req, res) => {
     // Kursa ait yorumları al
     const comments = await Comment.find({ _id: { $in: course.comments } });
 
-    await Lesson.deleteMany({
-      _id: { $in: course.lessons },
-    });
-
     // Her yorum için
     for (const comment of comments) {
       // Yorumu sil
@@ -152,6 +148,19 @@ const deleteCourse = async (req, res) => {
       // Yoruma ait cevapları sil
       for (const replyId of comment.replies) {
         await Comment.findByIdAndDelete(replyId);
+      }
+    }
+
+    await Lesson.deleteMany({
+      _id: { $in: course.lessons },
+    });
+
+    for (const lesson of course.lessons) {
+      if (lesson.videoUrl && lesson.videoUrl !== "") {
+        fs.unlink(lesson.videoUrl, (err) => {
+          if (err)
+            throw { code: 2, message: "Course video couldnt be deleted" };
+        });
       }
     }
 

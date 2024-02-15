@@ -59,14 +59,14 @@ app.use(
 
 // Routes
 app.use(
-  "/api/admin",
+  "/admin",
   authMiddlewares.isLoggedIn,
   authMiddlewares.isAdmin,
   adminRouters
 );
-app.use("/api/users", userRouters);
-app.use("/api/courses", courseRouters);
-app.use("/api/categories", categoryRouters);
+app.use("/users", userRouters);
+app.use("/courses", courseRouters);
+app.use("/categories", categoryRouters);
 app.get("/public/uploads/:file", (req, res) => {
   console.log(req.params.file);
   res.sendFile(resolve(__dirname, "public/uploads/", req.params.file));
