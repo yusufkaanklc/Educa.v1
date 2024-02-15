@@ -84,20 +84,23 @@ const getLesson = async (req, res) => {
 const updateLesson = async (req, res) => {
   try {
     const { courseSlug, lessonSlug } = req.params;
-    const { title, description, videoUrl } = req.body;
+    const { title, description, isFinished } = req.body;
 
     const [course, lesson] = await Promise.all([
       Course.findOne({ slug: courseSlug }),
       Lesson.findOne({ slug: lessonSlug }),
     ]);
 
-    if (!title || !description || !videoUrl)
+    if (!title && !description && !isFinished)
       throw { code: 1, message: "All fields required" };
 
     if (!course || !lesson || !course.lessons.includes(lesson?._id))
       throw { code: 2, message: "Invalid course or lesson" };
 
     let newSlug;
+    let newVideoUrl = lesson.videoUrl;
+
+    if (req.uploadedVideoUrl) newVideoUrl = req.uploadedVideoUrl;
 
     if (title !== undefined) {
       newSlug = slugify(title, { lower: true, strict: true });
@@ -108,7 +111,9 @@ const updateLesson = async (req, res) => {
       {
         title,
         description,
-        videoUrl,
+        newVideoUrl,
+        isFinished,
+
         slug: title !== "" ? newSlug : lessonSlug,
       },
       { new: true }

@@ -17,6 +17,10 @@ const lessonSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  isFinished: {
+    type: Boolean,
+    default: false,
+  },
   slug: {
     type: String,
   },
