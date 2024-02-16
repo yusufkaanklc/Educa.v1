@@ -109,8 +109,6 @@ const Home = () => {
               as={Link}
               to="/signup"
               fontSize={"md"}
-              position={"relative"}
-              top={"2px"}
               color={"white"}
               padding={".8em 1.5em"}
               bgColor={"#FFD05A"}
@@ -169,6 +167,7 @@ const Home = () => {
       </Box>
       <About />
       <Courses />
+      <div></div>
     </>
   );
 };

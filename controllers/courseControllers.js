@@ -53,7 +53,10 @@ const getAllCourses = async (req, res) => {
       filter.title = { $regex: regexPattern, $options: "i" };
     }
 
-    const courses = await Course.find(filter);
+    const courses = await Course.find(filter).populate({
+      path: "ownership",
+      select: "username",
+    });
 
     if (!courses || courses.length === 0) {
       throw new Error("Courses not found");

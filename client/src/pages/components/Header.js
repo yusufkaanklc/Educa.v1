@@ -9,7 +9,6 @@ import { Link } from "react-router-dom";
 const Header = () => {
   const handleScroll = (id) => {
     const element = document.getElementById(id);
-    console.log(element);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
