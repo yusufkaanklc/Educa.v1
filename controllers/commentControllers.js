@@ -1,27 +1,28 @@
 import errorHandling from "../middlewares/errorHandling.js";
 import Comment from "../models/Comment.js";
-import Course from "../models/Course.js";
+import Lesson from "../models/Lesson.js";
 
 const addComment = async (req, res) => {
   try {
-    const { courseSlug } = req.params;
-    const { text } = req.body;
+    const { lessonSlug } = req.params;
+    const { text, point } = req.body;
     if (text === "") throw { code: 1, message: "Text cannot be empty" };
     const newComment = new Comment({
       text,
       user: req.session.userID,
+      point,
     });
     if (!newComment) throw { code: 2, message: "Comment could not be created" };
     await newComment.save();
 
-    const course = await Course.findOneAndUpdate(
-      { slug: courseSlug },
+    const lesson = await Lesson.findOneAndUpdate(
+      { slug: lessonSlug },
       {
         $push: { comments: newComment._id },
       }
     );
 
-    if (!course) throw { code: 2, message: "Course could not be updated" };
+    if (!lesson) throw { code: 2, message: "Lesson could not be updated" };
 
     res.status(200).json({ message: "Comment created successfully" });
   } catch (error) {
@@ -31,11 +32,11 @@ const addComment = async (req, res) => {
 
 const getComments = async (req, res) => {
   try {
-    const { courseSlug } = req.params;
-    const course = await Course.findOne({ slug: courseSlug });
+    const { lessonSlug } = req.params;
+    const lesson = await Lesson.findOne({ slug: lessonSlug });
 
     const commentList = [];
-    for (const commentId of course.comments) {
+    for (const commentId of lesson.comments) {
       const comment = await Comment.findById(commentId);
       if (comment) {
         commentList.push(comment);
@@ -72,16 +73,16 @@ const updateComment = async (req, res) => {
 
 const deleteComment = async (req, res) => {
   try {
-    const { courseSlug, commentId } = req.params;
+    const { lessonSlug, commentId } = req.params;
 
-    // Kursu bul
-    const course = await Course.findOneAndUpdate(
-      { slug: courseSlug },
+    // Dersi bul
+    const course = await Lesson.findOneAndUpdate(
+      { slug: lessonSlug },
       {
         $pull: { comments: commentId },
       }
     );
-    if (!course) throw { code: 2, message: "Course could not be updated" };
+    if (!course) throw { code: 2, message: "Lesson could not be updated" };
 
     // Yorumu bul ve sil
     const comment = await Comment.findById(commentId);

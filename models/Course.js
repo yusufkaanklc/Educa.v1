@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 import Category from "./Category.js";
-import Comment from "./Comment.js";
 import User from "./User.js";
 import Lesson from "./Lesson.js";
 import slugify from "slugify";
@@ -27,12 +26,6 @@ const courseSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "categories",
   },
-  comments: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "comments",
-    },
-  ],
   ownership: {
     type: Schema.Types.ObjectId,
     ref: "users",
@@ -49,6 +42,10 @@ const courseSchema = new Schema({
       ref: "lessons",
     },
   ],
+  point: {
+    type: Number,
+  },
+
   slug: {
     type: String,
   },

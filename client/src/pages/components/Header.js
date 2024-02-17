@@ -65,22 +65,13 @@ const Header = () => {
               Courses
             </ChakraLink>
             <ChakraLink
-              onClick={() => handleScroll("instructers")}
+              onClick={() => handleScroll("instructors")}
               fontSize={"lg"}
               opacity={0.8}
               fontWeight={"500"}
               _hover={{ textDecoration: "none", opacity: 1, color: "black" }}
             >
-              Instructers
-            </ChakraLink>
-            <ChakraLink
-              onClick={() => handleScroll("events")}
-              fontSize={"lg"}
-              opacity={0.8}
-              fontWeight={"500"}
-              _hover={{ textDecoration: "none", opacity: 1, color: "black" }}
-            >
-              Events
+              Instructors
             </ChakraLink>
             <ChakraLink
               onClick={() => handleScroll("contact")}

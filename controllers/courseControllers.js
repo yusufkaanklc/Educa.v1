@@ -8,7 +8,7 @@ import errorHandling from "../middlewares/errorHandling.js";
 
 const createCourse = async (req, res) => {
   try {
-    const { title, description, category, price } = req.body;
+    const { title, description, category, price, point } = req.body;
 
     // Gelen verilerin boş olup olmadığını kontrol edin
     if (!title || !description || !price)
@@ -24,6 +24,7 @@ const createCourse = async (req, res) => {
 
     if (category) newCourseData.category = category;
     if (req.uploadedImageUrl) newCourseData.imageUrl = req.uploadedImageUrl;
+    if (point) newCourseData.point = point;
 
     const newCourse = new Course(newCourseData);
     await newCourse.save();
@@ -53,16 +54,58 @@ const getAllCourses = async (req, res) => {
       filter.title = { $regex: regexPattern, $options: "i" };
     }
 
-    const courses = await Course.find(filter).populate({
-      path: "ownership",
-      select: "username",
-    });
+    const coursesWithAvgPoints = await Course.aggregate([
+      {
+        $match: filter,
+      },
+      {
+        $lookup: {
+          from: "lessons",
+          localField: "lessons",
+          foreignField: "_id",
+          as: "lessonDetails",
+        },
+      },
+      {
+        $unwind: "$lessonDetails",
+      },
+      {
+        $lookup: {
+          from: "comments",
+          localField: "lessonDetails.comments",
+          foreignField: "_id",
+          as: "commentDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$commentDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "ownership",
+          foreignField: "_id",
+          as: "ownershipDetails",
+        },
+      },
+      { $unwind: "$ownershipDetails" },
+      {
+        $group: {
+          _id: "$_id",
+          title: { $first: "$title" },
+          description: { $first: "$description" },
+          ownership: { $first: "$ownershipDetails.username" },
+          lessons: { $push: "$lessonDetails" },
+          price: { $first: "$price" },
+          point: { $avg: { $ifNull: ["$commentDetails.point", 1] } }, // Dersin ortalama puanı
+        },
+      },
+    ]);
 
-    if (!courses || courses.length === 0) {
-      throw new Error("Courses not found");
-    }
-
-    res.status(200).json(courses);
+    res.status(200).json(coursesWithAvgPoints);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

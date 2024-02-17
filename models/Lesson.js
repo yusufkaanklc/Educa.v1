@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import slugify from "slugify";
+import Comment from "./Comment.js";
 
 const lessonSchema = new Schema({
   title: {
@@ -13,6 +14,13 @@ const lessonSchema = new Schema({
   videoUrl: {
     type: String,
   },
+  comments: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "comments",
+    },
+  ],
+
   createdAt: {
     type: Date,
     default: Date.now,

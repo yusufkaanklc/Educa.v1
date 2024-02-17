@@ -14,6 +14,8 @@ router.route("/login").post(authMiddlewares.isLoggedOut, userControllers.login);
 // Kullanıcı çıkış işlemi
 router.route("/logout").get(authMiddlewares.isLoggedIn, userControllers.logout);
 
+router.route("/accounts").get(userControllers.getAllUsers);
+
 // Kullanıcı bilgileri için GET isteği
 router
   .route("/account")

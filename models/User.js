@@ -22,6 +22,9 @@ const userSchema = new Schema({
     enum: ["student", "teacher", "superadmin"],
     default: "student",
   },
+  profession: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -58,7 +58,8 @@ const ownershipAndEnrollControl = async (req, res, next) => {
 const ownershipControlForCommentFunc = async (commentId, req, res, next) => {
   try {
     const comment = await Comment.findById(commentId);
-    if (comment.user !== req.session.userId) throw new Error("Unauthorized");
+    if (comment.user.toString() !== req.session.userID.toString())
+      throw new Error("Unauthorized");
     next();
   } catch (error) {
     res.status(500).json({ message: error.message });

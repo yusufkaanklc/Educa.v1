@@ -1,7 +1,36 @@
 import { Box, Flex, Text, Stack, Heading, Center } from "@chakra-ui/react";
+import { useEffect, useContext, useState } from "react";
+import getUsers from "../utils/data/UsersData";
+import dataContext from "../utils/contextApi";
 const About = () => {
+  const { users, setUsers, courses } = useContext(dataContext);
+  const [teachers, setTeachers] = useState([]);
+  const [lessons, setLessons] = useState([]);
+
+  useEffect(() => {
+    getUsers()
+      .then((data) => {
+        setUsers(data);
+      })
+      .catch((error) => console.log(error));
+  }, []);
+
+  useEffect(() => {
+    let filteredTeachers = [];
+    for (const user of users) {
+      if (user.role === "teacher") filteredTeachers.push(user);
+    }
+    setTeachers(filteredTeachers);
+  }, [users]);
+
+  useEffect(() => {
+    const lessonList = courses.flatMap((course) => {
+      return course.lessons;
+    });
+    setLessons(lessonList);
+  }, [courses]);
   return (
-    <Box mx={"10em"} h={"100vh"} id="about">
+    <Box mx={"10em"} mb={"8em"} id="about">
       <Flex
         bgColor={"var(--primary-color)"}
         align={"center"}
@@ -11,28 +40,29 @@ const About = () => {
       >
         <Stack color={"white"} textAlign={"center"}>
           <Text fontSize={"6xl"} fontWeight={"600"}>
-            34K +
-          </Text>
-          <Text>Success Stories</Text>
-        </Stack>
-        <Box w={"4px"} h={"5em"} bgColor={"white"} opacity={0.2}></Box>
-        <Stack color={"white"} textAlign={"center"}>
-          <Text fontSize={"6xl"} fontWeight={"600"}>
-            201 +
-          </Text>
-          <Text>Expert Instructor</Text>
-        </Stack>
-        <Box w={"4px"} h={"5em"} bgColor={"white"} opacity={0.2}></Box>
-        <Stack color={"white"} textAlign={"center"}>
-          <Text fontSize={"6xl"} fontWeight={"600"}>
-            54K +
+            {courses && courses.length}
           </Text>
           <Text>Online Courses</Text>
         </Stack>
         <Box w={"4px"} h={"5em"} bgColor={"white"} opacity={0.2}></Box>
         <Stack color={"white"} textAlign={"center"}>
+          <Text fontSize={"6xl"} fontWeight={"600"}></Text>
           <Text fontSize={"6xl"} fontWeight={"600"}>
-            80K +
+            {lessons.length}
+          </Text>
+          <Text>Lessons</Text>
+        </Stack>
+        <Box w={"4px"} h={"5em"} bgColor={"white"} opacity={0.2}></Box>
+        <Stack color={"white"} textAlign={"center"}>
+          <Text fontSize={"6xl"} fontWeight={"600"}>
+            {teachers.length}
+          </Text>
+          <Text>Expert Instructor</Text>
+        </Stack>{" "}
+        <Box w={"4px"} h={"5em"} bgColor={"white"} opacity={0.2}></Box>
+        <Stack color={"white"} textAlign={"center"}>
+          <Text fontSize={"6xl"} fontWeight={"600"}>
+            {users.length}
           </Text>
           <Text>Worldwide Members</Text>
         </Stack>

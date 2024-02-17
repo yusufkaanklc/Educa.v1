@@ -48,7 +48,9 @@ const getLessons = async (req, res) => {
     if (!course) throw { code: 2, message: "Course not found" };
 
     // Kursun derslerini bul ve liste oluştur
-    const lessonList = await Lesson.find({ _id: { $in: course.lessons } });
+    const lessonList = await Lesson.find({
+      _id: { $in: course.lessons },
+    }).populate({ path: "comments", select: " text point" });
 
     res.status(200).json(lessonList);
   } catch (error) {

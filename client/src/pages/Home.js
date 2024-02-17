@@ -8,11 +8,12 @@ import {
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { StarIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import InstructorWoman from "./components/Instructor-woman";
+import InstructorMan from "./components/Instructor-man";
 import Header from "./components/Header";
 import About from "./About";
 import Courses from "./Courses";
-import InstructorWoman from "./components/Instructor-woman";
-import InstructorMan from "./components/Instructor-man";
+import Instructors from "./Instructors";
 
 const Home = () => {
   const handleScroll = (id) => {
@@ -25,7 +26,7 @@ const Home = () => {
   return (
     <>
       <Header />
-      <Box mx={"10em"} mt={"8em"} h={"75vh"}>
+      <Box mx={"10em"} my={"8em"}>
         <Heading
           fontSize={"2xl"}
           fontWeight={500}
@@ -167,7 +168,7 @@ const Home = () => {
       </Box>
       <About />
       <Courses />
-      <div></div>
+      <Instructors />
     </>
   );
 };

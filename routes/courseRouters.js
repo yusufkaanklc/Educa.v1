@@ -63,72 +63,6 @@ router
   .route("/:courseSlug/disenroll")
   .post(authMiddlewares.isLoggedIn, userControllers.disenrollCourse);
 
-// Bir kursa yorum yapmak için POST isteği
-router
-  .route("/:courseSlug/add-comment")
-  .post(
-    authMiddlewares.isLoggedIn,
-    courseMiddlewares.ownershipAndEnrollControl,
-    commentControllers.addComment
-  );
-
-// Bir kursun yorumlarını getirmek için GET isteği
-router.route("/:courseSlug/comments").get(commentControllers.getComments);
-
-// Bir kursun yorumunu güncellemek için PUT isteği
-router
-  .route("/:courseSlug/comments/:commentId")
-  .put(
-    authMiddlewares.isLoggedIn,
-    courseMiddlewares.ownershipAndEnrollControl,
-    courseMiddlewares.ownershipControlForComment,
-    commentControllers.updateComment
-  );
-
-// Bir kursun yorumunu silmek için DELETE isteği
-router
-  .route("/:courseSlug/comments/:commentId")
-  .delete(
-    authMiddlewares.isLoggedIn,
-    courseMiddlewares.ownershipAndEnrollControl,
-    courseMiddlewares.ownershipControlForComment,
-    commentControllers.deleteComment
-  );
-
-//Bir yoruma cevap vermek için POST isteği
-router
-  .route("/:courseSlug/comments/:commentId/add-reply")
-  .post(
-    authMiddlewares.isLoggedIn,
-    courseMiddlewares.ownershipAndEnrollControl,
-    commentControllers.addReply
-  );
-
-// bir yorumun cevaplarını getirmek için GET isteği
-router
-  .route("/:courseSlug/comments/:commentId/replies")
-  .get(commentControllers.getReplies);
-
-// Bir cevabı güncellemek için PUT isteği
-router
-  .route("/:courseSlug/comments/:commentId/replies/:replyId")
-  .put(
-    authMiddlewares.isLoggedIn,
-    courseMiddlewares.ownershipAndEnrollControl,
-    courseMiddlewares.ownershipControlForReply,
-    commentControllers.updateReply
-  );
-
-// Bir cevabı silmek için DELETE isteği
-router
-  .route("/:courseSlug/comments/:commentId/replies/:replyId")
-  .delete(
-    authMiddlewares.isLoggedIn,
-    courseMiddlewares.ownershipAndEnrollControl,
-    courseMiddlewares.ownershipControlForReply,
-    commentControllers.deleteReply
-  );
-
 // Bir kursa ders eklemek için POST isteği
 router
   .route("/:courseSlug/add-lesson")
@@ -163,6 +97,78 @@ router
     authMiddlewares.isLoggedIn,
     courseMiddlewares.ownershipControl,
     lessonControllers.deleteLesson
+  );
+
+// Bir kursa yorum yapmak için POST isteği
+router
+  .route("/:courseSlug/lessons/:lessonSlug/add-comment")
+  .post(
+    authMiddlewares.isLoggedIn,
+    courseMiddlewares.ownershipAndEnrollControl,
+    commentControllers.addComment
+  );
+
+// Bir kursun yorumlarını getirmek için GET isteği
+router
+  .route("/:courseSlug/lessons/:lessonSlug/comments")
+  .get(commentControllers.getComments);
+
+// Bir kursun yorumunu güncellemek için PUT isteği
+router
+  .route("/:courseSlug/lessons/:lessonSlug/comments/:commentId")
+  .put(
+    authMiddlewares.isLoggedIn,
+    courseMiddlewares.ownershipAndEnrollControl,
+    courseMiddlewares.ownershipControlForComment,
+    commentControllers.updateComment
+  );
+
+// Bir kursun yorumunu silmek için DELETE isteği
+router
+  .route("/:courseSlug/lessons/:lessonSlug/comments/:commentId")
+  .delete(
+    authMiddlewares.isLoggedIn,
+    courseMiddlewares.ownershipAndEnrollControl,
+    courseMiddlewares.ownershipControlForComment,
+    commentControllers.deleteComment
+  );
+
+//Bir yoruma cevap vermek için POST isteği
+router
+  .route("/:courseSlug/lessons/:lessonSlug/comments/:commentId/add-reply")
+  .post(
+    authMiddlewares.isLoggedIn,
+    courseMiddlewares.ownershipAndEnrollControl,
+    commentControllers.addReply
+  );
+
+// bir yorumun cevaplarını getirmek için GET isteği
+router
+  .route("/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies")
+  .get(commentControllers.getReplies);
+
+// Bir cevabı güncellemek için PUT isteği
+router
+  .route(
+    "/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies/:replyId"
+  )
+  .put(
+    authMiddlewares.isLoggedIn,
+    courseMiddlewares.ownershipAndEnrollControl,
+    courseMiddlewares.ownershipControlForReply,
+    commentControllers.updateReply
+  );
+
+// Bir cevabı silmek için DELETE isteği
+router
+  .route(
+    "/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies/:replyId"
+  )
+  .delete(
+    authMiddlewares.isLoggedIn,
+    courseMiddlewares.ownershipAndEnrollControl,
+    courseMiddlewares.ownershipControlForReply,
+    commentControllers.deleteReply
   );
 
 export default router;

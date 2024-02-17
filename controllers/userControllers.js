@@ -7,12 +7,15 @@ import errorHandling from "../middlewares/errorHandling.js";
 
 const register = async (req, res) => {
   try {
-    const { username, password, email, avatar, role } = req.body;
+    const { username, password, email, avatar, role, profession } = req.body;
     if (!username || !password || !email) {
       throw { code: 1, message: "All fields are required" };
     }
     if (role === "admin") {
       throw { code: 4, message: "Admin cannot be created" };
+    }
+    if (role === "teacher" && !profession) {
+      throw { code: 4, message: "Profession is required" };
     }
 
     const existingUser = await User.findOne({ email });
@@ -20,13 +23,19 @@ const register = async (req, res) => {
       throw { code: 5, message: "User already exists" };
     }
 
-    const newUser = new User({
+    const userData = {
       username,
       password,
       email,
       avatar,
       role,
-    });
+    };
+
+    if (role === "teacher") {
+      userData.profession = profession;
+    }
+
+    const newUser = new User(userData);
 
     await newUser.save();
 
@@ -72,6 +81,41 @@ const logout = async (req, res) => {
       }
     });
   } catch (error) {
+    errorHandling(error, req, res);
+  }
+};
+
+const getAllUsers = async (req, res) => {
+  try {
+    const { role, username } = req.query;
+    // Filtreleme için boş filtre oluşturma
+    let filter = {};
+    // Eğer role parametresi varsa ve boş değilse filtreye ekle
+    if (role && role !== "") {
+      filter.role = role;
+    }
+    // Eğer username parametresi varsa ve boş değilse filtreye eklemek için regex kullan
+    if (username && username !== "") {
+      const regexPattern = new RegExp(username, "i");
+      filter.username = regexPattern;
+    }
+    // Kullanıcı adı ve rol boş ise tüm kullanıcıları getir
+    if (!role && !username) {
+      filter = {};
+    }
+    // Veritabanından kullanıcıları bul
+    const users = await User.find(filter);
+    // Kullanıcı bulunamadığında hata fırlat
+    if (!users || users.length === 0) {
+      throw {
+        code: 1,
+        message: "No user found",
+      };
+    }
+    // Kullanıcıları başarıyla bulduğunda 200 OK yanıtı gönder
+    res.status(200).json(users);
+  } catch (error) {
+    // Hata durumunda 500 hatası gönder
     errorHandling(error, req, res);
   }
 };
@@ -191,7 +235,7 @@ const enrollCourse = async (req, res) => {
 
 const getEnrollments = async (req, res) => {
   try {
-    const enrollments = Course.find({ enrollments: req.session.userID });
+    const enrollments = await Course.find({ enrollments: req.session.userID });
     res.status(200).json(enrollments);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -252,4 +296,5 @@ export default {
   getEnrollments,
   disenrollCourse,
   getOwnedCourses,
+  getAllUsers,
 };

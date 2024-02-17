@@ -6,41 +6,6 @@ import userControllers from "./userControllers.js";
 import slugify from "slugify";
 import errorHandling from "../middlewares/errorHandling.js";
 
-const getAllUsers = async (req, res) => {
-  try {
-    const { role, username } = req.query;
-    // Filtreleme için boş filtre oluşturma
-    let filter = {};
-    // Eğer role parametresi varsa ve boş değilse filtreye ekle
-    if (role && role !== "") {
-      filter.role = role;
-    }
-    // Eğer username parametresi varsa ve boş değilse filtreye eklemek için regex kullan
-    if (username && username !== "") {
-      const regexPattern = new RegExp(username, "i");
-      filter.username = regexPattern;
-    }
-    // Kullanıcı adı ve rol boş ise tüm kullanıcıları getir
-    if (!role && !username) {
-      filter = {};
-    }
-    // Veritabanından kullanıcıları bul
-    const users = await User.find(filter);
-    // Kullanıcı bulunamadığında hata fırlat
-    if (!users || users.length === 0) {
-      throw {
-        code: 1,
-        message: "No user found",
-      };
-    }
-    // Kullanıcıları başarıyla bulduğunda 200 OK yanıtı gönder
-    res.status(200).json({ users: users });
-  } catch (error) {
-    // Hata durumunda 500 hatası gönder
-    errorHandling(error, req, res);
-  }
-};
-
 const getUser = async (req, res) => {
   const { userId } = req.params;
   userControllers.accountDetailsFunc(userId, req, res);
@@ -228,7 +193,6 @@ const deleteCategory = async (req, res) => {
 };
 
 export default {
-  getAllUsers,
   getUser,
   updateUser,
   removeUsers,

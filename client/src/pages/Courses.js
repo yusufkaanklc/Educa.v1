@@ -10,42 +10,44 @@ import {
   Image,
   Flex,
 } from "@chakra-ui/react";
+import { useContext, useEffect, useState } from "react";
 import { StarIcon } from "@chakra-ui/icons";
 import InstructorWomen from "./components/Instructor-woman";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import dataContext from "../utils/contextApi";
+import getCourses from "../utils/data/CoursesData";
 
 const Courses = () => {
-  // const [courses, setCourses] = useState(null);
-  // useEffect(() => {
-  //   const fetchCourse = async () => {
-  //     try {
-  //       const courseData = await axios.get("/courses");
-  //       setCourses(courseData.data);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
+  const { setCourses, courses } = useContext(dataContext);
+  const [popularCourses, setPopularCourses] = useState([]);
 
-  //   fetchCourse();
-  // }, []);
+  useEffect(() => {
+    getCourses()
+      .then((data) => {
+        console.log(data);
+        setCourses(data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
-  // useEffect(() => {
-  //   console.log(courses);
-  // }, [courses]);
+  useEffect(() => {
+    setPopularCourses(courses.slice(0, 6));
+  }, [courses]);
+
   return (
     <Box
       mx={"10em"}
-      mt={"3em"}
+      mb={"8em"}
       bgColor={"var(--bg-color)"}
-      pt={"4em"}
+      py={"4em"}
       px={"2em"}
       borderRadius={"10px"}
       id="courses"
     >
       <Center>
-        <Stack textAlign={"center"} gap={"1em"} maxW={"2xl"} mb={"3em"}>
+        <Stack textAlign={"center"} gap={"1em"} maxW={"2xl"}>
           <Heading
             fontSize={"2xl"}
             fontWeight={"500"}
@@ -60,9 +62,9 @@ const Courses = () => {
           </Text>
         </Stack>
       </Center>
-      <Flex gap={"2em"} justify={"center"} flexWrap={"wrap"}>
-        {courses &&
-          courses.map((course, index) => (
+      <Flex gap={"2em"} justify={"center"} flexWrap={"wrap"} mt={"4em"}>
+        {popularCourses &&
+          popularCourses.map((course, index) => (
             <Card key={index} maxW="sm" display={"flex"}>
               <CardBody>
                 <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
@@ -87,7 +89,7 @@ const Courses = () => {
                         {course.title}
                       </Center>
                       <Flex align={"center"} gap={"0.5em"}>
-                        <Text fontSize={"sm"}>4.8</Text>
+                        <Text fontSize={"sm"}>{course.point}</Text>
                         <StarIcon
                           color={"var(--accent-color)"}
                           pos={"relative"}
@@ -122,9 +124,7 @@ const Courses = () => {
                     <Flex align={"center"} mt={"1em"} justify={"space-between"}>
                       <Flex align={"center"} gap={"0.5em"}>
                         <InstructorWomen />
-                        <Text fontWeight={"600"}>
-                          {course.ownership.username}
-                        </Text>
+                        <Text fontWeight={"600"}>{course.ownership}</Text>
                       </Flex>
                       <Text fontWeight={600} color={"var(--primary-color)"}>
                         {"$" + course.price}
@@ -136,7 +136,7 @@ const Courses = () => {
             </Card>
           ))}
       </Flex>
-      <Center py={"3em"}>
+      <Center pt={"3em"}>
         <ChakraLink
           as={Link}
           to="/courses"

@@ -5,9 +5,6 @@ import lessonControllers from "../controllers/lessonControllers.js";
 import commentControllers from "../controllers/commentControllers.js";
 const router = express.Router();
 
-// Bütün kullanıcıları getiren GET isteği
-router.route("/users").get(adminControllers.getAllUsers);
-
 // Bir kullanıcıyı getirmek için GET isteği
 router.route("/users/:userId").get(adminControllers.getUser);
 

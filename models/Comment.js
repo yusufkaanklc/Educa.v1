@@ -10,6 +10,11 @@ const commentSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "users",
   },
+  point: {
+    type: Number,
+    default: 1,
+    enum: [1, 2, 3, 4, 5],
+  },
   replies: [
     {
       type: Schema.Types.ObjectId,
