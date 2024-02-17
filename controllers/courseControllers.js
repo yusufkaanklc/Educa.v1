@@ -67,7 +67,10 @@ const getAllCourses = async (req, res) => {
         },
       },
       {
-        $unwind: "$lessonDetails",
+        $unwind: {
+          path: "$lessonDetails",
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $lookup: {
@@ -104,7 +107,7 @@ const getAllCourses = async (req, res) => {
         },
       },
     ]);
-
+    console.log(coursesWithAvgPoints);
     res.status(200).json(coursesWithAvgPoints);
   } catch (error) {
     res.status(500).json({ message: error.message });

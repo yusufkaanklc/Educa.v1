@@ -14,6 +14,8 @@ import Header from "./components/Header";
 import About from "./About";
 import Courses from "./Courses";
 import Instructors from "./Instructors";
+import { useContext } from "react";
+import dataContext from "../utils/contextApi";
 
 const Home = () => {
   const handleScroll = (id) => {
@@ -23,12 +25,26 @@ const Home = () => {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  const { isMobile, isTablet, isLaptop } = useContext(dataContext);
   return (
     <>
       <Header />
-      <Box mx={"10em"} my={"8em"}>
+      <Box
+        m={
+          isMobile
+            ? "4em 2em"
+            : isTablet
+            ? "6em 4em"
+            : isLaptop
+            ? "8em 7em"
+            : "10em 8em"
+        }
+      >
         <Heading
-          fontSize={"2xl"}
+          fontSize={
+            isMobile ? "md" : isTablet ? "lg" : isLaptop ? "2xl" : "3xl"
+          }
           fontWeight={500}
           color={"var(--secondary-color)"}
           textAlign={"center"}
@@ -36,9 +52,25 @@ const Home = () => {
         >
           Education & Online Course
         </Heading>
-        <Flex justify={"space-between"} mb={"2em"}>
-          <Box w={"180px"}></Box>
-          <Heading fontSize={"7xl"} w={"60%"} textAlign={"center"}>
+        <Flex justify={"space-between"} mb={"1em"}>
+          <Box
+            w={
+              isMobile
+                ? "80px"
+                : isTablet
+                ? "100px"
+                : isLaptop
+                ? "150px"
+                : "180px"
+            }
+          ></Box>
+          <Heading
+            fontSize={
+              isMobile ? "xl" : isTablet ? "3xl" : isLaptop ? "5xl" : "7xl"
+            }
+            w={"60%"}
+            textAlign={"center"}
+          >
             Learn Without Limits With Educa
           </Heading>
           <Box
@@ -48,11 +80,21 @@ const Home = () => {
             borderLeft={"transparent"}
             borderBottom={"transparent"}
             borderRadius={" 0 100% 0  0  "}
-            w={"180px"}
-            h={"150px"}
+            w={
+              isMobile
+                ? "80px"
+                : isTablet
+                ? "100px"
+                : isLaptop
+                ? "150px"
+                : "180px"
+            }
+            h={"140px"}
             position={"relative"}
-            right={"10%"}
-            top={"3em"}
+            right={isMobile ? "2%" : isTablet ? "5%" : isLaptop ? "8%" : "10%"}
+            top={
+              isMobile ? "1em" : isTablet ? "1em" : isLaptop ? "1.5em" : "3em"
+            }
           >
             <ChevronDownIcon
               pos={"absolute"}
@@ -64,27 +106,81 @@ const Home = () => {
           </Box>
         </Flex>
         <Flex justify={"space-between"}>
-          <Box mt={"4em"} w={"25%"} position={"relative"} left={"5em"}>
+          <Box
+            mt={"4em"}
+            w={"25%"}
+            position={"relative"}
+            left={
+              isMobile ? "0em" : isTablet ? "1em" : isLaptop ? "3em" : "5em"
+            }
+          >
             <Flex gap={"0.5em"}>
               <StarIcon
-                fontSize={"20px"}
+                fontSize={
+                  isMobile
+                    ? "7px"
+                    : isTablet
+                    ? "10px"
+                    : isLaptop
+                    ? "15px"
+                    : "20px"
+                }
                 color={"var(--accent-color)"}
               ></StarIcon>
               <StarIcon
-                fontSize={"20px"}
+                fontSize={
+                  isMobile
+                    ? "7px"
+                    : isTablet
+                    ? "10px"
+                    : isLaptop
+                    ? "15px"
+                    : "20px"
+                }
                 color={"var(--accent-color)"}
               ></StarIcon>
               <StarIcon
-                fontSize={"20px"}
+                fontSize={
+                  isMobile
+                    ? "7px"
+                    : isTablet
+                    ? "10px"
+                    : isLaptop
+                    ? "15px"
+                    : "20px"
+                }
                 color={"var(--accent-color)"}
               ></StarIcon>
               <StarIcon
-                fontSize={"20px"}
+                fontSize={
+                  isMobile
+                    ? "7px"
+                    : isTablet
+                    ? "10px"
+                    : isLaptop
+                    ? "15px"
+                    : "20px"
+                }
                 color={"var(--accent-color)"}
               ></StarIcon>
-              <StarIcon fontSize={"20px"}></StarIcon>
+              <StarIcon
+                fontSize={
+                  isMobile
+                    ? "7px"
+                    : isTablet
+                    ? "10px"
+                    : isLaptop
+                    ? "15px"
+                    : "20px"
+                }
+              ></StarIcon>
             </Flex>
-            <Text fontSize={"sm"} my={"1em"}>
+            <Text
+              fontSize={
+                isMobile ? "xxs" : isTablet ? "xxs" : isLaptop ? "xs" : "sm"
+              }
+              my={"1em"}
+            >
               "This course was comprehensive and covered everything i needed to
               know about animation"
             </Text>
@@ -109,7 +205,9 @@ const Home = () => {
               mt={"2em"}
               as={Link}
               to="/signup"
-              fontSize={"md"}
+              fontSize={
+                isMobile ? "xxs" : isTablet ? "xxs" : isLaptop ? "sm" : "md"
+              }
               color={"white"}
               padding={".8em 1.5em"}
               bgColor={"#FFD05A"}
@@ -144,7 +242,10 @@ const Home = () => {
             </Stack>
           </Flex>
         </Flex>
-        <Flex mt={"5em"} justify={"center"}>
+        <Flex
+          mt={isMobile ? "1em" : isTablet ? "2em" : isLaptop ? "3em" : "5em"}
+          justify={"center"}
+        >
           <Flex
             onClick={() => handleScroll("about")}
             align={"center"}
