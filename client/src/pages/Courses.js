@@ -47,6 +47,7 @@ const Courses = () => {
 
   return (
     <Box
+      border={"2px dashed #cfcfcf"}
       mx={responsive("", "8em", "10em")}
       mb={responsive("", "6em", "8em")}
       bgColor={"var(--bg-color)"}

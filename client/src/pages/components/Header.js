@@ -5,7 +5,7 @@ import {
   Box,
   Link as ChakraLink,
 } from "@chakra-ui/react";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import dataContext from "../../utils/contextApi";
 const Header = () => {
@@ -17,6 +17,7 @@ const Header = () => {
   };
 
   const { isMobile, isLaptop } = useContext(dataContext);
+  const [navVisible, setNavVisible] = useState(true);
 
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
@@ -28,10 +29,33 @@ const Header = () => {
     }
   };
 
+  useEffect(() => {
+    let lastScrollTop = 0;
+
+    const handleScroll = () => {
+      const currentScrollTop = document.documentElement.scrollTop;
+      console.log(currentScrollTop);
+      if (currentScrollTop > lastScrollTop) {
+        setNavVisible(false);
+      } else {
+        setNavVisible(true);
+      }
+
+      lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop;
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <>
       <Box id="home"></Box>
       <Box
+        transform={navVisible ? "translateY(0)" : "translateY(-150%)"}
+        transition={"0.5s ease"}
         m={responsive("", "1em 8em", "1em 10em")}
         bgColor={"white"}
         boxShadow={"md"}

@@ -131,7 +131,7 @@ const getAllCourses = async (req, res) => {
           { new: true }
         );
       } else {
-        await Course.findByIdAndUpdate(course._id, { point: 1 }, { new: true });
+        await Course.findByIdAndUpdate(course._id, { point: 0 }, { new: true });
       }
     }
 

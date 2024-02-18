@@ -34,6 +34,8 @@ const Instructors = () => {
 
   return (
     <Box
+      border={"2px dashed #cfcfcf"}
+      borderRadius={"10px"}
       bgColor={"var(--bg-color)"}
       mx={responsive("", "8em", "10em")}
       py={"4em"}

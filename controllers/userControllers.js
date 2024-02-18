@@ -131,7 +131,7 @@ const getAllUsers = async (req, res) => {
           avatar: { $first: "$avatar" },
           role: { $first: "$role" },
           profession: { $first: "$profession" },
-          point: { $avg: { $ifNull: ["$courses.point", 1] } },
+          point: { $avg: { $ifNull: ["$courses.point", 0] } },
         },
       },
     ]);
@@ -164,8 +164,8 @@ const accountUpdate = (req, res) => {
 
 const accountUpdateFunc = async (userId, req, res) => {
   try {
-    const { username, password, email, avatar, role } = req.body;
-    if (!username && !password && !email && !avatar && !role)
+    const { username, password, email, avatar, role, profession } = req.body;
+    if (!username && !password && !email && !avatar && !role && !profession)
       throw { code: 1, message: "No field to update" };
     const userFindAndUpdate = await User.findByIdAndUpdate(userId, {
       username,
@@ -173,6 +173,7 @@ const accountUpdateFunc = async (userId, req, res) => {
       email,
       avatar,
       role,
+      profession,
     });
     if (!userFindAndUpdate) throw { code: 2, message: "User not found" };
     res.status(201).json({ "updated user": userFindAndUpdate });

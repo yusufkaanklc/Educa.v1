@@ -115,7 +115,10 @@ const About = () => {
         justify={"space-between"}
         mt={responsive("", "2em", "3em")}
       >
-        <Stack gap={responsive("", "1.2em", "1.5em")} w={"50%"}>
+        <Stack
+          gap={responsive("", "1.2em", "1.5em")}
+          w={responsive("", "40%", "50%")}
+        >
           <Heading
             fontSize={responsive("", "xl", "2xl")}
             color={"var(--secondary-color)"}

@@ -14,6 +14,7 @@ import Header from "./components/Header";
 import About from "./About";
 import Courses from "./Courses";
 import Instructors from "./Instructors";
+import Contact from "./Contact";
 import { useContext } from "react";
 import dataContext from "../utils/contextApi";
 
@@ -203,6 +204,7 @@ const Home = () => {
       <About />
       <Courses />
       <Instructors />
+      <Contact />
     </>
   );
 };
