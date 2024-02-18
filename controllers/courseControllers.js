@@ -127,11 +127,13 @@ const getAllCourses = async (req, res) => {
       if (pointList.length > 0) {
         await Course.findByIdAndUpdate(
           course._id,
-          { point: pointList.reduce((a, b) => a + b) / pointList.length },
+          {
+            point: Math.floor(
+              pointList.reduce((a, b) => a + b) / pointList.length
+            ),
+          },
           { new: true }
         );
-      } else {
-        await Course.findByIdAndUpdate(course._id, { point: 0 }, { new: true });
       }
     }
 

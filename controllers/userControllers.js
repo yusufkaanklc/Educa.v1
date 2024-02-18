@@ -131,10 +131,20 @@ const getAllUsers = async (req, res) => {
           avatar: { $first: "$avatar" },
           role: { $first: "$role" },
           profession: { $first: "$profession" },
-          point: { $avg: { $ifNull: ["$courses.point", 0] } },
+          point: {
+            $avg: {
+              $cond: [
+                { $eq: ["$courses.point", 0] }, // Kursun puanı 0 ise
+                "$$REMOVE", // Ortalamaya dahil etme
+                "$courses.point", // Değilse, puanı ortalamaya dahil et
+              ],
+            },
+          },
         },
       },
     ]);
+
+    console.log(users);
 
     // Kullanıcıları başarıyla bulduğunda 200 OK yanıtı gönder
     res.status(200).json(users);

@@ -21,9 +21,9 @@ const Contact = () => {
         <Heading
           fontSize={responsive("", "xl", "2xl")}
           color={"var(--secondary-color)"}
-          fontWeight={"500"}
+          fontWeight={"400"}
         >
-          How it's work.
+          How it's work
         </Heading>
         <Heading fontSize={responsive("", "3xl", "4xl")} fontWeight={"700"}>
           Your Online Learning Journey Made Easy
