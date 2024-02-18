@@ -3,7 +3,10 @@ import adminControllers from "../controllers/adminControllers.js";
 import courseControllers from "../controllers/courseControllers.js";
 import lessonControllers from "../controllers/lessonControllers.js";
 import commentControllers from "../controllers/commentControllers.js";
+import userControllers from "../controllers/userControllers.js";
 const router = express.Router();
+
+router.route("/users").get(userControllers.getAllUsers);
 
 // Bir kullanıcıyı getirmek için GET isteği
 router.route("/users/:userId").get(adminControllers.getUser);
@@ -31,42 +34,48 @@ router.route("/courses/:courseSlug").delete(courseControllers.deleteCourse);
 
 // Bir kursa yorum yapmak için POST isteği
 router
-  .route("/courses/:courseSlug/add-comment")
+  .route("/courses/:courseSlug/lessons/:lessonSlug/add-comment")
   .post(commentControllers.addComment);
 
 // Bir kursun yorumlarını getirmek için GET isteği
 router
-  .route("/courses/:courseSlug/comments")
+  .route("/courses/:courseSlug/lessons/:lessonSlug/comments")
   .get(commentControllers.getComments);
 
 // Bir kursun yorumunu güncellemek için PUT isteği
 router
-  .route("/courses/:courseSlug/comments/:commentId")
+  .route("/courses/:courseSlug/lessons/:lessonSlug/comments/:commentId")
   .put(commentControllers.updateComment);
 
 // Bir kursun yorumunu silmek için DELETE isteği
 router
-  .route("/courses/:courseSlug/comments/:commentId")
+  .route("/courses/:courseSlug/lessons/:lessonSlug/comments/:commentId")
   .delete(commentControllers.deleteComment);
 
 // Bir yorume cevap vermek için POST isteği
 router
-  .route("/courses/:courseSlug/comments/:commentId/add-reply")
+  .route(
+    "//courses/:courseSlug/lessons/:lessonSlug/comments/:commentId/add-reply"
+  )
   .post(commentControllers.addReply);
 
 // Cevapları getirmek için GET isteği
 router
-  .route("/courses/:courseSlug/comments/:commentId/replies")
+  .route("/courses/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies")
   .get(commentControllers.getReplies);
 
 // Cevabı güncellemek için PUT isteği
 router
-  .route("/courses/:courseSlug/comments/:commentId/replies/:replyId")
+  .route(
+    "/courses/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies/:replyId"
+  )
   .put(commentControllers.updateReply);
 
 // Bir cevabı silmek için DELETE isteği
 router
-  .route("/courses/:courseSlug/comments/:commentId/replies/:replyId")
+  .route(
+    "/courses/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies/:replyId"
+  )
   .delete(commentControllers.deleteReply);
 
 // Ders eklemek için POST isteği

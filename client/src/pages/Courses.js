@@ -18,13 +18,12 @@ import dataContext from "../utils/contextApi";
 import getCourses from "../utils/data/CoursesData";
 
 const Courses = () => {
-  const { setCourses, courses } = useContext(dataContext);
+  const { setCourses, courses, isMobile, isLaptop } = useContext(dataContext);
   const [popularCourses, setPopularCourses] = useState([]);
 
   useEffect(() => {
     getCourses()
       .then((data) => {
-        console.log(data);
         setCourses(data);
       })
       .catch((error) => {
@@ -32,40 +31,64 @@ const Courses = () => {
       });
   }, []);
 
+  const responsive = (mobile, laptop, desktop) => {
+    if (isMobile) {
+      return mobile;
+    } else if (isLaptop) {
+      return laptop;
+    } else {
+      return desktop;
+    }
+  };
+
   useEffect(() => {
     setPopularCourses(courses.slice(0, 6));
   }, [courses]);
 
   return (
     <Box
-      mx={"10em"}
-      mb={"8em"}
+      mx={responsive("", "8em", "10em")}
+      mb={responsive("", "6em", "8em")}
       bgColor={"var(--bg-color)"}
-      py={"4em"}
-      px={"2em"}
+      py={responsive("", "3em", "4em")}
       borderRadius={"10px"}
       id="courses"
     >
       <Center>
-        <Stack textAlign={"center"} gap={"1em"} maxW={"2xl"}>
+        <Stack
+          textAlign={"center"}
+          gap={responsive("", ".75em", "1em")}
+          maxW={"2xl"}
+        >
           <Heading
-            fontSize={"2xl"}
+            fontSize={responsive("", "xl", "2xl")}
             fontWeight={"500"}
             color={"var(--secondary-color)"}
           >
             Featured Courses
           </Heading>
-          <Heading fontSize={"4xl"}>Browse Our Popular Courses</Heading>
-          <Text opacity={0.9} fontSize={"md"}>
+          <Heading fontSize={responsive("", "3xl", "4xl")}>
+            Browse Our Popular Courses
+          </Heading>
+          <Text opacity={0.9} fontSize={responsive("", "sm", "md")}>
             Lorem, ipsum dolor sit amet consectetur adipisicing elit. Delectus,
             minima! Lorem ipsum dolor sit amet.
           </Text>
         </Stack>
       </Center>
-      <Flex gap={"2em"} justify={"center"} flexWrap={"wrap"} mt={"4em"}>
+      <Flex
+        gap={responsive("", "1em", "2em")}
+        justify={"center"}
+        flexWrap={"wrap"}
+        mt={responsive("", "3em", "4em")}
+      >
         {popularCourses &&
           popularCourses.map((course, index) => (
-            <Card key={index} maxW="sm" display={"flex"}>
+            <Card
+              key={index}
+              maxW={responsive("", "xs", "sm")}
+              display={"flex"}
+            >
               <CardBody>
                 <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
                   <Box>
@@ -78,10 +101,10 @@ const Courses = () => {
                       my={"1em"}
                       justify={"space-between"}
                       align={"center"}
-                      fontSize={"sm"}
+                      fontSize={responsive("xxs", "xs", "sm")}
                     >
                       <Center
-                        p={"5px 10px"}
+                        p={responsive("", "2px 5px", "3px 7px", "5px 10px")}
                         border={"1px solid var(--secondary-color)"}
                         borderRadius={"5px"}
                         color={"var(--secondary-color)"}
@@ -89,7 +112,9 @@ const Courses = () => {
                         {course.title}
                       </Center>
                       <Flex align={"center"} gap={"0.5em"}>
-                        <Text fontSize={"sm"}>{course.point}</Text>
+                        <Text fontSize={responsive("xxs", "xs", "sm")}>
+                          {course.point}
+                        </Text>
                         <StarIcon
                           color={"var(--accent-color)"}
                           pos={"relative"}
@@ -97,14 +122,16 @@ const Courses = () => {
                         ></StarIcon>
                       </Flex>
                     </Flex>
-                    <Text>{course.description}</Text>
+                    <Text fontSize={responsive("", "sm", "md")}>
+                      {course.description}
+                    </Text>
                   </Box>
                   <Box>
                     <Flex
-                      mt={"1em"}
+                      mt={responsive("", ".5em", "1em")}
                       justify={"space-between"}
                       align={"center"}
-                      fontSize={"sm"}
+                      fontSize={responsive("xxs", "xs", "sm")}
                     >
                       <Flex gap={"0.5em"} align={"center"}>
                         <i
@@ -124,9 +151,19 @@ const Courses = () => {
                     <Flex align={"center"} mt={"1em"} justify={"space-between"}>
                       <Flex align={"center"} gap={"0.5em"}>
                         <InstructorWomen />
-                        <Text fontWeight={"600"}>{course.ownership}</Text>
+                        <Text
+                          fontWeight={"600"}
+                          maxW={responsive("", "70%", "80%")}
+                          fontSize={responsive("", "sm", "md")}
+                        >
+                          {course.ownership.username}
+                        </Text>
                       </Flex>
-                      <Text fontWeight={600} color={"var(--primary-color)"}>
+                      <Text
+                        fontWeight={600}
+                        fontSize={responsive("", "sm", "md")}
+                        color={"var(--primary-color)"}
+                      >
                         {"$" + course.price}
                       </Text>
                     </Flex>
@@ -141,7 +178,7 @@ const Courses = () => {
           as={Link}
           to="/courses"
           fontSize={"md"}
-          color={"black"}
+          color={"white"}
           padding={".8em 1.5em"}
           bgColor={"#FFD05A"}
           border={"1px solid transparent"}
@@ -152,7 +189,7 @@ const Courses = () => {
             textDecoration: "none",
             opacity: 1,
             color: "black",
-            bgColor: "white",
+            bgColor: "transparent",
             border: "1px solid #FFD05A",
             transition: "all 0.5s ease",
           }}

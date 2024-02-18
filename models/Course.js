@@ -45,7 +45,6 @@ const courseSchema = new Schema({
   point: {
     type: Number,
   },
-
   slug: {
     type: String,
   },

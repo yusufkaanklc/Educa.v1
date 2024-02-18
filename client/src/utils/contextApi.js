@@ -6,10 +6,11 @@ const dataContext = createContext();
 export const DataProvider = ({ children }) => {
   const [courses, setCourses] = useState([]);
   const [users, setUsers] = useState([]);
+  const [teachers, setTeachers] = useState([]);
 
   const [isMobile] = useMediaQuery("(max-width: 768px)");
-  const [isTablet] = useMediaQuery("(max-width: 1280px)");
-  const [isLaptop] = useMediaQuery("(max-width: 1600px)");
+
+  const [isLaptop] = useMediaQuery("(max-width: 1568px)");
   const [isDesktop] = useMediaQuery("(max-width: 1920px)");
 
   return (
@@ -19,8 +20,9 @@ export const DataProvider = ({ children }) => {
         setCourses,
         users,
         setUsers,
+        teachers,
+        setTeachers,
         isMobile,
-        isTablet,
         isLaptop,
         isDesktop,
       }}

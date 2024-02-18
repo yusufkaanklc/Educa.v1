@@ -1,11 +1,14 @@
 import errorHandling from "../middlewares/errorHandling.js";
 import Comment from "../models/Comment.js";
+import Course from "../models/Course.js";
 import Lesson from "../models/Lesson.js";
 
 const addComment = async (req, res) => {
   try {
-    const { lessonSlug } = req.params;
+    const { courseSlug, lessonSlug } = req.params;
+
     const { text, point } = req.body;
+    console.log(typeof point);
     if (text === "") throw { code: 1, message: "Text cannot be empty" };
     const newComment = new Comment({
       text,
@@ -23,6 +26,19 @@ const addComment = async (req, res) => {
     );
 
     if (!lesson) throw { code: 2, message: "Lesson could not be updated" };
+
+    const getCoursePoint = await Course.findOne({ slug: courseSlug });
+    const coursePoint = getCoursePoint.point;
+
+    const newCoursePoint = Math.ceil((coursePoint + point) / 2);
+
+    await Course.findOneAndUpdate(
+      { slug: courseSlug },
+      { point: newCoursePoint },
+      {
+        new: true,
+      }
+    );
 
     res.status(200).json({ message: "Comment created successfully" });
   } catch (error) {
@@ -54,11 +70,11 @@ const getComments = async (req, res) => {
 const updateComment = async (req, res) => {
   try {
     const { commentId } = req.params;
-    const { text } = req.body;
+    const { text, point } = req.body;
     if (text === "") throw { code: 1, message: "Text cannot be empty" };
     const commment = await Comment.findByIdAndUpdate(
       commentId,
-      { text },
+      { text, point },
       {
         new: true,
       }

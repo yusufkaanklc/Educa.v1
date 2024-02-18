@@ -150,6 +150,22 @@ const deleteLesson = async (req, res) => {
       $pull: { lessons: lesson._id },
     });
 
+    // Kursa ait yorumları al
+    const comments = await Comment.find({
+      _id: { $in: deletedLesson.comments },
+    });
+
+    // Her yorum için
+    for (const comment of comments) {
+      // Yorumu sil
+      await Comment.findByIdAndDelete(comment._id);
+
+      // Yoruma ait cevapları sil
+      for (const replyId of comment.replies) {
+        await Comment.findByIdAndDelete(replyId);
+      }
+    }
+
     // Silinen dersi kontrol et
     if (!deletedLesson) throw { code: 2, message: "Lesson could not deleted" };
 

@@ -54,61 +54,88 @@ const getAllCourses = async (req, res) => {
       filter.title = { $regex: regexPattern, $options: "i" };
     }
 
-    const coursesWithAvgPoints = await Course.aggregate([
-      {
-        $match: filter,
-      },
-      {
-        $lookup: {
-          from: "lessons",
-          localField: "lessons",
-          foreignField: "_id",
-          as: "lessonDetails",
-        },
-      },
-      {
-        $unwind: {
-          path: "$lessonDetails",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: "comments",
-          localField: "lessonDetails.comments",
-          foreignField: "_id",
-          as: "commentDetails",
-        },
-      },
-      {
-        $unwind: {
-          path: "$commentDetails",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "ownership",
-          foreignField: "_id",
-          as: "ownershipDetails",
-        },
-      },
-      { $unwind: "$ownershipDetails" },
-      {
-        $group: {
-          _id: "$_id",
-          title: { $first: "$title" },
-          description: { $first: "$description" },
-          ownership: { $first: "$ownershipDetails.username" },
-          lessons: { $push: "$lessonDetails" },
-          price: { $first: "$price" },
-          point: { $avg: { $ifNull: ["$commentDetails.point", 1] } }, // Dersin ortalama puanı
-        },
-      },
-    ]);
-    console.log(coursesWithAvgPoints);
-    res.status(200).json(coursesWithAvgPoints);
+    // const coursesWithAvgPoints = await Course.aggregate([
+    //   {
+    //     $match: filter,
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "lessons",
+    //       localField: "lessons",
+    //       foreignField: "_id",
+    //       as: "lessonDetails",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$lessonDetails",
+    //       preserveNullAndEmptyArrays: true,
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "comments",
+    //       localField: "lessonDetails.comments",
+    //       foreignField: "_id",
+    //       as: "commentDetails",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$commentDetails",
+    //       preserveNullAndEmptyArrays: true,
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "users",
+    //       localField: "ownership",
+    //       foreignField: "_id",
+    //       as: "ownershipDetails",
+    //     },
+    //   },
+    //   { $unwind: "$ownershipDetails" },
+    //   {
+    //     $group: {
+    //       _id: "$_id",
+    //       title: { $first: "$title" },
+    //       description: { $first: "$description" },
+    //       ownership: { $first: "$ownershipDetails.username" },
+    //       lessons: { $push: "$lessonDetails" },
+    //       price: { $first: "$price" },
+    //       point: {
+    //         $avg: { $ifNull: ["$commentDetails.point", 1] },
+    //       },
+    //     },
+    //   },
+    // ]);
+
+    const courses = await Course.find(filter).populate({
+      path: "ownership",
+      select: "username",
+    });
+
+    for (const course of courses) {
+      let pointList = [];
+      for (const lesson of course.lessons) {
+        const lessonForComment = await Lesson.findById(lesson?._id);
+        for (const comment of lessonForComment.comments) {
+          const commentPoint = await Comment.findById(comment?._id);
+          pointList.push(commentPoint?.point);
+        }
+      }
+      if (pointList.length > 0) {
+        await Course.findByIdAndUpdate(
+          course._id,
+          { point: pointList.reduce((a, b) => a + b) / pointList.length },
+          { new: true }
+        );
+      } else {
+        await Course.findByIdAndUpdate(course._id, { point: 1 }, { new: true });
+      }
+    }
+
+    res.status(200).json(courses);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -185,19 +212,6 @@ const deleteCourse = async (req, res) => {
       fs.unlink(course.imageUrl, (err) => {
         if (err) throw { code: 2, message: "Course image couldnt be deleted" };
       });
-    }
-    // Kursa ait yorumları al
-    const comments = await Comment.find({ _id: { $in: course.comments } });
-
-    // Her yorum için
-    for (const comment of comments) {
-      // Yorumu sil
-      await Comment.findByIdAndDelete(comment._id);
-
-      // Yoruma ait cevapları sil
-      for (const replyId of comment.replies) {
-        await Comment.findByIdAndDelete(replyId);
-      }
     }
 
     await Lesson.deleteMany({

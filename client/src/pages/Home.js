@@ -26,25 +26,23 @@ const Home = () => {
     }
   };
 
-  const { isMobile, isTablet, isLaptop } = useContext(dataContext);
+  const { isMobile, isLaptop } = useContext(dataContext);
+
+  const responsive = (mobile, laptop, desktop) => {
+    if (isMobile) {
+      return mobile;
+    } else if (isLaptop) {
+      return laptop;
+    } else {
+      return desktop;
+    }
+  };
   return (
     <>
       <Header />
-      <Box
-        m={
-          isMobile
-            ? "4em 2em"
-            : isTablet
-            ? "6em 4em"
-            : isLaptop
-            ? "8em 7em"
-            : "10em 8em"
-        }
-      >
+      <Box m={responsive("", "6em 7em", "10em 8em")}>
         <Heading
-          fontSize={
-            isMobile ? "md" : isTablet ? "lg" : isLaptop ? "2xl" : "3xl"
-          }
+          fontSize={responsive("", "2xl", "3xl")}
           fontWeight={500}
           color={"var(--secondary-color)"}
           textAlign={"center"}
@@ -53,21 +51,9 @@ const Home = () => {
           Education & Online Course
         </Heading>
         <Flex justify={"space-between"} mb={"1em"}>
-          <Box
-            w={
-              isMobile
-                ? "80px"
-                : isTablet
-                ? "100px"
-                : isLaptop
-                ? "150px"
-                : "180px"
-            }
-          ></Box>
+          <Box w={responsive("", "150px", "180px")}></Box>
           <Heading
-            fontSize={
-              isMobile ? "xl" : isTablet ? "3xl" : isLaptop ? "5xl" : "7xl"
-            }
+            fontSize={responsive("", "5xl", "7xl")}
             w={"60%"}
             textAlign={"center"}
           >
@@ -80,21 +66,11 @@ const Home = () => {
             borderLeft={"transparent"}
             borderBottom={"transparent"}
             borderRadius={" 0 100% 0  0  "}
-            w={
-              isMobile
-                ? "80px"
-                : isTablet
-                ? "100px"
-                : isLaptop
-                ? "150px"
-                : "180px"
-            }
+            w={isLaptop ? "150px" : "180px"}
             h={"140px"}
             position={"relative"}
-            right={isMobile ? "2%" : isTablet ? "5%" : isLaptop ? "8%" : "10%"}
-            top={
-              isMobile ? "1em" : isTablet ? "1em" : isLaptop ? "1.5em" : "3em"
-            }
+            right={responsive("", "8.5%", "10%")}
+            top={responsive("", "1.5em", "3em")}
           >
             <ChevronDownIcon
               pos={"absolute"}
@@ -107,95 +83,53 @@ const Home = () => {
         </Flex>
         <Flex justify={"space-between"}>
           <Box
-            mt={"4em"}
+            mt={responsive("", "3em", "4em")}
             w={"25%"}
             position={"relative"}
-            left={
-              isMobile ? "0em" : isTablet ? "1em" : isLaptop ? "3em" : "5em"
-            }
+            left={responsive("", "3em", "5em")}
           >
             <Flex gap={"0.5em"}>
               <StarIcon
-                fontSize={
-                  isMobile
-                    ? "7px"
-                    : isTablet
-                    ? "10px"
-                    : isLaptop
-                    ? "15px"
-                    : "20px"
-                }
+                fontSize={responsive("", "15px", "20px")}
                 color={"var(--accent-color)"}
               ></StarIcon>
               <StarIcon
-                fontSize={
-                  isMobile
-                    ? "7px"
-                    : isTablet
-                    ? "10px"
-                    : isLaptop
-                    ? "15px"
-                    : "20px"
-                }
+                fontSize={responsive("", "15px", "20px")}
                 color={"var(--accent-color)"}
               ></StarIcon>
               <StarIcon
-                fontSize={
-                  isMobile
-                    ? "7px"
-                    : isTablet
-                    ? "10px"
-                    : isLaptop
-                    ? "15px"
-                    : "20px"
-                }
+                fontSize={responsive("", "15px", "20px")}
                 color={"var(--accent-color)"}
               ></StarIcon>
               <StarIcon
-                fontSize={
-                  isMobile
-                    ? "7px"
-                    : isTablet
-                    ? "10px"
-                    : isLaptop
-                    ? "15px"
-                    : "20px"
-                }
+                fontSize={responsive("", "15px", "20px")}
                 color={"var(--accent-color)"}
               ></StarIcon>
-              <StarIcon
-                fontSize={
-                  isMobile
-                    ? "7px"
-                    : isTablet
-                    ? "10px"
-                    : isLaptop
-                    ? "15px"
-                    : "20px"
-                }
-              ></StarIcon>
+              <StarIcon fontSize={responsive("", "15px", "20px")}></StarIcon>
             </Flex>
-            <Text
-              fontSize={
-                isMobile ? "xxs" : isTablet ? "xxs" : isLaptop ? "xs" : "sm"
-              }
-              my={"1em"}
-            >
+            <Text fontSize={responsive("", "xs", "sm")} my={"1em"}>
               "This course was comprehensive and covered everything i needed to
               know about animation"
             </Text>
             <Flex gap={"1em"} align={"center"}>
               <InstructorWoman />
               <Stack gap={0}>
-                <Text fontWeight={"bold"} fontSize={"sm"}>
+                <Text fontWeight={"bold"} fontSize={responsive("", "xs", "sm")}>
                   Emily Brown
                 </Text>
-                <Text fontSize={"small"}>UI/UX Designer</Text>
+                <Text fontSize={responsive("", "x-small", "small")}>
+                  UI/UX Designer
+                </Text>
               </Stack>
             </Flex>
           </Box>
           <Flex flexDir={"column"} align={"center"}>
-            <Text w={"65%"} textAlign={"center"} opacity={0.9}>
+            <Text
+              w={"65%"}
+              textAlign={"center"}
+              opacity={0.9}
+              fontSize={responsive("", "sm", "md")}
+            >
               Start, switch, or advance your career with more than 5,400
               courses, Professional Certificates, and degrees from world-class
               universities and companies.
@@ -205,9 +139,7 @@ const Home = () => {
               mt={"2em"}
               as={Link}
               to="/signup"
-              fontSize={
-                isMobile ? "xxs" : isTablet ? "xxs" : isLaptop ? "sm" : "md"
-              }
+              fontSize={responsive("", "sm", "md")}
               color={"white"}
               padding={".8em 1.5em"}
               bgColor={"#FFD05A"}
@@ -237,15 +169,16 @@ const Home = () => {
           >
             <InstructorMan />
             <Stack gap={"0"} textAlign={"right"}>
-              <Text fontWeight={"bold"}>Thomas Musk</Text>
-              <Text fontSize={"small"}>Web Developer</Text>
+              <Text fontWeight={"bold"} fontSize={responsive("", "xs", "sm")}>
+                Thomas Musk
+              </Text>
+              <Text fontSize={responsive("", "x-small", "small")}>
+                Web Developer
+              </Text>
             </Stack>
           </Flex>
         </Flex>
-        <Flex
-          mt={isMobile ? "1em" : isTablet ? "2em" : isLaptop ? "3em" : "5em"}
-          justify={"center"}
-        >
+        <Flex mt={responsive("", "2em", "5em")} justify={"center"}>
           <Flex
             onClick={() => handleScroll("about")}
             align={"center"}

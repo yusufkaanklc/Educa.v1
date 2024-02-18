@@ -103,15 +103,39 @@ const getAllUsers = async (req, res) => {
     if (!role && !username) {
       filter = {};
     }
+
     // Veritabanından kullanıcıları bul
-    const users = await User.find(filter);
-    // Kullanıcı bulunamadığında hata fırlat
-    if (!users || users.length === 0) {
-      throw {
-        code: 1,
-        message: "No user found",
-      };
-    }
+    const users = await User.aggregate([
+      {
+        $match: filter, // Filter koşullarınızı buraya eklediğinizi varsayalım
+      },
+      {
+        $lookup: {
+          from: "courses",
+          localField: "_id",
+          foreignField: "ownership",
+          as: "courses",
+        },
+      },
+      {
+        $unwind: {
+          path: "$courses",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          username: { $first: "$username" }, // $first operatörüyle diğer alanları koruyoruz
+          email: { $first: "$email" },
+          avatar: { $first: "$avatar" },
+          role: { $first: "$role" },
+          profession: { $first: "$profession" },
+          point: { $avg: { $ifNull: ["$courses.point", 1] } },
+        },
+      },
+    ]);
+
     // Kullanıcıları başarıyla bulduğunda 200 OK yanıtı gönder
     res.status(200).json(users);
   } catch (error) {

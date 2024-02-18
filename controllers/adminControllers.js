@@ -51,11 +51,17 @@ const removeUsers = async (req, res) => {
         );
       }
 
-      // Kullanıcıya ait enrollments'ları silme
-      await Enrollment.deleteMany({ user: userId });
+      await Promise.all([
+        await Course.updateMany(
+          { ownership: userId },
+          { ownership: req.session.userID }
+        ),
 
-      // Kullanıcıya ait ownerships'ları silme
-      await Ownership.deleteMany({ user: userId });
+        await Course.updateMany(
+          { enrollments: userId },
+          { $pull: { enrollments: userId } }
+        ),
+      ]);
 
       // Kullanıcıyı silme
       const deletedUser = await User.findByIdAndDelete(userId);

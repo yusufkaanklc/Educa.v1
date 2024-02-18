@@ -5,7 +5,7 @@ import {
   Box,
   Link as ChakraLink,
 } from "@chakra-ui/react";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
 import dataContext from "../../utils/contextApi";
 const Header = () => {
@@ -16,25 +16,27 @@ const Header = () => {
     }
   };
 
-  const { isMobile, isTablet, isLaptop } = useContext(dataContext);
+  const { isMobile, isLaptop } = useContext(dataContext);
+
+  const responsive = (mobile, laptop, desktop) => {
+    if (isMobile) {
+      return mobile;
+    } else if (isLaptop) {
+      return laptop;
+    } else {
+      return desktop;
+    }
+  };
 
   return (
     <>
       <Box id="home"></Box>
       <Box
-        m={
-          isMobile
-            ? "1em 2em"
-            : isTablet
-            ? "1em 4em"
-            : isLaptop
-            ? "1em 8em"
-            : "1em 10em"
-        }
+        m={responsive("", "1em 8em", "1em 10em")}
         bgColor={"white"}
         boxShadow={"md"}
         p={"1em"}
-        h={isMobile ? "2em" : isTablet ? "3em" : isLaptop ? "4em" : "5em"}
+        h={responsive("", "4em", "5em")}
         borderRadius={"10px"}
         pos={"sticky"}
         top={"1em"}
@@ -43,14 +45,9 @@ const Header = () => {
       >
         <Flex justify={"space-between"} align={"center"} h={"100%"}>
           <Flex align={"center"}>
-            <Image
-              w={isMobile ? "1em" : isTablet ? "2em" : isLaptop ? "3em" : "5em"}
-              src="./hayvan.png"
-            ></Image>
+            <Image w={responsive("", "3em", "5em")} src="./hayvan.png"></Image>
             <Heading
-              fontSize={
-                isMobile ? "xl" : isTablet ? "xl" : isLaptop ? "2xl" : "3xl"
-              }
+              fontSize={responsive("", "2xl", "3xl")}
               fontWeight={"700"}
               letterSpacing={1}
             >
@@ -58,23 +55,10 @@ const Header = () => {
             </Heading>
           </Flex>
 
-          <Flex
-            align={"center"}
-            gap={
-              isMobile
-                ? "0.5em"
-                : isTablet
-                ? "0.75em"
-                : isLaptop
-                ? "1em"
-                : "1.5em"
-            }
-          >
+          <Flex align={"center"} gap={responsive("", "1em", "1.5em")}>
             <ChakraLink
               onClick={() => handleScroll("home")}
-              fontSize={
-                isMobile ? "sm" : isTablet ? "sm" : isLaptop ? "md" : "lg"
-              }
+              fontSize={responsive("", "md", "lg")}
               opacity={0.8}
               fontWeight={"500"}
               _hover={{ textDecoration: "none", opacity: 1, color: "black" }}
@@ -83,9 +67,7 @@ const Header = () => {
             </ChakraLink>
             <ChakraLink
               onClick={() => handleScroll("about")}
-              fontSize={
-                isMobile ? "sm" : isTablet ? "sm" : isLaptop ? "md" : "lg"
-              }
+              fontSize={responsive("", "md", "lg")}
               opacity={0.8}
               fontWeight={"500"}
               _hover={{ textDecoration: "none", opacity: 1, color: "black" }}
@@ -94,9 +76,7 @@ const Header = () => {
             </ChakraLink>
             <ChakraLink
               onClick={() => handleScroll("courses")}
-              fontSize={
-                isMobile ? "sm" : isTablet ? "sm" : isLaptop ? "md" : "lg"
-              }
+              fontSize={responsive("", "md", "lg")}
               opacity={0.8}
               fontWeight={"500"}
               _hover={{ textDecoration: "none", opacity: 1, color: "black" }}
@@ -105,9 +85,7 @@ const Header = () => {
             </ChakraLink>
             <ChakraLink
               onClick={() => handleScroll("instructors")}
-              fontSize={
-                isMobile ? "sm" : isTablet ? "sm" : isLaptop ? "md" : "lg"
-              }
+              fontSize={responsive("", "md", "lg")}
               opacity={0.8}
               fontWeight={"500"}
               _hover={{ textDecoration: "none", opacity: 1, color: "black" }}
@@ -116,9 +94,7 @@ const Header = () => {
             </ChakraLink>
             <ChakraLink
               onClick={() => handleScroll("contact")}
-              fontSize={
-                isMobile ? "sm" : isTablet ? "sm" : isLaptop ? "md" : "lg"
-              }
+              fontSize={responsive("", "md", "lg")}
               opacity={0.8}
               fontWeight={"500"}
               _hover={{ textDecoration: "none", opacity: 1, color: "black" }}
@@ -130,9 +106,7 @@ const Header = () => {
             <ChakraLink
               as={Link}
               to="/login"
-              fontSize={
-                isMobile ? "sm" : isTablet ? "sm" : isLaptop ? "md" : "lg"
-              }
+              fontSize={responsive("", "md", "lg")}
               fontWeight={"500"}
               padding={".5em 1em"}
               opacity={0.8}
@@ -144,14 +118,8 @@ const Header = () => {
                   class="fi fi-rr-world"
                   style={{
                     position: "relative",
-                    top: "3px",
-                    fontSize: isMobile
-                      ? "7px"
-                      : isTablet
-                      ? "10px"
-                      : isLaptop
-                      ? "15px"
-                      : "20px",
+                    top: "4px",
+                    fontSize: responsive("", "15px", "20px"),
                   }}
                 ></i>
                 Login
@@ -160,11 +128,7 @@ const Header = () => {
             <ChakraLink
               as={Link}
               to="/signup"
-              fontSize={
-                isMobile ? "sm" : isTablet ? "sm" : isLaptop ? "md" : "lg"
-              }
-              position={"relative"}
-              top={"2px"}
+              fontSize={responsive("", "md", "lg")}
               color={"white"}
               padding={".5em 1.5em"}
               bgColor={"var(--primary-color)"}
