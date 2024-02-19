@@ -11,7 +11,7 @@ const register = async (req, res) => {
     if (!username || !password || !email) {
       throw { code: 1, message: "All fields are required" };
     }
-    if (role === "admin") {
+    if (role === "superadmin") {
       throw { code: 4, message: "Admin cannot be created" };
     }
     if (role === "teacher" && !profession) {
@@ -143,8 +143,6 @@ const getAllUsers = async (req, res) => {
         },
       },
     ]);
-
-    console.log(users);
 
     // Kullanıcıları başarıyla bulduğunda 200 OK yanıtı gönder
     res.status(200).json(users);

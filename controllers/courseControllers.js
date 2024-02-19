@@ -54,88 +54,67 @@ const getAllCourses = async (req, res) => {
       filter.title = { $regex: regexPattern, $options: "i" };
     }
 
-    // const coursesWithAvgPoints = await Course.aggregate([
-    //   {
-    //     $match: filter,
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "lessons",
-    //       localField: "lessons",
-    //       foreignField: "_id",
-    //       as: "lessonDetails",
-    //     },
-    //   },
-    //   {
-    //     $unwind: {
-    //       path: "$lessonDetails",
-    //       preserveNullAndEmptyArrays: true,
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "comments",
-    //       localField: "lessonDetails.comments",
-    //       foreignField: "_id",
-    //       as: "commentDetails",
-    //     },
-    //   },
-    //   {
-    //     $unwind: {
-    //       path: "$commentDetails",
-    //       preserveNullAndEmptyArrays: true,
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "users",
-    //       localField: "ownership",
-    //       foreignField: "_id",
-    //       as: "ownershipDetails",
-    //     },
-    //   },
-    //   { $unwind: "$ownershipDetails" },
-    //   {
-    //     $group: {
-    //       _id: "$_id",
-    //       title: { $first: "$title" },
-    //       description: { $first: "$description" },
-    //       ownership: { $first: "$ownershipDetails.username" },
-    //       lessons: { $push: "$lessonDetails" },
-    //       price: { $first: "$price" },
-    //       point: {
-    //         $avg: { $ifNull: ["$commentDetails.point", 1] },
-    //       },
-    //     },
-    //   },
-    // ]);
-
-    const courses = await Course.find(filter).populate({
-      path: "ownership",
-      select: "username",
-    });
-
-    for (const course of courses) {
-      let pointList = [];
-      for (const lesson of course.lessons) {
-        const lessonForComment = await Lesson.findById(lesson?._id);
-        for (const comment of lessonForComment.comments) {
-          const commentPoint = await Comment.findById(comment?._id);
-          pointList.push(commentPoint?.point);
-        }
-      }
-      if (pointList.length > 0) {
-        await Course.findByIdAndUpdate(
-          course._id,
-          {
-            point: Math.floor(
-              pointList.reduce((a, b) => a + b) / pointList.length
-            ),
+    const pipeline = [
+      { $match: filter },
+      {
+        $lookup: {
+          from: "users",
+          localField: "ownership",
+          foreignField: "_id",
+          as: "ownershipDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "lessons",
+          localField: "lessons",
+          foreignField: "_id",
+          as: "lessonDetails",
+        },
+      },
+      { $unwind: { path: "$lessonDetails", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "comments",
+          localField: "lessonDetails.comments",
+          foreignField: "_id",
+          as: "commentDetails",
+        },
+      },
+      {
+        $unwind: { path: "$commentDetails", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          title: { $first: "$title" },
+          description: { $first: "$description" },
+          ownership: { $first: "$ownershipDetails.username" },
+          price: { $first: "$price" },
+          lessons: { $addToSet: "$lessonDetails" },
+          point: {
+            $avg: {
+              $cond: [
+                { $gt: [{ $size: "$lessonDetails.comments" }, 0] }, // Yorum varsa
+                "$commentDetails.point",
+                null, // Yorum yoksa null döndür
+              ],
+            },
           },
-          { new: true }
-        );
-      }
-    }
+          commentCount: {
+            $sum: {
+              $cond: [{ $ifNull: ["$commentDetails", false] }, 1, 0],
+            },
+          },
+          category: { $first: "$category" },
+          imageUrl: { $first: "$imageUrl" },
+        },
+      },
+    ];
+
+    const courses = await Course.aggregate(pipeline);
+
+    console.log(courses);
 
     res.status(200).json(courses);
   } catch (error) {

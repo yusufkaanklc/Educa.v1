@@ -13,7 +13,11 @@ const Contact = () => {
     }
   };
   return (
-    <Box mx={responsive("", "8em", "10em")} my={responsive("", "6em", "8em")}>
+    <Box
+      mx={responsive("", "8em", "10em")}
+      my={responsive("", "6em", "8em")}
+      id="events"
+    >
       <Stack
         w={responsive("", "40%", "50%")}
         gap={responsive("", "1.2em", "1.5em")}

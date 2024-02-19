@@ -114,13 +114,14 @@ const Courses = () => {
                       </Center>
                       <Flex align={"center"} gap={"0.5em"}>
                         <Text fontSize={responsive("xxs", "xs", "sm")}>
-                          {course.point}
+                          {course.point ? course.point : 0}
                         </Text>
                         <StarIcon
                           color={"var(--accent-color)"}
                           pos={"relative"}
                           bottom={"1px"}
                         ></StarIcon>
+                        <Text>({course.commentCount})</Text>
                       </Flex>
                     </Flex>
                     <Text fontSize={responsive("", "sm", "md")}>
@@ -157,7 +158,7 @@ const Courses = () => {
                           maxW={responsive("", "70%", "80%")}
                           fontSize={responsive("", "sm", "md")}
                         >
-                          {course.ownership.username}
+                          {course.ownership}
                         </Text>
                       </Flex>
                       <Text

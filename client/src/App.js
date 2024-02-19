@@ -4,6 +4,7 @@ import { DataProvider } from "./utils/contextApi";
 import "./styles/globals.css";
 import theme from "./utils/theme";
 import Home from "./pages/Home";
+import Signup from "./pages/Signup";
 
 const App = () => {
   return (
@@ -13,7 +14,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Home></Home>} />
-              {/* <Route path="/about" element={<About />} /> */}
+              <Route path="/signup" element={<Signup></Signup>} />
             </Routes>
           </BrowserRouter>
         </ChakraProvider>

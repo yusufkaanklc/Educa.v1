@@ -34,7 +34,6 @@ const Header = () => {
 
     const handleScroll = () => {
       const currentScrollTop = document.documentElement.scrollTop;
-      console.log(currentScrollTop);
       if (currentScrollTop > lastScrollTop) {
         setNavVisible(false);
       } else {
@@ -117,13 +116,13 @@ const Header = () => {
               Instructors
             </ChakraLink>
             <ChakraLink
-              onClick={() => handleScroll("contact")}
+              onClick={() => handleScroll("events")}
               fontSize={responsive("", "md", "lg")}
               opacity={0.8}
               fontWeight={"500"}
               _hover={{ textDecoration: "none", opacity: 1, color: "black" }}
             >
-              Contact us
+              Events
             </ChakraLink>
           </Flex>
           <Flex>
