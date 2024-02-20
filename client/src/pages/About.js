@@ -1,6 +1,6 @@
 import { Box, Flex, Text, Stack, Heading, Center } from "@chakra-ui/react";
 import { useEffect, useContext, useState } from "react";
-import getUsers from "../utils/data/UsersData";
+import { getUsers } from "../utils/data/UsersData";
 import dataContext from "../utils/contextApi";
 const About = () => {
   const {
@@ -50,9 +50,6 @@ const About = () => {
     setLessons(lessonList);
   }, [courses]);
 
-  useEffect(() => {
-    console.log(lessons);
-  }, [lessons]);
   return (
     <Box
       mx={responsive("", "8em", "10em")}

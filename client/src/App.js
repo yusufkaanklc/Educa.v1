@@ -5,6 +5,7 @@ import "./styles/globals.css";
 import theme from "./utils/theme";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
+import Login from "./pages/Login";
 
 const App = () => {
   return (
@@ -15,6 +16,10 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Home></Home>} />
               <Route path="/signup" element={<Signup></Signup>} />
+              <Route path="/signup" element={<Signup></Signup>} />
+              {!localStorage.getItem("token") && (
+                <Route path="/login" element={<Login />} />
+              )}
             </Routes>
           </BrowserRouter>
         </ChakraProvider>

@@ -9,7 +9,6 @@ export const DataProvider = ({ children }) => {
   const [teachers, setTeachers] = useState([]);
 
   const [isMobile] = useMediaQuery("(max-width: 768px)");
-
   const [isLaptop] = useMediaQuery("(max-width: 1568px)");
   const [isDesktop] = useMediaQuery("(max-width: 1920px)");
 

@@ -5,34 +5,97 @@ import {
   Input,
   Button,
   FormControl,
+  InputRightElement,
   Select,
   Link as ChakraLink,
   FormLabel,
+  Tooltip,
+  useToast,
+  InputGroup,
 } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, useContext } from "react";
+import dataContext from "../utils/contextApi";
+import { registerUser } from "../utils/data/UsersData";
 const Signup = () => {
+  const { isMobile, isLaptop } = useContext(dataContext);
   // Kullanıcı bilgilerini tutacak state
-  const [input, setInput] = useState({
+  const [register, setRegister] = useState({
     username: "",
     email: "",
     password: "",
     role: "",
   });
 
+  const responsive = (mobile, laptop, desktop) => {
+    if (isMobile) {
+      return mobile;
+    } else if (isLaptop) {
+      return laptop;
+    } else {
+      return desktop;
+    }
+  };
+
+  const [passwordShow, setPasswordShow] = useState(false);
+  const handleClick = () => setPasswordShow(!passwordShow);
+
   // Kullanıcı bilgilerini handle edecek fonksiyon
-  const handleInputChange = (e) =>
-    setInput({ ...input, [e.target.name]: e.target.value });
+  const handleregisterChange = (e) =>
+    setRegister({ ...register, [e.target.name]: e.target.value });
 
   // useEffect ile tetikleyici ile kullanıcı bilgilerini ekrana yazdır
-  useEffect(() => {
-    console.log(input);
-  }, [input]);
+
+  const navigate = useNavigate();
+  const toast = useToast();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    registerUser(register)
+      .then(() => {
+        setRegister({
+          username: "",
+          email: "",
+          password: "",
+          role: "",
+        });
+
+        toast({
+          title: "Account created.",
+          description: "We've created your account for you.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+
+        navigate("/login");
+      })
+      .catch((error) => {
+        if (Array.isArray(error)) {
+          error.message.forEach((element) => {
+            toast({
+              title: "Error",
+              description: element,
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+            });
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: error.message,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        }
+      });
+  };
 
   return (
     <Center
       h={"100vh"}
-      bgColor={"var(--bg-color)"}
       bgImg={"./image.png"}
       bgPos={"center"}
       position={"relative"}
@@ -50,117 +113,175 @@ const Signup = () => {
       <Box position={"relative"} zIndex={2} w={"35%"}>
         <Box
           pos={"absolute"}
-          top={"-4em"}
-          right={"-4em"}
+          top={responsive("", "-3em", "-4em")}
+          right={responsive("", "-3em", "-4em")}
           zIndex={-1}
-          w={"10em"}
-          h={"10em"}
+          w={responsive("", "8em", "10em")}
+          h={responsive("", "8em", "10em")}
           bgColor={"var(--secondary-color)"}
-        >
-          <Flex></Flex>
-        </Box>
+        ></Box>
         <Box
-          bgColor={"var(--bg-color)"}
-          p={"4em 5em"}
-          pb={"3em"}
+          bgColor={"white"}
+          p={responsive("", "2em 3em", "4em 5em")}
+          pb={responsive("", "2em", "3em")}
           borderRadius={"10px"}
           boxShadow={"0 0 50px 0 rgba(0,0,0,0.2)"}
           border={"2px dashed  #cfcfcf"}
         >
-          <FormControl display={"flex"} flexDirection={"column"} gap={"1em"}>
-            <Box>
-              <FormLabel fontSize={"1.2em"}>Username</FormLabel>
-              <Input
-                h={"3em"}
-                variant={"outline"}
-                border={"1px solid rgba(0,0,0,0.2)"}
-                type="text"
-                name="username"
-                value={input.username}
-                onChange={handleInputChange}
-                _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
-                _focus={{ border: "1px solid var(--secondary-color)" }}
-              />
-            </Box>
-            <Box>
-              <FormLabel fontSize={"1.2em"}>Email</FormLabel>
-              <Input
-                h={"3em"}
-                variant={"outline"}
-                border={"1px solid rgba(0,0,0,0.2)"}
-                type="email"
-                name="email"
-                value={input.email}
-                onChange={handleInputChange}
-                _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
-                _focus={{ border: "1px solid var(--secondary-color)" }}
-              />
-            </Box>
-            <Box>
-              <FormLabel fontSize={"1.2em"}>Password</FormLabel>
-              <Input
-                h={"3em"}
-                variant={"outline"}
-                border={"1px solid rgba(0,0,0,0.2)"}
-                type="password"
-                name="password"
-                value={input.password}
-                onChange={handleInputChange}
-                _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
-                _focus={{ border: "1px solid var(--secondary-color)" }}
-              />
-            </Box>
-            <Box>
-              <FormLabel fontSize={"1.2em"}>Account Type</FormLabel>
-              <Select
-                h={"3em"}
-                variant={"outline"}
-                border={"1px solid rgba(0,0,0,0.2)"}
-                name="role"
-                value={input.role}
-                onChange={handleInputChange}
-                _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
-                _focus={{ border: "1px solid var(--secondary-color)" }}
+          <form onSubmit={handleSubmit}>
+            <Flex flexDirection={"column"} gap={"1em"}>
+              <FormControl isRequired>
+                <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                  Username
+                </FormLabel>
+                <Input
+                  h={responsive("", "2.5em", "3em")}
+                  variant={"outline"}
+                  border={"1px solid rgba(0,0,0,0.2)"}
+                  type="text"
+                  name="username"
+                  value={register.username}
+                  onChange={handleregisterChange}
+                  _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
+                  _focus={{ border: "1px solid var(--secondary-color)" }}
+                  _active={{ bgColor: "transparent" }}
+                />
+              </FormControl>
+              <FormControl isRequired>
+                <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                  Email
+                </FormLabel>
+                <Input
+                  h={responsive("", "2.5em", "3em")}
+                  variant={"outline"}
+                  border={"1px solid rgba(0,0,0,0.2)"}
+                  type="text"
+                  name="email"
+                  value={register.email}
+                  onChange={handleregisterChange}
+                  _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
+                  _focus={{ border: "1px solid var(--secondary-color)" }}
+                  _active={{ bgColor: "transparent" }}
+                />
+              </FormControl>
+              <FormControl isRequired>
+                <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                  <Tooltip
+                    label="Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, one number, and one special character."
+                    placement="top"
+                    bgColor={"var(--accent-color)"}
+                    borderRadius={"5px"}
+                    p={"0.5em"}
+                    hasArrow
+                  >
+                    Password
+                  </Tooltip>
+                </FormLabel>
+                <InputGroup display={"flex"} alignItems={"center"}>
+                  <Input
+                    h={responsive("", "2.5em", "3em")}
+                    variant={"outline"}
+                    border={"1px solid rgba(0,0,0,0.2)"}
+                    type={passwordShow ? "text" : "password"}
+                    name="password"
+                    pr={"4.5rem"}
+                    value={register.password}
+                    onChange={handleregisterChange}
+                    _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
+                    _focus={{ border: "1px solid var(--secondary-color)" }}
+                    _active={{ bgColor: "transparent" }}
+                  />
+
+                  <InputRightElement width="4.5rem" top={"unset"}>
+                    <Button h="1.75rem" size="sm" onClick={handleClick}>
+                      {passwordShow ? "Hide" : "Show"}
+                    </Button>
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
+
+              {register.role === "Teacher" && (
+                <FormControl isRequired>
+                  <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                    <Tooltip
+                      label="Write your profession"
+                      placement="top"
+                      bgColor={"var(--accent-color)"}
+                      borderRadius={"5px"}
+                      p={"0.5em"}
+                      hasArrow
+                    >
+                      Profession
+                    </Tooltip>
+                  </FormLabel>
+                  <Input
+                    h={responsive("", "2.5em", "3em")}
+                    variant={"outline"}
+                    border={"1px solid rgba(0,0,0,0.2)"}
+                    name="profession"
+                    value={register.profession}
+                    onChange={handleregisterChange}
+                    _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
+                    _focus={{ border: "1px solid var(--secondary-color)" }}
+                    _active={{ bgColor: "transparent" }}
+                  />
+                </FormControl>
+              )}
+              <FormControl isRequired>
+                <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                  Account Type
+                </FormLabel>
+                <Select
+                  h={responsive("", "2.5em", "3em")}
+                  variant={"outline"}
+                  border={"1px solid rgba(0,0,0,0.2)"}
+                  name="role"
+                  value={register.role}
+                  onChange={handleregisterChange}
+                  _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
+                  _focus={{ border: "1px solid var(--secondary-color)" }}
+                  _active={{ bgColor: "transparent" }}
+                  placeholder="Select account type"
+                >
+                  <option>Student</option>
+                  <option>Teacher</option>
+                </Select>
+              </FormControl>
+            </Flex>
+            <Flex flexDir={"column"} gap={"1em"} mt={"2em"}>
+              <Button
+                variant={"solid"}
+                type="submit"
+                bgColor={"var(--secondary-color)"}
+                w={"100%"}
+                p={"1.3em"}
+                fontSize={responsive("", "1em", "1.2em")}
+                border={"1px solid transparent"}
+                color={"white"}
+                _hover={{
+                  bgColor: "transparent",
+                  border: "1px solid var(--secondary-color)",
+                  color: "var(--secondary-color)",
+                }}
               >
-                <option>Student</option>
-                <option>Teacher</option>
-              </Select>
-            </Box>
-          </FormControl>
-          <Flex flexDir={"column"} gap={"1em"} mt={"2em"}>
-            <Button
-              variant={"solid"}
-              bgColor={"var(--secondary-color)"}
-              w={"100%"}
-              p={"1.3em"}
-              fontSize={"1.2em"}
-              border={"1px solid transparent"}
-              color={"white"}
-              _hover={{
-                bgColor: "transparent",
-                border: "1px solid var(--secondary-color)",
-                color: "var(--secondary-color)",
-              }}
-            >
-              Sign up
-            </Button>
-            <ChakraLink as={Link} to={"/login"} ml={"1em"}>
-              {" "}
-              Already have an account?
-            </ChakraLink>
-          </Flex>
+                Sign up
+              </Button>
+              <ChakraLink as={Link} to={"/login"} ml={"1em"}>
+                {" "}
+                Already have an account?
+              </ChakraLink>
+            </Flex>
+          </form>
         </Box>
         <Box
           pos={"absolute"}
-          bottom={"-4em"}
-          left={"-4em"}
+          bottom={responsive("", "-3em", "-4em")}
+          left={responsive("", "-3em", "-4em")}
           zIndex={-1}
-          w={"10em"}
-          h={"10em"}
+          w={responsive("", "8em", "10em")}
+          h={responsive("", "8em", "10em")}
           bgColor={"var(--secondary-color)"}
-        >
-          <Flex></Flex>
-        </Box>
+        ></Box>
       </Box>
     </Center>
   );

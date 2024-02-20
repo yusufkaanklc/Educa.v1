@@ -16,13 +16,12 @@ import Courses from "./Courses";
 import Instructors from "./Instructors";
 import Events from "./Events";
 import Footer from "./components/Footer";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import dataContext from "../utils/contextApi";
 
 const Home = () => {
   const handleScroll = (id) => {
     const element = document.getElementById(id);
-    console.log(element);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
@@ -39,6 +38,10 @@ const Home = () => {
       return desktop;
     }
   };
+
+  useEffect(() => {
+    console.log(localStorage.getItem("isLoggedIn"));
+  }, []);
   return (
     <>
       <Header />
