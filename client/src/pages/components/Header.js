@@ -4,10 +4,13 @@ import {
   Image,
   Box,
   Link as ChakraLink,
+  Button,
+  useToast,
 } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import dataContext from "../../utils/contextApi";
+import { getAccount } from "../../utils/data/UsersData";
 const Header = () => {
   const handleScroll = (id) => {
     const element = document.getElementById(id);
@@ -16,7 +19,7 @@ const Header = () => {
     }
   };
 
-  const { isMobile, isLaptop } = useContext(dataContext);
+  const { isMobile, isLaptop, account, setAccount } = useContext(dataContext);
   const [navVisible, setNavVisible] = useState(true);
 
   const responsive = (mobile, laptop, desktop) => {
@@ -44,9 +47,29 @@ const Header = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
+  }, []);
+
+  const toast = useToast;
+
+  useEffect(() => {
+    getAccount(localStorage.getItem("token"))
+      .then((data) => {
+        console.log(data.user);
+        setAccount(data.user);
+      })
+      .catch((error) => {
+        toast({
+          title: "Error",
+          description: error.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      });
   }, []);
 
   return (
@@ -126,50 +149,63 @@ const Header = () => {
             </ChakraLink>
           </Flex>
           <Flex>
-            <ChakraLink
-              as={Link}
-              to="/login"
-              fontSize={responsive("", "md", "lg")}
-              fontWeight={"500"}
-              padding={".5em 1em"}
-              opacity={0.8}
-              border={"1px solid transparent"}
-              _hover={{ textDecoration: "none", opacity: 1, color: "black" }}
-            >
-              <Flex gap={"0.5em"} align={"center"}>
-                <i
-                  class="fi fi-rr-world"
-                  style={{
-                    position: "relative",
-                    top: "4px",
-                    fontSize: responsive("", "15px", "20px"),
+            {!localStorage.getItem("token") ? (
+              <>
+                <ChakraLink
+                  as={Link}
+                  to="/login"
+                  fontSize={responsive("", "md", "lg")}
+                  fontWeight={"500"}
+                  padding={".5em 1em"}
+                  opacity={0.8}
+                  border={"1px solid transparent"}
+                  _hover={{
+                    textDecoration: "none",
+                    opacity: 1,
+                    color: "black",
                   }}
-                ></i>
-                Login
-              </Flex>
-            </ChakraLink>
-            <ChakraLink
-              as={Link}
-              to="/signup"
-              fontSize={responsive("", "md", "lg")}
-              color={"white"}
-              padding={".5em 1.5em"}
-              bgColor={"var(--primary-color)"}
-              border={"1px solid transparent"}
-              borderRadius={"30px"}
-              fontWeight={"500"}
-              transition={"all 0.5s ease"}
-              _hover={{
-                textDecoration: "none",
-                opacity: 1,
-                color: "black",
-                bgColor: "white",
-                border: "1px solid #007bff",
-                transition: "all 0.5s ease",
-              }}
-            >
-              Sign Up
-            </ChakraLink>
+                >
+                  <Flex gap={"0.5em"} align={"center"}>
+                    <i
+                      class="fi fi-rr-world"
+                      style={{
+                        position: "relative",
+                        top: "4px",
+                        fontSize: responsive("", "15px", "20px"),
+                      }}
+                    ></i>
+                    Login
+                  </Flex>
+                </ChakraLink>
+                <ChakraLink
+                  as={Link}
+                  to="/signup"
+                  fontSize={responsive("", "md", "lg")}
+                  color={"white"}
+                  padding={".5em 1.5em"}
+                  bgColor={"var(--primary-color)"}
+                  border={"1px solid transparent"}
+                  borderRadius={"30px"}
+                  fontWeight={"500"}
+                  transition={"all 0.5s ease"}
+                  _hover={{
+                    textDecoration: "none",
+                    opacity: 1,
+                    color: "black",
+                    bgColor: "white",
+                    border: "1px solid #007bff",
+                    transition: "all 0.5s ease",
+                  }}
+                >
+                  Sign Up
+                </ChakraLink>
+              </>
+            ) : (
+              <Button>
+                <i class="fi fi-rr-user"></i>
+                {account.username}
+              </Button>
+            )}
           </Flex>
         </Flex>
       </Box>

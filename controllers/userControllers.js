@@ -8,13 +8,14 @@ import errorHandling from "../middlewares/errorHandling.js";
 const register = async (req, res) => {
   try {
     const { username, password, email, avatar, role, profession } = req.body;
-    if (!username || !password || !email) {
+    if (!username || !password || !email || !role) {
       throw { code: 1, message: "All fields are required" };
     }
-    if (role === "superadmin") {
+    const lowerCaseRole = role.toLowerCase();
+    if (lowerCaseRole === "superadmin") {
       throw { code: 4, message: "Admin cannot be created" };
     }
-    if (role === "teacher" && !profession) {
+    if (lowerCaseRole === "teacher" && !profession) {
       throw { code: 4, message: "Profession is required" };
     }
 
@@ -28,10 +29,10 @@ const register = async (req, res) => {
       password,
       email,
       avatar,
-      role,
+      role: lowerCaseRole,
     };
 
-    if (role === "teacher") {
+    if (lowerCaseRole === "teacher") {
       userData.profession = profession;
     }
 
@@ -64,7 +65,7 @@ const login = async (req, res) => {
     }
 
     req.session.userID = user._id;
-    res.status(200).json({ message: "Login successful" });
+    res.status(200).json({ message: "Login successful", user: user });
   } catch (error) {
     errorHandling(error, req, res);
   }
@@ -153,7 +154,7 @@ const getAllUsers = async (req, res) => {
 };
 
 const accountDetails = async (req, res) => {
-  accountDetailsFunc(req.session.userID, req, res);
+  accountDetailsFunc(req.session.userID || req.params.userID, req, res);
 };
 
 const accountDetailsFunc = async (userId, req, res) => {

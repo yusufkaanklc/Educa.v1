@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ChakraProvider } from "@chakra-ui/react";
 import { DataProvider } from "./utils/contextApi";
@@ -9,22 +10,17 @@ import Login from "./pages/Login";
 
 const App = () => {
   return (
-    <>
-      <DataProvider>
-        <ChakraProvider theme={theme}>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Home></Home>} />
-              <Route path="/signup" element={<Signup></Signup>} />
-              <Route path="/signup" element={<Signup></Signup>} />
-              {!localStorage.getItem("token") && (
-                <Route path="/login" element={<Login />} />
-              )}
-            </Routes>
-          </BrowserRouter>
-        </ChakraProvider>
-      </DataProvider>
-    </>
+    <DataProvider>
+      <ChakraProvider theme={theme}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Routes>
+        </BrowserRouter>
+      </ChakraProvider>
+    </DataProvider>
   );
 };
 

@@ -24,7 +24,7 @@ const errorHandling = (error, req, res) => {
       break;
   }
 
-  res.status(statusCode).json({ error: { code: error.code, message } });
+  res.status(statusCode).json({ code: error.code, message });
 };
 
 export default errorHandling;

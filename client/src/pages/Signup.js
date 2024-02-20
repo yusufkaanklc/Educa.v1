@@ -14,7 +14,7 @@ import {
   InputGroup,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import dataContext from "../utils/contextApi";
 import { registerUser } from "../utils/data/UsersData";
 const Signup = () => {
@@ -93,23 +93,14 @@ const Signup = () => {
       });
   };
 
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/");
+    }
+  }, []);
+
   return (
-    <Center
-      h={"100vh"}
-      bgImg={"./image.png"}
-      bgPos={"center"}
-      position={"relative"}
-    >
-      <Box
-        position={"absolute"}
-        top={0}
-        left={0}
-        backdropFilter={"blur(5px)"}
-        bgColor={"rgba(0,0,0,0.1)"}
-        w={"100%"}
-        h={"100%"}
-        zIndex={"1"}
-      ></Box>
+    <Center h={"100vh"} bgPos={"center"} position={"relative"}>
       <Box position={"relative"} zIndex={2} w={"35%"}>
         <Box
           pos={"absolute"}
@@ -227,7 +218,7 @@ const Signup = () => {
                   />
                 </FormControl>
               )}
-              <FormControl isRequired>
+              <FormControl>
                 <FormLabel fontSize={responsive("", "1em", "1.2em")}>
                   Account Type
                 </FormLabel>

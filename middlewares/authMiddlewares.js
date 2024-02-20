@@ -8,7 +8,7 @@ const isLoggedIn = (req, res, next) => {
   if (loginCheck(req, res)) {
     next();
   } else {
-    res.status(401).send("you are not logged in");
+    res.status(401).json("you are not logged in");
   }
 };
 
@@ -16,7 +16,7 @@ const isLoggedOut = (req, res, next) => {
   if (!loginCheck(req, res)) {
     next();
   } else {
-    res.status(403).send("your are already logged in");
+    res.status(403).json("your are already logged in");
   }
 };
 

@@ -16,7 +16,7 @@ import Courses from "./Courses";
 import Instructors from "./Instructors";
 import Events from "./Events";
 import Footer from "./components/Footer";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import dataContext from "../utils/contextApi";
 
 const Home = () => {
@@ -39,9 +39,6 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    console.log(localStorage.getItem("isLoggedIn"));
-  }, []);
   return (
     <>
       <Header />
