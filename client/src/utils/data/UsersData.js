@@ -36,8 +36,7 @@ const registerUser = async (input) => {
 
 const loginUser = async (input) => {
   try {
-    const { data } = await axios.post("/users/login", input);
-    return data;
+    await axios.post("/users/login", input);
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
     throw {
@@ -47,9 +46,21 @@ const loginUser = async (input) => {
   }
 };
 
-const getAccount = async (id) => {
+const logout = async () => {
   try {
-    const { data } = await axios.get(`/users/account/${id}`);
+    await axios.get("/users/logout");
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data.message,
+      status: error.response.status,
+    };
+  }
+};
+
+const getAccount = async () => {
+  try {
+    const { data } = await axios.get("/users/account/");
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
@@ -60,4 +71,4 @@ const getAccount = async (id) => {
   }
 };
 
-export { getUsers, registerUser, loginUser, getAccount };
+export { getUsers, registerUser, loginUser, getAccount, logout };

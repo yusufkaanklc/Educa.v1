@@ -8,7 +8,6 @@ import {
   InputRightElement,
   Link as ChakraLink,
   FormLabel,
-  Tooltip,
   useToast,
   InputGroup,
 } from "@chakra-ui/react";
@@ -16,6 +15,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
 import dataContext from "../utils/contextApi";
 import { loginUser } from "../utils/data/UsersData";
+import Cookies from "js-cookie";
+
 const Login = () => {
   const { isMobile, isLaptop } = useContext(dataContext);
 
@@ -43,7 +44,7 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     loginUser(login)
-      .then((data) => {
+      .then(() => {
         toast({
           title: "login successful",
           description: "you are now logged in",
@@ -51,7 +52,7 @@ const Login = () => {
           duration: 5000,
           isClosable: true,
         });
-        localStorage.setItem("token", data.user._id);
+        Cookies.set("isLoggedIn", true, { expires: 1 });
         navigate("/");
       })
       .catch((error) => {
@@ -70,7 +71,7 @@ const Login = () => {
   };
 
   useEffect(() => {
-    if (localStorage.getItem("token")) {
+    if (Cookies.get("isLoggedIn")) {
       navigate("/");
     }
   }, []);
@@ -117,16 +118,7 @@ const Login = () => {
                 </FormControl>
                 <FormControl isRequired>
                   <FormLabel fontSize={responsive("", "1em", "1.2em")}>
-                    <Tooltip
-                      label="Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, one number, and one special character."
-                      placement="top"
-                      bgColor={"var(--accent-color)"}
-                      borderRadius={"5px"}
-                      p={"0.5em"}
-                      hasArrow
-                    >
-                      Password
-                    </Tooltip>
+                    Password
                   </FormLabel>
                   <InputGroup display={"flex"} alignItems={"center"}>
                     <Input

@@ -10,7 +10,8 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import dataContext from "../../utils/contextApi";
-import { getAccount } from "../../utils/data/UsersData";
+import { getAccount, logout } from "../../utils/data/UsersData";
+import Cookies from "js-cookie";
 const Header = () => {
   const handleScroll = (id) => {
     const element = document.getElementById(id);
@@ -21,6 +22,9 @@ const Header = () => {
 
   const { isMobile, isLaptop, account, setAccount } = useContext(dataContext);
   const [navVisible, setNavVisible] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toast = useToast();
 
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
@@ -30,6 +34,30 @@ const Header = () => {
     } else {
       return desktop;
     }
+  };
+
+  const handleLogout = () => {
+    logout()
+      .then(() => {
+        Cookies.remove("isLoggedIn");
+        setAccount(null);
+        toast({
+          title: "Logout",
+          description: "You have been logged out",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: "Error",
+          description: error.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      });
   };
 
   useEffect(() => {
@@ -48,18 +76,11 @@ const Header = () => {
 
     window.addEventListener("scroll", handleScroll);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  const toast = useToast;
-
-  useEffect(() => {
-    getAccount(localStorage.getItem("token"))
+    getAccount()
       .then((data) => {
-        console.log(data.user);
-        setAccount(data.user);
+        if (Cookies.get("isLoggedIn")) {
+          setAccount(data.user);
+        }
       })
       .catch((error) => {
         toast({
@@ -70,6 +91,10 @@ const Header = () => {
           isClosable: true,
         });
       });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (
@@ -149,7 +174,7 @@ const Header = () => {
             </ChakraLink>
           </Flex>
           <Flex>
-            {!localStorage.getItem("token") ? (
+            {!account ? (
               <>
                 <ChakraLink
                   as={Link}
@@ -201,10 +226,102 @@ const Header = () => {
                 </ChakraLink>
               </>
             ) : (
-              <Button>
-                <i class="fi fi-rr-user"></i>
-                {account.username}
-              </Button>
+              <Box position={"relative"}>
+                <Button
+                  border={"2px dashed #cfcfcf"}
+                  bgColor={"white"}
+                  borderRadius={"10px"}
+                  color={"black"}
+                  fontWeight={"500"}
+                  opacity={0.8}
+                  fontSize={responsive("", "md", "lg")}
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                >
+                  {account.username}
+                </Button>
+                {isMenuOpen && (
+                  <>
+                    <Flex
+                      border={"2px dashed #cfcfcf"}
+                      flexDir={"column"}
+                      gap={responsive("", ".5em", ".7em")}
+                      w={"100%"}
+                      bgColor={"white"}
+                      p={".5em 1em"}
+                      position={"absolute"}
+                      bottom={responsive("", "-7em", "-8em")}
+                      left={0}
+                      borderRadius={"10px"}
+                    >
+                      {account.role === "student" ? (
+                        <ChakraLink
+                          as={Link}
+                          to=""
+                          fontSize={responsive("", "md", "lg")}
+                          transition={"all 0.5s ease"}
+                          _hover={{ textDecoration: "none" }}
+                        >
+                          <i
+                            class="fi fi-rr-file-signature"
+                            style={{ position: "relative", top: "3px" }}
+                          ></i>
+                          &nbsp; Enrollments
+                        </ChakraLink>
+                      ) : (
+                        <>
+                          <ChakraLink
+                            as={Link}
+                            to=""
+                            fontSize={responsive("", "md", "lg")}
+                            transition={"all 0.5s ease"}
+                            _hover={{ textDecoration: "none" }}
+                          >
+                            <i
+                              class="fi fi-rr-book-alt"
+                              style={{ position: "relative", top: "3px" }}
+                            ></i>
+                            &nbsp; My courses
+                          </ChakraLink>
+                          <ChakraLink
+                            as={Link}
+                            to=""
+                            fontSize={responsive("", "md", "lg")}
+                            transition={"all 0.5s ease"}
+                            _hover={{ textDecoration: "none" }}
+                          >
+                            Dashboard
+                          </ChakraLink>
+                        </>
+                      )}
+                      <ChakraLink
+                        as={Link}
+                        to=""
+                        fontSize={responsive("", "md", "lg")}
+                        transition={"all 0.5s ease"}
+                        _hover={{ textDecoration: "none" }}
+                      >
+                        <i
+                          class="fi fi-rr-user-pen"
+                          style={{ position: "relative", top: "3px" }}
+                        ></i>
+                        &nbsp; Account
+                      </ChakraLink>
+                      <ChakraLink
+                        onClick={() => handleLogout()}
+                        fontSize={responsive("", "md", "lg")}
+                        transition={"all 0.5s ease"}
+                        _hover={{ textDecoration: "none" }}
+                      >
+                        <i
+                          class="fi fi-rr-sign-out-alt"
+                          style={{ position: "relative", top: "3px" }}
+                        ></i>
+                        &nbsp; Logout
+                      </ChakraLink>
+                    </Flex>
+                  </>
+                )}
+              </Box>
             )}
           </Flex>
         </Flex>

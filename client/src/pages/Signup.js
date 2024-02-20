@@ -17,6 +17,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
 import dataContext from "../utils/contextApi";
 import { registerUser } from "../utils/data/UsersData";
+import Cookies from "js-cookie";
 const Signup = () => {
   const { isMobile, isLaptop } = useContext(dataContext);
   // Kullanıcı bilgilerini tutacak state
@@ -43,8 +44,6 @@ const Signup = () => {
   // Kullanıcı bilgilerini handle edecek fonksiyon
   const handleregisterChange = (e) =>
     setRegister({ ...register, [e.target.name]: e.target.value });
-
-  // useEffect ile tetikleyici ile kullanıcı bilgilerini ekrana yazdır
 
   const navigate = useNavigate();
   const toast = useToast();
@@ -94,7 +93,7 @@ const Signup = () => {
   };
 
   useEffect(() => {
-    if (localStorage.getItem("token")) {
+    if (Cookies.get("isLoggedIn")) {
       navigate("/");
     }
   }, []);
