@@ -76,21 +76,23 @@ const Header = () => {
 
     window.addEventListener("scroll", handleScroll);
 
-    getAccount()
-      .then((data) => {
-        if (Cookies.get("isLoggedIn")) {
-          setAccount(data.user);
-        }
-      })
-      .catch((error) => {
-        toast({
-          title: "Error",
-          description: error.message,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
+    if (Cookies.get("isLoggedIn")) {
+      getAccount()
+        .then((data) => {
+          if (Cookies.get("isLoggedIn")) {
+            setAccount(data.user);
+          }
+        })
+        .catch((error) => {
+          toast({
+            title: "Error",
+            description: error.message,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
         });
-      });
+    }
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -101,7 +103,9 @@ const Header = () => {
     <>
       <Box id="home"></Box>
       <Box
-        transform={navVisible ? "translateY(0)" : "translateY(-150%)"}
+        transform={
+          !isMenuOpen && (navVisible ? "translateY(0)" : "translateY(-150%)")
+        }
         transition={"0.5s ease"}
         m={responsive("", "1em 8em", "1em 10em")}
         bgColor={"white"}
@@ -245,13 +249,13 @@ const Header = () => {
                       border={"2px dashed #cfcfcf"}
                       flexDir={"column"}
                       gap={responsive("", ".5em", ".7em")}
-                      w={"100%"}
                       bgColor={"white"}
                       p={".5em 1em"}
                       position={"absolute"}
-                      bottom={responsive("", "-7em", "-8em")}
-                      left={0}
+                      width={"150%"}
+                      right={0}
                       borderRadius={"10px"}
+                      mt={".5em"}
                     >
                       {account.role === "student" ? (
                         <ChakraLink
@@ -289,7 +293,11 @@ const Header = () => {
                             transition={"all 0.5s ease"}
                             _hover={{ textDecoration: "none" }}
                           >
-                            Dashboard
+                            <i
+                              class="fi fi-rr-chart-pie-alt"
+                              style={{ position: "relative", top: "3px" }}
+                            ></i>
+                            &nbsp; Dashboard
                           </ChakraLink>
                         </>
                       )}

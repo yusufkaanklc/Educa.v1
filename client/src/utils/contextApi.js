@@ -6,7 +6,7 @@ const dataContext = createContext();
 export const DataProvider = ({ children }) => {
   const [courses, setCourses] = useState([]);
   const [users, setUsers] = useState([]);
-  const [account, setAccount] = useState([]);
+  const [account, setAccount] = useState(null);
   const [teachers, setTeachers] = useState([]);
 
   const [isMobile] = useMediaQuery("(max-width: 768px)");

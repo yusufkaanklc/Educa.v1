@@ -28,6 +28,7 @@ const Instructors = () => {
   };
 
   useEffect(() => {
+    console.log("teachers", teachers);
     setInstructors(teachers.slice(0, 3));
   }, [teachers]);
 

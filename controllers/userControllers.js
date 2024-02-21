@@ -154,7 +154,7 @@ const getAllUsers = async (req, res) => {
 };
 
 const accountDetails = async (req, res) => {
-  accountDetailsFunc(req.session.userID || req.params.userID, req, res);
+  accountDetailsFunc(req.session.userID, req, res);
 };
 
 const accountDetailsFunc = async (userId, req, res) => {

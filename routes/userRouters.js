@@ -23,7 +23,7 @@ router.route("/accounts").get(userControllers.getAllUsers);
 
 // Kullanıcı bilgileri için GET isteği
 router
-  .route("/account/:userID")
+  .route("/account")
   .get(authMiddlewares.isLoggedIn, userControllers.accountDetails);
 
 // Kullanıcı bilgilerini güncelleme
