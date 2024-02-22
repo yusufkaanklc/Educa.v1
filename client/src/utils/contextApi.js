@@ -8,7 +8,9 @@ export const DataProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const [account, setAccount] = useState(null);
   const [teachers, setTeachers] = useState([]);
-
+  const [course, setCourse] = useState({});
+  const [isLogin, setIsLogin] = useState(false);
+  const [targetScroll, setTargetScroll] = useState("");
   const [isMobile] = useMediaQuery("(max-width: 768px)");
   const [isLaptop] = useMediaQuery("(max-width: 1568px)");
   const [isDesktop] = useMediaQuery("(max-width: 1920px)");
@@ -24,6 +26,12 @@ export const DataProvider = ({ children }) => {
         setTeachers,
         account,
         setAccount,
+        course,
+        setCourse,
+        isLogin,
+        setIsLogin,
+        targetScroll,
+        setTargetScroll,
         isMobile,
         isLaptop,
         isDesktop,

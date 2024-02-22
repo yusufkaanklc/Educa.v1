@@ -7,7 +7,8 @@ import errorHandling from "../middlewares/errorHandling.js";
 
 const register = async (req, res) => {
   try {
-    const { username, password, email, avatar, role, profession } = req.body;
+    const { username, password, email, avatar, role, profession, introduce } =
+      req.body;
     if (!username || !password || !email || !role) {
       throw { code: 1, message: "All fields are required" };
     }
@@ -34,6 +35,10 @@ const register = async (req, res) => {
 
     if (lowerCaseRole === "teacher") {
       userData.profession = profession;
+    }
+
+    if (introduce) {
+      userData.introduce = introduce;
     }
 
     const newUser = new User(userData);

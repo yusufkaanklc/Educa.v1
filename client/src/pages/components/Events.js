@@ -1,5 +1,5 @@
 import { Box, Stack, Heading, Text, Flex, Center } from "@chakra-ui/react";
-import dataContext from "../utils/contextApi";
+import dataContext from "../../utils/contextApi";
 import { useContext } from "react";
 const Contact = () => {
   const { isMobile, isLaptop } = useContext(dataContext);

@@ -12,13 +12,13 @@ import {
   InputGroup,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import dataContext from "../utils/contextApi";
 import { loginUser } from "../utils/data/UsersData";
 import Cookies from "js-cookie";
 
 const Login = () => {
-  const { isMobile, isLaptop } = useContext(dataContext);
+  const { isMobile, isLaptop, setIsLogin } = useContext(dataContext);
 
   const [passwordShow, setPasswordShow] = useState(false);
   const handleClick = () => setPasswordShow(!passwordShow);
@@ -53,6 +53,7 @@ const Login = () => {
           isClosable: true,
         });
         Cookies.set("isLoggedIn", true, { expires: 1 });
+        setIsLogin(true);
         navigate("/");
       })
       .catch((error) => {
@@ -69,12 +70,6 @@ const Login = () => {
   const handleLoginChange = (e) => {
     setLogin({ ...login, [e.target.name]: e.target.value });
   };
-
-  useEffect(() => {
-    if (Cookies.get("isLoggedIn")) {
-      navigate("/");
-    }
-  }, []);
 
   return (
     <>

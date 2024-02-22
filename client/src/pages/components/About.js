@@ -1,7 +1,7 @@
 import { Box, Flex, Text, Stack, Heading, Center } from "@chakra-ui/react";
 import { useEffect, useContext, useState } from "react";
-import { getUsers } from "../utils/data/UsersData";
-import dataContext from "../utils/contextApi";
+import { getUsers } from "../../utils/data/UsersData";
+import dataContext from "../../utils/contextApi";
 const About = () => {
   const {
     users,

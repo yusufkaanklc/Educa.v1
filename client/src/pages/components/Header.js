@@ -20,7 +20,8 @@ const Header = () => {
     }
   };
 
-  const { isMobile, isLaptop, account, setAccount } = useContext(dataContext);
+  const { isMobile, isLaptop, account, setAccount, setIsLogin } =
+    useContext(dataContext);
   const [navVisible, setNavVisible] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -41,6 +42,7 @@ const Header = () => {
       .then(() => {
         Cookies.remove("isLoggedIn");
         setAccount(null);
+        setIsLogin(false);
         toast({
           title: "Logout",
           description: "You have been logged out",
@@ -120,7 +122,7 @@ const Header = () => {
       >
         <Flex justify={"space-between"} align={"center"} h={"100%"}>
           <Flex align={"center"}>
-            <Image w={responsive("", "3em", "5em")} src="./hayvan.png"></Image>
+            <Image w={responsive("", "3em", "5em")} src="/hayvan.png"></Image>
             <Heading
               fontSize={responsive("", "2xl", "3xl")}
               fontWeight={"700"}
@@ -236,6 +238,7 @@ const Header = () => {
                   bgColor={"white"}
                   borderRadius={"10px"}
                   color={"black"}
+                  minW={"6em"}
                   fontWeight={"500"}
                   opacity={0.8}
                   fontSize={responsive("", "md", "lg")}
@@ -252,7 +255,7 @@ const Header = () => {
                       bgColor={"white"}
                       p={".5em 1em"}
                       position={"absolute"}
-                      width={"150%"}
+                      width={"160%"}
                       right={0}
                       borderRadius={"10px"}
                       mt={".5em"}
@@ -273,19 +276,6 @@ const Header = () => {
                         </ChakraLink>
                       ) : (
                         <>
-                          <ChakraLink
-                            as={Link}
-                            to=""
-                            fontSize={responsive("", "md", "lg")}
-                            transition={"all 0.5s ease"}
-                            _hover={{ textDecoration: "none" }}
-                          >
-                            <i
-                              class="fi fi-rr-book-alt"
-                              style={{ position: "relative", top: "3px" }}
-                            ></i>
-                            &nbsp; My courses
-                          </ChakraLink>
                           <ChakraLink
                             as={Link}
                             to=""

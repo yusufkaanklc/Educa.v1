@@ -10,4 +10,14 @@ const getCourses = async () => {
   }
 };
 
-export default getCourses;
+const getCourse = async (courseSlug) => {
+  try {
+    const { data } = await axios.get(`/courses/${courseSlug}`);
+    return data;
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    throw new Error("Failed to fetch courses");
+  }
+};
+
+export { getCourses, getCourse };

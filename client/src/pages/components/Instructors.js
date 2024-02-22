@@ -8,11 +8,12 @@ import {
   CardBody,
   Image,
   Center,
+  Skeleton,
   Link as ChakraLink,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
-import dataContext from "../utils/contextApi";
+import dataContext from "../../utils/contextApi";
 const Instructors = () => {
   const { isMobile, isLaptop, teachers } = useContext(dataContext);
   const [instructors, setInstructors] = useState([]);
@@ -28,7 +29,6 @@ const Instructors = () => {
   };
 
   useEffect(() => {
-    console.log("teachers", teachers);
     setInstructors(teachers.slice(0, 3));
   }, [teachers]);
 
@@ -64,7 +64,7 @@ const Instructors = () => {
         flexWrap={"wrap"}
         mt={responsive("", "3em", "4em")}
       >
-        {instructors &&
+        {instructors.length > 0 ? (
           instructors.map((instructor, index) => (
             <Card maxW={responsive("", "xs", "sm")} key={index}>
               <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
@@ -134,8 +134,28 @@ const Instructors = () => {
                 </CardBody>
               </Flex>
             </Card>
-          ))}
+          ))
+        ) : (
+          <>
+            <Skeleton
+              h={responsive("", "17em", "20em")}
+              w={responsive("", "xs", "sm")}
+              borderRadius={"10px"}
+            />
+            <Skeleton
+              h={responsive("", "17em", "20em")}
+              w={responsive("", "xs", "sm")}
+              borderRadius={"10px"}
+            />
+            <Skeleton
+              h={responsive("", "17em", "20em")}
+              w={responsive("", "xs", "sm")}
+              borderRadius={"10px"}
+            />
+          </>
+        )}
       </Flex>
+
       <Center pt={"3em"}>
         <ChakraLink
           as={Link}

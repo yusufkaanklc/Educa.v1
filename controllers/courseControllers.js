@@ -108,13 +108,21 @@ const getAllCourses = async (req, res) => {
           },
           category: { $first: "$category" },
           imageUrl: { $first: "$imageUrl" },
+          slug: { $first: "$slug" },
         },
       },
+      { $sort: { point: -1 } },
     ];
 
     const courses = await Course.aggregate(pipeline);
 
-    console.log(courses);
+    for (const course of courses) {
+      // Burada her bir belgeyi güncellemek için MongoDB sorgusu yapın
+      await Course.updateOne(
+        { _id: course._id },
+        { $set: { point: course.point } }
+      );
+    }
 
     res.status(200).json(courses);
   } catch (error) {
@@ -125,11 +133,103 @@ const getAllCourses = async (req, res) => {
 const getCourse = async (req, res) => {
   try {
     const courseSlug = req.params.courseSlug;
-    const course = await Course.findOne({ slug: courseSlug });
-    if (!course) {
+    // const course = await Course.findOne({ slug: courseSlug });
+    const pipeline = [
+      { $match: { slug: courseSlug } },
+      {
+        $lookup: {
+          from: "lessons",
+          localField: "lessons",
+          foreignField: "_id",
+          as: "lessonDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$lessonDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "ownership",
+          foreignField: "_id",
+          as: "ownershipDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "enrollments",
+          foreignField: "_id",
+          as: "enrollmentsDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$enrollmentsDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          title: { $first: "$title" },
+          description: { $first: "$description" },
+          ownerName: { $first: "$ownershipDetails.username" },
+          ownerIntroduce: { $first: "$ownershipDetails.introduce" },
+          enrollments: { $addToSet: "$enrollmentsDetails" },
+          price: { $first: "$price" },
+          lessons: { $addToSet: "$lessonDetails" },
+          category: { $first: "$category" },
+          imageUrl: { $first: "$imageUrl" },
+          point: { $first: "$point" },
+          slug: { $first: "$slug" },
+          totalFinishedLessons: {
+            $sum: {
+              $cond: [{ $eq: ["$lessonDetails.isFinished", true] }, 1, 0],
+            },
+          }, // Tamamlanmış ders sayısı
+          totalLessons: { $sum: 1 }, // Toplam ders sayısı
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          description: 1,
+          ownerName: 1,
+          enrollments: 1,
+          ownerIntroduce: 1,
+          price: 1,
+          lessons: 1,
+          category: 1,
+          imageUrl: 1,
+          point: 1,
+          slug: 1,
+          totalLessons: 1,
+          totalFinishedLessons: 1,
+          lessonProgressRatio: {
+            $cond: [
+              { $eq: ["$totalLessons", 0] },
+              0,
+              {
+                $divide: ["$totalFinishedLessons", "$totalLessons"],
+              },
+            ],
+          },
+        },
+      },
+    ];
+
+    const course = await Course.aggregate(pipeline);
+
+    console.log(course);
+
+    if (course.length === 0) {
       throw { code: 2, message: "Course not found" };
     }
-    res.status(200).json(course);
+    res.status(200).json(course[0]);
   } catch (error) {
     errorHandling(error, req, res);
   }

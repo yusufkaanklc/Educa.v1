@@ -6,18 +6,19 @@ import {
   Box,
   Link as ChakraLink,
 } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { StarIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import InstructorWoman from "./components/Instructor-woman";
 import InstructorMan from "./components/Instructor-man";
 import Header from "./components/Header";
-import About from "./About";
-import Courses from "./Courses";
-import Instructors from "./Instructors";
-import Events from "./Events";
+import About from "./components/About";
+import Courses from "./components/Courses";
+import Instructors from "./components/Instructors";
+import Events from "./components/Events";
 import Footer from "./components/Footer";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import dataContext from "../utils/contextApi";
+import Cookies from "js-cookie";
 
 const Home = () => {
   const handleScroll = (id) => {
@@ -27,7 +28,8 @@ const Home = () => {
     }
   };
 
-  const { isMobile, isLaptop } = useContext(dataContext);
+  const { isMobile, isLaptop, setIsLogin, targetScroll } =
+    useContext(dataContext);
 
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
@@ -38,6 +40,22 @@ const Home = () => {
       return desktop;
     }
   };
+
+  useEffect(() => {
+    if (Cookies.get("isLoggedIn")) {
+      setIsLogin(true);
+    } else {
+      setIsLogin(false);
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    if (targetScroll !== "") {
+      const element = document.getElementById(targetScroll);
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [targetScroll]);
 
   return (
     <>
@@ -206,7 +224,8 @@ const Home = () => {
       <Courses />
       <Instructors />
       <Events />
-      <Footer></Footer>
+
+      <Footer />
     </>
   );
 };

@@ -14,10 +14,9 @@ import {
   InputGroup,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import dataContext from "../utils/contextApi";
 import { registerUser } from "../utils/data/UsersData";
-import Cookies from "js-cookie";
 const Signup = () => {
   const { isMobile, isLaptop } = useContext(dataContext);
   // Kullanıcı bilgilerini tutacak state
@@ -91,12 +90,6 @@ const Signup = () => {
         }
       });
   };
-
-  useEffect(() => {
-    if (Cookies.get("isLoggedIn")) {
-      navigate("/");
-    }
-  }, []);
 
   return (
     <Center h={"100vh"} bgPos={"center"} position={"relative"}>
