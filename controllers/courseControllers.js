@@ -230,6 +230,8 @@ const getCourse = async (req, res) => {
 
     const course = await Course.aggregate(pipeline);
 
+    console.log(course);
+
     if (course.length === 0) {
       throw { code: 2, message: "Course not found" };
     }

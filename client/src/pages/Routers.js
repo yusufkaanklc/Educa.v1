@@ -25,7 +25,7 @@ const Routers = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/course/:slug" element={<Course />} />
-        <Route path="/courses" element={<AllCourses />} />
+        <Route path="/all-courses" element={<AllCourses />} />
         <Route
           path="/login"
           element={isLogin ? <Navigate to="/" replace /> : <Login />}

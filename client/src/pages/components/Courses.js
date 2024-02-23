@@ -98,8 +98,8 @@ const Courses = () => {
                 border: "2px dashed #cfcfcf",
               }}
             >
-              <Card maxW={responsive("", "xs", "sm")} display={"flex"}>
-                <CardBody>
+              <Card maxW={responsive("", "xs", "sm")} h={"100%"}>
+                <CardBody h={"100%"}>
                   <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
                     <Box>
                       <Image

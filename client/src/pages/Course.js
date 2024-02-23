@@ -38,7 +38,7 @@ const Course = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [starList, setStarList] = useState([]);
   const [account, setAccount] = useState(null);
-  const [enrollList, setEnrollList] = useState([]);
+  const [enroll, setEnroll] = useState(null);
 
   const { slug } = useParams();
   const toast = useToast();
@@ -59,9 +59,31 @@ const Course = () => {
     setTargetScroll(link);
     navigate("/");
   };
+  const handleLessonClick = () => {
+    if (!account) {
+      toast({
+        title: "Error",
+        description: "Please Login",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } else if (course.ownerName !== account.username && !enroll) {
+      toast({
+        title: "Error",
+        description: "Please enroll",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } else {
+      // Buraya başka bir işlem eklenebilir veya boş bırakılabilir
+    }
+  };
 
   useEffect(() => {
     setIsLoading(true);
+
     getCourse(slug)
       .then((data) => {
         setCourse(data);
@@ -77,6 +99,7 @@ const Course = () => {
         });
       });
     setIsLoading(true);
+
     getLessons(slug)
       .then((data) => {
         setLessons(data);
@@ -92,6 +115,7 @@ const Course = () => {
         });
       });
     setIsLoading(true);
+
     getAccount()
       .then((data) => {
         setAccount(data);
@@ -116,7 +140,7 @@ const Course = () => {
     if (course && account) {
       course.enrollments.map((enrollment) => {
         if (enrollment._id === account._id) {
-          setEnrollList([...enrollList, account._id]);
+          setEnroll(account._id);
         }
       });
     }
@@ -256,8 +280,12 @@ const Course = () => {
         </Grid>
       ) : (
         <Grid
-          templateRows="repeat(20, 1em)"
-          templateColumns="repeat(2, 1fr)"
+          templateRows="repeat(auto-fill, minmax(1em, auto))"
+          templateColumns={responsive(
+            "1fr",
+            "repeat(2, 1fr)",
+            "repeat(2, 1fr)"
+          )}
           gap={10}
         >
           <GridItem
@@ -265,6 +293,9 @@ const Course = () => {
             rowSpan={7}
             border={"2px dashed var(--secondary-color)"}
             colSpan={1}
+            display={"flex"}
+            flexDirection={"column"}
+            justifyContent={"space-between"}
             bgColor={"var(--bg-color)"}
             p={responsive("", "1em", "2em 1em")}
           >
@@ -293,7 +324,7 @@ const Course = () => {
                   ></i>
                 )}
               </Flex>
-              <Text fontSize={responsive("", "sm", "md")}>
+              <Text fontSize={responsive("", "sm", "md")} maxH={"5em"}>
                 {course.description}
               </Text>
             </Stack>
@@ -302,6 +333,7 @@ const Course = () => {
                 mt={"1em"}
                 border={"1px solid transparent"}
                 bgColor={"var(--accent-color)"}
+                fontSize={responsive("", "sm", "md")}
                 color={"white"}
                 _hover={{
                   bgColor: "var(--bg-color)",
@@ -312,7 +344,7 @@ const Course = () => {
                 {account
                   ? course.ownerName === account.username
                     ? "Edit"
-                    : enrollList.length > 0
+                    : enroll
                     ? "Continue"
                     : "Enroll now"
                   : "Login to enroll"}
@@ -343,7 +375,7 @@ const Course = () => {
               borderRadius={"5px"}
               color={"var(--secondary-color)"}
               w={"min-content"}
-              minW={"15%"}
+              minW={"25%"}
             >
               {course.ownerName}
             </Center>
@@ -386,7 +418,11 @@ const Course = () => {
               {lessons &&
                 lessons.map((lesson, index) => (
                   <Flex key={index} align={"center"} justify={"space-between"}>
-                    <Flex gap={".5em"} align={"center"}>
+                    <Flex
+                      gap={".5em"}
+                      align={"center"}
+                      fontSize={responsive("", "sm", "md")}
+                    >
                       <Box
                         w={"1em"}
                         h={"1em"}
@@ -395,14 +431,19 @@ const Course = () => {
                       ></Box>
                       <ChakraLink
                         as={Link}
-                        to={`/lesson/${lesson.slug}`}
+                        onClick={() => handleLessonClick()}
+                        to={enroll ? `/lesson/${lesson.slug}` : ""}
                         fontWeight={500}
                         opacity={0.9}
                       >
                         {lesson.title}
                       </ChakraLink>
                     </Flex>
-                    <Text opacity={0.9} fontWeight={500}>
+                    <Text
+                      opacity={0.9}
+                      fontWeight={500}
+                      fontSize={responsive("", "sm", "md")}
+                    >
                       {lesson.duration ? lesson.duration + "min" : "140 min"}
                     </Text>
                   </Flex>
@@ -412,7 +453,7 @@ const Course = () => {
           <GridItem
             border={"2px dashed transparent"}
             borderRadius={"10px"}
-            rowSpan={2}
+            rowSpan={3}
             colSpan={1}
             bgColor={"var(--secondary-color)"}
             color={"white"}
@@ -433,7 +474,9 @@ const Course = () => {
                     top: "2px",
                   }}
                 ></i>
-                <Text>Course Details</Text>
+                <Text fontSize={responsive("", "sm", "md")}>
+                  Course Details
+                </Text>
               </Flex>
               <Flex align={"center"} gap={".5em"}>
                 <Flex
@@ -449,7 +492,7 @@ const Course = () => {
                       top: "2px",
                     }}
                   ></i>
-                  <Text>
+                  <Text fontSize={responsive("", "sm", "md")}>
                     {course.enrollments && course.enrollments.length}{" "}
                     Enrollments
                   </Text>
@@ -468,7 +511,7 @@ const Course = () => {
                       top: "2px",
                     }}
                   ></i>
-                  <Text>45 Hours</Text>
+                  <Text fontSize={responsive("", "sm", "md")}>45 Hours</Text>
                 </Flex>
                 /
                 <Flex
@@ -484,7 +527,9 @@ const Course = () => {
                       top: "2px",
                     }}
                   ></i>
-                  <Text>{course.lessons && course.lessons.length} Lessons</Text>
+                  <Text fontSize={responsive("", "sm", "md")}>
+                    {course.lessons && course.lessons.length} Lessons
+                  </Text>
                 </Flex>
               </Flex>
             </Flex>

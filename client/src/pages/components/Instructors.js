@@ -159,7 +159,7 @@ const Instructors = () => {
       <Center pt={"3em"}>
         <ChakraLink
           as={Link}
-          to="/courses"
+          to="/insturctors"
           fontSize={"md"}
           color={"white"}
           padding={".8em 1.5em"}

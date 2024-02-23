@@ -65,11 +65,11 @@ const AllCourses = () => {
       border={"2px dashed #cfcfcf"}
       borderRadius={"10px"}
       bgColor={"var(--bg-color)"}
-      p={responsive("", "1em ", "2em")}
+      p={responsive("", "2em  1em ", "4em 1em")}
       mx={responsive("", "8em", "10em")}
       my={responsive("", "2em", "3em")}
     >
-      <Center mb={responsive("", "1em", "2em")}>
+      <Center mb={responsive("", "1em ", "2em")}>
         <Heading
           fontSize={responsive("", "xl", "2xl")}
           fontWeight={"500"}
@@ -134,7 +134,11 @@ const AllCourses = () => {
                 border: "2px dashed #cfcfcf",
               }}
             >
-              <Card maxW={responsive("", "xs", "sm")} display={"flex"}>
+              <Card
+                maxW={responsive("", "xs", "sm")}
+                display={"flex"}
+                h={"100%"}
+              >
                 <CardBody>
                   <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
                     <Box>
