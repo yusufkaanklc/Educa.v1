@@ -6,7 +6,11 @@ const getCourses = async () => {
     return data;
   } catch (error) {
     console.error("Error fetching courses:", error);
-    throw new Error("Failed to fetch courses");
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
   }
 };
 
@@ -16,7 +20,11 @@ const getCourse = async (courseSlug) => {
     return data;
   } catch (error) {
     console.error("Error fetching courses:", error);
-    throw new Error("Failed to fetch courses");
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
   }
 };
 

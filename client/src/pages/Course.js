@@ -12,6 +12,7 @@ import {
   Center,
   Stack,
   Grid,
+  Link as ChakraLink,
   GridItem,
   Progress,
   Skeleton,
@@ -20,13 +21,24 @@ import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import dataContext from "../utils/contextApi";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getCourse } from "../utils/data/CoursesData";
+import { getAccount } from "../utils/data/UsersData";
+import { getLessons } from "../utils/data/LessonsData";
 import { useToast } from "@chakra-ui/react";
 
 const Course = () => {
-  const { course, setCourse, isMobile, isLaptop, setTargetScroll } =
-    useContext(dataContext);
+  const {
+    course,
+    setCourse,
+    isMobile,
+    isLaptop,
+    setTargetScroll,
+    lessons,
+    setLessons,
+  } = useContext(dataContext);
   const [isLoading, setIsLoading] = useState(false);
   const [starList, setStarList] = useState([]);
+  const [account, setAccount] = useState(null);
+  const [enrollList, setEnrollList] = useState([]);
 
   const { slug } = useParams();
   const toast = useToast();
@@ -64,6 +76,30 @@ const Course = () => {
           isClosable: true,
         });
       });
+    setIsLoading(true);
+    getLessons(slug)
+      .then((data) => {
+        setLessons(data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        toast({
+          title: "Error",
+          description: error.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      });
+    setIsLoading(true);
+    getAccount()
+      .then((data) => {
+        setAccount(data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
     window.scrollTo(0, 0);
   }, []);
@@ -74,9 +110,17 @@ const Course = () => {
       newStarList.push(i);
     }
     setStarList(newStarList);
-
-    console.log(course.enrollments);
   }, [course]);
+
+  useEffect(() => {
+    if (course && account) {
+      course.enrollments.map((enrollment) => {
+        if (enrollment._id === account._id) {
+          setEnrollList([...enrollList, account._id]);
+        }
+      });
+    }
+  }, [account]);
 
   return (
     <Box
@@ -126,7 +170,12 @@ const Course = () => {
               </BreadcrumbItem>
 
               <BreadcrumbItem>
-                <BreadcrumbLink fontWeight={500} opacity={0.9}>
+                <BreadcrumbLink
+                  fontWeight={500}
+                  opacity={0.9}
+                  as={Link}
+                  to={`/course/${slug}`}
+                >
                   {course.title}
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -260,7 +309,13 @@ const Course = () => {
                   border: "1px solid var(--accent-color)",
                 }}
               >
-                Start course
+                {account
+                  ? course.ownerName === account.username
+                    ? "Edit"
+                    : enrollList.length > 0
+                    ? "Continue"
+                    : "Enroll now"
+                  : "Login to enroll"}
               </Button>
             </Flex>
           </GridItem>
@@ -313,7 +368,46 @@ const Course = () => {
             bgColor={"var(--bg-color)"}
             p={responsive("", "1em", "2em 1em")}
           >
-            <Heading fontSize={responsive("", "xl", "2xl")}>Lessons</Heading>
+            <Flex align={"center"} gap={".5em"}>
+              <i
+                class="fi fi-rr-book-alt"
+                style={{ position: "relative", top: "2px", fontSize: "1.5em" }}
+              ></i>
+              <Heading fontSize={responsive("", "xl", "2xl")} fontWeight={600}>
+                Lessons
+              </Heading>
+            </Flex>
+            <Flex
+              flexDir={"column"}
+              gap={responsive("", "1em", "2em")}
+              mt={responsive("", "1em", "2em")}
+              px={responsive("", "1em", "2em")}
+            >
+              {lessons &&
+                lessons.map((lesson, index) => (
+                  <Flex key={index} align={"center"} justify={"space-between"}>
+                    <Flex gap={".5em"} align={"center"}>
+                      <Box
+                        w={"1em"}
+                        h={"1em"}
+                        borderRadius={"full"}
+                        bgColor={"var(--accent-color)"}
+                      ></Box>
+                      <ChakraLink
+                        as={Link}
+                        to={`/lesson/${lesson.slug}`}
+                        fontWeight={500}
+                        opacity={0.9}
+                      >
+                        {lesson.title}
+                      </ChakraLink>
+                    </Flex>
+                    <Text opacity={0.9} fontWeight={500}>
+                      {lesson.duration ? lesson.duration + "min" : "140 min"}
+                    </Text>
+                  </Flex>
+                ))}
+            </Flex>
           </GridItem>
           <GridItem
             border={"2px dashed transparent"}

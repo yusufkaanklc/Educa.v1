@@ -166,7 +166,7 @@ const accountDetailsFunc = async (userId, req, res) => {
   try {
     const user = await User.findById(userId);
     if (!user) throw { code: 2, message: "User not found" };
-    res.status(200).json({ user });
+    res.status(200).json(user);
   } catch (error) {
     errorHandling(error, req, res);
   }

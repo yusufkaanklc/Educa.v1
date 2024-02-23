@@ -1,5 +1,6 @@
 import { createContext, useState } from "react";
 import { useMediaQuery } from "@chakra-ui/react";
+import Cookies from "js-cookie";
 
 const dataContext = createContext();
 
@@ -9,7 +10,10 @@ export const DataProvider = ({ children }) => {
   const [account, setAccount] = useState(null);
   const [teachers, setTeachers] = useState([]);
   const [course, setCourse] = useState({});
-  const [isLogin, setIsLogin] = useState(false);
+  const [lessons, setLessons] = useState([]);
+  const [isLogin, setIsLogin] = useState(
+    Cookies.get("isLoggedIn") ? true : false
+  );
   const [targetScroll, setTargetScroll] = useState("");
   const [isMobile] = useMediaQuery("(max-width: 768px)");
   const [isLaptop] = useMediaQuery("(max-width: 1568px)");
@@ -28,10 +32,12 @@ export const DataProvider = ({ children }) => {
         setAccount,
         course,
         setCourse,
-        isLogin,
-        setIsLogin,
+        lessons,
+        setLessons,
         targetScroll,
         setTargetScroll,
+        isLogin,
+        setIsLogin,
         isMobile,
         isLaptop,
         isDesktop,

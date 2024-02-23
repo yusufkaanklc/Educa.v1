@@ -14,6 +14,9 @@ const lessonSchema = new Schema({
   videoUrl: {
     type: String,
   },
+  duration: {
+    type: Number,
+  },
   comments: [
     {
       type: Schema.Types.ObjectId,

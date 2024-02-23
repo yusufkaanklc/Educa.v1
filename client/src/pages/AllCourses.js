@@ -1,26 +1,29 @@
 import {
   Box,
   Heading,
-  Text,
   Center,
-  Stack,
+  Flex,
+  Skeleton,
+  Text,
   Link as ChakraLink,
   Card,
   CardBody,
-  Skeleton,
   Image,
-  Flex,
+  useToast,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
 } from "@chakra-ui/react";
+import { StarIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { Link, useNavigate } from "react-router-dom";
+import dataContext from "../utils/contextApi";
+import InstructorWomen from "./components/Instructor-woman";
+import { getCourses } from "../utils/data/CoursesData";
 import { useContext, useEffect, useState } from "react";
-import { StarIcon } from "@chakra-ui/icons";
-import InstructorWomen from "./Instructor-woman";
-import { Link } from "react-router-dom";
-import dataContext from "../../utils/contextApi";
-import { getCourses } from "../../utils/data/CoursesData";
 
-const Courses = () => {
-  const { setCourses, courses, isMobile, isLaptop } = useContext(dataContext);
-  const [popularCourses, setPopularCourses] = useState([]);
+const AllCourses = () => {
+  const { isLaptop, isMobile, setTargetScroll } = useContext(dataContext);
+  const [courses, setCourses] = useState([]);
 
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
@@ -32,60 +35,93 @@ const Courses = () => {
     }
   };
 
+  const navigate = useNavigate();
+
+  const handleClick = (link) => {
+    setTargetScroll(link);
+    navigate("/");
+  };
+
+  const toast = useToast();
+
   useEffect(() => {
     getCourses()
       .then((data) => {
         setCourses(data);
       })
       .catch((error) => {
-        console.log(error);
+        toast({
+          title: "Error",
+          description: error.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
       });
   }, []);
-
-  useEffect(() => {
-    setPopularCourses(courses.slice(0, 6));
-  }, [courses]);
 
   return (
     <Box
       border={"2px dashed #cfcfcf"}
-      mx={responsive("", "8em", "10em")}
-      mb={responsive("", "6em", "8em")}
-      bgColor={"var(--bg-color)"}
-      py={responsive("", "3em", "4em")}
       borderRadius={"10px"}
-      id="courses"
+      bgColor={"var(--bg-color)"}
+      p={responsive("", "1em ", "2em")}
+      mx={responsive("", "8em", "10em")}
+      my={responsive("", "2em", "3em")}
     >
-      <Center>
-        <Stack
-          textAlign={"center"}
-          gap={responsive("", ".75em", "1em")}
-          maxW={"2xl"}
+      <Center mb={responsive("", "1em", "2em")}>
+        <Heading
+          fontSize={responsive("", "xl", "2xl")}
+          fontWeight={"500"}
+          color={"var(--secondary-color)"}
         >
-          <Heading
-            fontSize={responsive("", "xl", "2xl")}
-            fontWeight={"500"}
-            color={"var(--secondary-color)"}
-          >
-            Featured Courses
-          </Heading>
-          <Heading fontSize={responsive("", "3xl", "4xl")}>
-            Browse Our Popular Courses
-          </Heading>
-          <Text opacity={0.9} fontSize={responsive("", "sm", "md")}>
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Delectus,
-            minima! Lorem ipsum dolor sit amet.
-          </Text>
-        </Stack>
+          All Courses
+        </Heading>
       </Center>
+      <Breadcrumb
+        spacing="8px"
+        separator={<ChevronRightIcon color="gray.500" />}
+      >
+        <BreadcrumbItem>
+          <BreadcrumbLink
+            as={Link}
+            to="/"
+            onClick={() => setTargetScroll("")}
+            fontWeight={500}
+            opacity={0.9}
+          >
+            Home
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem>
+          <BreadcrumbLink
+            fontWeight={500}
+            opacity={0.9}
+            onClick={() => handleClick("courses")}
+          >
+            Courses
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+
+        <BreadcrumbItem>
+          <BreadcrumbLink
+            fontWeight={500}
+            opacity={0.9}
+            as={Link}
+            to={"/all-courses"}
+          >
+            All Courses
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+      </Breadcrumb>
       <Flex
         gap={responsive("", "1em", "2em")}
         justify={"center"}
         flexWrap={"wrap"}
         mt={responsive("", "3em", "4em")}
       >
-        {popularCourses.length > 0 ? (
-          popularCourses.map((course, index) => (
+        {courses.length > 0 ? (
+          courses.map((course, index) => (
             <ChakraLink
               as={Link}
               to={`/course/${course.slug}`}
@@ -208,33 +244,8 @@ const Courses = () => {
           </>
         )}
       </Flex>
-
-      <Center pt={"3em"}>
-        <ChakraLink
-          as={Link}
-          to="/all-courses"
-          fontSize={"md"}
-          color={"white"}
-          padding={".8em 1.5em"}
-          bgColor={"#FFD05A"}
-          border={"1px solid transparent"}
-          borderRadius={"30px"}
-          fontWeight={"500"}
-          transition={"all 0.5s ease"}
-          _hover={{
-            textDecoration: "none",
-            opacity: 1,
-            color: "black",
-            bgColor: "transparent",
-            border: "1px solid #FFD05A",
-            transition: "all 0.5s ease",
-          }}
-        >
-          Explore All Course
-        </ChakraLink>
-      </Center>
     </Box>
   );
 };
 
-export default Courses;
+export default AllCourses;

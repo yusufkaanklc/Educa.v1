@@ -4,14 +4,17 @@ import { DataProvider } from "./utils/contextApi";
 import "./styles/globals.css";
 import Routers from "./pages/Routers";
 import theme from "./utils/theme";
+import { BrowserRouter } from "react-router-dom";
 
 const App = () => {
   return (
-    <DataProvider>
-      <ChakraProvider theme={theme}>
-        <Routers />
-      </ChakraProvider>
-    </DataProvider>
+    <BrowserRouter>
+      <DataProvider>
+        <ChakraProvider theme={theme}>
+          <Routers />
+        </ChakraProvider>
+      </DataProvider>
+    </BrowserRouter>
   );
 };
 

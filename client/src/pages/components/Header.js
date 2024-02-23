@@ -64,10 +64,10 @@ const Header = () => {
 
   useEffect(() => {
     let lastScrollTop = 0;
-
+    let treshold = 100;
     const handleScroll = () => {
       const currentScrollTop = document.documentElement.scrollTop;
-      if (currentScrollTop > lastScrollTop) {
+      if (currentScrollTop > lastScrollTop && currentScrollTop > treshold) {
         setNavVisible(false);
       } else {
         setNavVisible(true);
@@ -82,7 +82,7 @@ const Header = () => {
       getAccount()
         .then((data) => {
           if (Cookies.get("isLoggedIn")) {
-            setAccount(data.user);
+            setAccount(data);
           }
         })
         .catch((error) => {
@@ -293,7 +293,7 @@ const Header = () => {
                       )}
                       <ChakraLink
                         as={Link}
-                        to=""
+                        to="/account"
                         fontSize={responsive("", "md", "lg")}
                         transition={"all 0.5s ease"}
                         _hover={{ textDecoration: "none" }}

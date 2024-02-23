@@ -14,11 +14,11 @@ import {
   InputGroup,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import dataContext from "../utils/contextApi";
 import { registerUser } from "../utils/data/UsersData";
 const Signup = () => {
-  const { isMobile, isLaptop } = useContext(dataContext);
+  const { isMobile, isLaptop, setTargetScroll } = useContext(dataContext);
   // Kullanıcı bilgilerini tutacak state
   const [register, setRegister] = useState({
     username: "",
@@ -91,6 +91,9 @@ const Signup = () => {
       });
   };
 
+  useEffect(() => {
+    setTargetScroll("home");
+  }, []);
   return (
     <Center h={"100vh"} bgPos={"center"} position={"relative"}>
       <Box position={"relative"} zIndex={2} w={"35%"}>

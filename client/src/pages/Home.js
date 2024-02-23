@@ -6,7 +6,7 @@ import {
   Box,
   Link as ChakraLink,
 } from "@chakra-ui/react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { StarIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import InstructorWoman from "./components/Instructor-woman";
 import InstructorMan from "./components/Instructor-man";
@@ -28,8 +28,7 @@ const Home = () => {
     }
   };
 
-  const { isMobile, isLaptop, setIsLogin, targetScroll } =
-    useContext(dataContext);
+  const { isMobile, isLaptop, targetScroll } = useContext(dataContext);
 
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
@@ -40,15 +39,6 @@ const Home = () => {
       return desktop;
     }
   };
-
-  useEffect(() => {
-    if (Cookies.get("isLoggedIn")) {
-      setIsLogin(true);
-    } else {
-      setIsLogin(false);
-    }
-    window.scrollTo(0, 0);
-  }, []);
 
   useEffect(() => {
     if (targetScroll !== "") {

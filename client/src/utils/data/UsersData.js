@@ -5,7 +5,11 @@ const getUsers = async () => {
     const { data } = await axios.get("/users/accounts");
     return data;
   } catch (error) {
-    throw new Error("Failed to fetch users");
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
   }
 };
 
@@ -38,11 +42,19 @@ const loginUser = async (input) => {
   try {
     await axios.post("/users/login", input);
   } catch (error) {
-    // eslint-disable-next-line no-throw-literal
-    throw {
-      message: error.response.data.message,
-      status: error.response.status,
-    };
+    if (error.response.data.message) {
+      // eslint-disable-next-line no-throw-literal
+      throw {
+        message: error.response.data.message,
+        status: error.response.status,
+      };
+    } else {
+      // eslint-disable-next-line no-throw-literal
+      throw {
+        message: error.response.data,
+        status: error.response.status,
+      };
+    }
   }
 };
 
