@@ -18,7 +18,8 @@ import { loginUser } from "../utils/data/UsersData";
 import Cookies from "js-cookie";
 
 const Login = () => {
-  const { isMobile, isLaptop, setTargetScroll } = useContext(dataContext);
+  const { isMobile, isLaptop, setTargetScroll, setErrors, errors } =
+    useContext(dataContext);
 
   const [passwordShow, setPasswordShow] = useState(false);
   const handleClick = () => setPasswordShow(!passwordShow);
@@ -56,13 +57,7 @@ const Login = () => {
         navigate("/");
       })
       .catch((error) => {
-        toast({
-          title: "Error",
-          description: error.message,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
+        setErrors([...errors, error]);
       });
   };
 

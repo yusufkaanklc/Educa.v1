@@ -69,15 +69,15 @@ const Signup = () => {
         navigate("/login");
       })
       .catch((error) => {
-        if (Array.isArray(error)) {
-          error.message.forEach((element) => {
-            toast({
-              title: "Error",
-              description: element,
-              status: "error",
-              duration: 5000,
-              isClosable: true,
-            });
+        console.log(error);
+        if (Array.isArray(error.message)) {
+          const errorMessage = error.message.map((error) => error).join(", ");
+          toast({
+            title: "Error",
+            description: `Error : ${errorMessage}`,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
           });
         } else {
           toast({

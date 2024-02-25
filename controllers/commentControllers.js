@@ -8,7 +8,6 @@ const addComment = async (req, res) => {
     const { courseSlug, lessonSlug } = req.params;
 
     const { text, point } = req.body;
-    console.log(typeof point);
     if (text === "") throw { code: 1, message: "Text cannot be empty" };
     const newComment = new Comment({
       text,

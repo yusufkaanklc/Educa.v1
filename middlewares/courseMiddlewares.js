@@ -12,7 +12,6 @@ const handleError = (res, error) => {
 const ownershipControl = async (req, res, next) => {
   try {
     const courseSlug = req.params.courseSlug;
-    console.log(req.session.userID);
     const ownership = await Course.findOne({
       slug: courseSlug,
       ownership: req.session.userID,

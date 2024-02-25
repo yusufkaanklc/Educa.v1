@@ -8,7 +8,7 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   Button,
-  Image,
+  Avatar,
   Center,
   Stack,
   Grid,
@@ -21,7 +21,6 @@ import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import dataContext from "../utils/contextApi";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getCourse } from "../utils/data/CoursesData";
-import { getAccount } from "../utils/data/UsersData";
 import { getLessons } from "../utils/data/LessonsData";
 import { useToast } from "@chakra-ui/react";
 
@@ -34,10 +33,10 @@ const Course = () => {
     setTargetScroll,
     lessons,
     setLessons,
+    account,
   } = useContext(dataContext);
   const [isLoading, setIsLoading] = useState(false);
   const [starList, setStarList] = useState([]);
-  const [account, setAccount] = useState(null);
   const [enroll, setEnroll] = useState(null);
 
   const { slug } = useParams();
@@ -87,7 +86,6 @@ const Course = () => {
     getCourse(slug)
       .then((data) => {
         setCourse(data);
-        setIsLoading(false);
       })
       .catch((error) => {
         toast({
@@ -98,12 +96,10 @@ const Course = () => {
           isClosable: true,
         });
       });
-    setIsLoading(true);
 
     getLessons(slug)
       .then((data) => {
         setLessons(data);
-        setIsLoading(false);
       })
       .catch((error) => {
         toast({
@@ -113,16 +109,6 @@ const Course = () => {
           duration: 5000,
           isClosable: true,
         });
-      });
-    setIsLoading(true);
-
-    getAccount()
-      .then((data) => {
-        setAccount(data);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.log(error);
       });
 
     window.scrollTo(0, 0);
@@ -137,14 +123,20 @@ const Course = () => {
   }, [course]);
 
   useEffect(() => {
-    if (course && account) {
-      course.enrollments.map((enrollment) => {
+    if (course && lessons.length > 0) {
+      setIsLoading(false);
+    }
+  }, [course, lessons]);
+
+  useEffect(() => {
+    if (course && course.enrollments && account && account._id) {
+      course.enrollments.forEach((enrollment) => {
         if (enrollment._id === account._id) {
           setEnroll(account._id);
         }
       });
     }
-  }, [account]);
+  }, [account, course]);
 
   return (
     <Box
@@ -241,8 +233,12 @@ const Course = () => {
       </Flex>
       {isLoading ? (
         <Grid
-          templateRows="repeat(20, 1em)"
-          templateColumns="repeat(2, 1fr)"
+          templateRows="repeat(auto-fill, minmax(1em, auto))"
+          templateColumns={responsive(
+            "1fr",
+            "repeat(2, 1fr)",
+            "repeat(2, 1fr)"
+          )}
           gap={10}
         >
           <GridItem
@@ -324,7 +320,7 @@ const Course = () => {
                   ></i>
                 )}
               </Flex>
-              <Text fontSize={responsive("", "sm", "md")} maxH={"5em"}>
+              <Text fontSize={responsive("", "sm", "md")}>
                 {course.description}
               </Text>
             </Stack>
@@ -358,39 +354,45 @@ const Course = () => {
             bgColor={"var(--bg-color)"}
             p={responsive("", "1em", "2em 1em")}
           >
-            <Flex gap={".5em"} align={"center"} fontWeight={600} mb={"1em"}>
-              <i
-                class="fi fi-rr-chalkboard-user"
-                style={{
-                  position: "relative",
-                  top: "2px",
-                }}
-              ></i>
-              <Text>Instructor</Text>
-            </Flex>
-            <Center
-              p={responsive("", "2px 5px", "3px 7px", "5px 10px")}
-              mb={".5em"}
-              border={"1px solid var(--secondary-color)"}
-              borderRadius={"5px"}
-              color={"var(--secondary-color)"}
-              w={"min-content"}
-              minW={"25%"}
-            >
-              {course.ownerName}
-            </Center>
             <Flex
-              w={"100%"}
-              gap={responsive("", "2em", "3em")}
               align={"center"}
+              justify={"space-between"}
+              mb={responsive("", "1em", "1em")}
             >
-              <Text fontSize={responsive("", "xs", "sm")} w={"63%"}>
-                {course.ownerIntroduce}
-              </Text>
-              <Box w={"30%"} overflow={"hidden"} borderRadius={"10px"}>
-                <Image src="/teacher1.jpg" />
+              <Box>
+                <Flex gap={".5em"} align={"center"} fontWeight={600} mb={"1em"}>
+                  <i
+                    class="fi fi-rr-chalkboard-user"
+                    style={{
+                      position: "relative",
+                      top: "2px",
+                    }}
+                  ></i>
+                  <Text>Instructor</Text>
+                </Flex>
+                <Center
+                  p={responsive("", "2px 5px", "3px 7px", "5px 10px")}
+                  mb={".5em"}
+                  border={"1px solid var(--secondary-color)"}
+                  borderRadius={"5px"}
+                  color={"var(--secondary-color)"}
+                  w={"max-content"}
+                >
+                  {course.ownerName}
+                </Center>
               </Box>
+              <Avatar
+                border={"2px dashed var(--secondary-color)"}
+                src={"http://localhost:5000/" + course.ownerImage}
+                bgColor={"var(--secondary-color)"}
+                name={course.ownerName}
+                size={responsive("", "lg", "xl")}
+              ></Avatar>
             </Flex>
+
+            <Text fontSize={responsive("", "xs", "sm")}>
+              {course.ownerIntroduce}
+            </Text>
           </GridItem>
 
           <GridItem
@@ -432,7 +434,12 @@ const Course = () => {
                       <ChakraLink
                         as={Link}
                         onClick={() => handleLessonClick()}
-                        to={enroll ? `/lesson/${lesson.slug}` : ""}
+                        to={
+                          enroll ||
+                          (account && account.username === course.ownerName)
+                            ? `/lesson/${lesson.slug}`
+                            : ""
+                        }
                         fontWeight={500}
                         opacity={0.9}
                       >
@@ -529,6 +536,27 @@ const Course = () => {
                   ></i>
                   <Text fontSize={responsive("", "sm", "md")}>
                     {course.lessons && course.lessons.length} Lessons
+                  </Text>
+                </Flex>
+                /
+                <Flex
+                  gap={".5em"}
+                  align={"center"}
+                  fontWeight={500}
+                  opacity={0.9}
+                >
+                  <i
+                    class="fi fi-rr-comment-alt"
+                    style={{
+                      position: "relative",
+                      top: "2px",
+                    }}
+                  ></i>
+                  <Text fontSize={responsive("", "sm", "md")}>
+                    {course.comments && course?.comments.length > 0
+                      ? course.comments.length
+                      : 0}{" "}
+                    Comments
                   </Text>
                 </Flex>
               </Flex>

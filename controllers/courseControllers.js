@@ -1,7 +1,6 @@
 import Category from "../models/Category.js";
 import Course from "../models/Course.js";
 import Lesson from "../models/Lesson.js";
-import Comment from "../models/Comment.js";
 import slugify from "slugify";
 import fs from "node:fs/promises";
 import errorHandling from "../middlewares/errorHandling.js";
@@ -65,6 +64,12 @@ const getAllCourses = async (req, res) => {
         },
       },
       {
+        $unwind: {
+          path: "$ownershipDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $lookup: {
           from: "lessons",
           localField: "lessons",
@@ -90,14 +95,24 @@ const getAllCourses = async (req, res) => {
           title: { $first: "$title" },
           description: { $first: "$description" },
           ownership: { $first: "$ownershipDetails.username" },
+          ownerImage: { $first: "$ownershipDetails.image" },
+          enrollments: { $addToSet: "$enrollments" },
+          comments: { $addToSet: "$commentDetails" },
           price: { $first: "$price" },
           lessons: { $addToSet: "$lessonDetails" },
           point: {
             $avg: {
               $cond: [
-                { $gt: [{ $size: "$lessonDetails.comments" }, 0] }, // Yorum varsa
-                "$commentDetails.point",
-                null, // Yorum yoksa null döndür
+                { $isArray: "$lessonDetails.comments" }, // LessonDetails.comments bir dizi mi kontrol ediyoruz.
+                {
+                  $cond: [
+                    // Eğer bir dizi ise içerisinde eleman var mı kontrol ediyoruz.
+                    { $gt: [{ $size: "$lessonDetails.comments" }, 0] }, // Yorum varsa
+                    "$commentDetails.point",
+                    null, // Yorum yoksa null döndür
+                  ],
+                },
+                null, // Dizi değilse null döndür
               ],
             },
           },
@@ -185,7 +200,9 @@ const getCourse = async (req, res) => {
           description: { $first: "$description" },
           ownerName: { $first: "$ownershipDetails.username" },
           ownerIntroduce: { $first: "$ownershipDetails.introduce" },
+          ownerImage: { $first: "$ownershipDetails.image" },
           enrollments: { $addToSet: "$enrollmentsDetails" },
+          comments: { $first: "$comments" },
           price: { $first: "$price" },
           lessons: { $addToSet: "$lessonDetails" },
           category: { $first: "$category" },
@@ -207,7 +224,9 @@ const getCourse = async (req, res) => {
           ownerName: 1,
           enrollments: 1,
           ownerIntroduce: 1,
+          ownerImage: 1,
           price: 1,
+          comments: 1,
           lessons: 1,
           category: 1,
           imageUrl: 1,
@@ -230,24 +249,10 @@ const getCourse = async (req, res) => {
 
     const course = await Course.aggregate(pipeline);
 
-    console.log(course);
-
     if (course.length === 0) {
       throw { code: 2, message: "Course not found" };
     }
     res.status(200).json(course[0]);
-  } catch (error) {
-    errorHandling(error, req, res);
-  }
-};
-
-const getOwnedCourses = async (req, res) => {
-  try {
-    const ownership = await Course.find({ ownership: req.session.userID });
-    if (!ownership || ownership.length === 0) {
-      throw { code: 2, message: "Courses not found" };
-    }
-    res.status(200).json(ownership);
   } catch (error) {
     errorHandling(error, req, res);
   }
@@ -324,7 +329,6 @@ export default {
   createCourse,
   getAllCourses,
   getCourse,
-  getOwnedCourses,
   updateCourse,
   deleteCourse,
 };

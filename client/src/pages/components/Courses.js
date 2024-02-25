@@ -9,17 +9,16 @@ import {
   CardBody,
   Skeleton,
   Image,
+  Avatar,
   Flex,
 } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { StarIcon } from "@chakra-ui/icons";
-import InstructorWomen from "./Instructor-woman";
 import { Link } from "react-router-dom";
 import dataContext from "../../utils/contextApi";
-import { getCourses } from "../../utils/data/CoursesData";
 
 const Courses = () => {
-  const { setCourses, courses, isMobile, isLaptop } = useContext(dataContext);
+  const { courses, isMobile, isLaptop } = useContext(dataContext);
   const [popularCourses, setPopularCourses] = useState([]);
 
   const responsive = (mobile, laptop, desktop) => {
@@ -31,16 +30,6 @@ const Courses = () => {
       return desktop;
     }
   };
-
-  useEffect(() => {
-    getCourses()
-      .then((data) => {
-        setCourses(data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
 
   useEffect(() => {
     setPopularCourses(courses.slice(0, 6));
@@ -134,7 +123,9 @@ const Courses = () => {
                         </Flex>
                       </Flex>
                       <Text fontSize={responsive("", "sm", "md")}>
-                        {course.description.substring(0, 100 - 3) + "..."}
+                        {course.description.length > 100
+                          ? course.description.substring(0, 100) + "..."
+                          : course.description}
                       </Text>
                     </Box>
                     <Box>
@@ -165,7 +156,10 @@ const Courses = () => {
                         justify={"space-between"}
                       >
                         <Flex align={"center"} gap={"0.5em"}>
-                          <InstructorWomen />
+                          <Avatar
+                            size={responsive("", "xs", "sm")}
+                            src={"http://localhost:5000/" + course.ownerImage}
+                          ></Avatar>
                           <Text
                             fontWeight={"600"}
                             maxW={responsive("", "70%", "80%")}

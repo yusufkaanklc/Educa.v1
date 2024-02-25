@@ -1,26 +1,32 @@
 import { access, constants, mkdir } from "node:fs/promises";
-import { join, extname } from "node:path";
+import { join } from "node:path";
+import sharp from "sharp";
 
 const uploadFile = async (file, fileType) => {
   const uploadDir = join("public", "uploads");
-  const ext = extname(file.name);
-  const uploadPath = join(uploadDir, `${fileType}_${Date.now()}${ext}`);
+  const fileName = file.name;
+  const uploadPath = join(
+    uploadDir,
+    `${fileType}_${fileName.split(".").slice(0, -1).join(".")}.webp`
+  );
 
   // Dosya yolu kontrol ediliyor, eğer yoksa oluşturuluyor
   try {
-    await access(uploadDir, constants.F_OK);
+    await access(uploadPath, constants.F_OK); // Burada uploadPath kontrol ediliyor
   } catch (err) {
-    // Dosya yolu zaten varsa ve oluşturulamazsa, bir hata döndür
+    // Dosya yoksa veya erişilemezse, oluşturuluyor
     if (err.code === "ENOENT") {
-      await mkdir(uploadDir, { recursive: true });
+      try {
+        await mkdir(uploadDir, { recursive: true });
+      } catch (err) {
+        throw new Error("Directory could not be created", err);
+      }
     } else {
-      throw new Error("Direction could not create", err);
+      throw new Error("File already exists or cannot be accessed", err);
     }
   }
 
-  console.log("uploadPath", uploadPath);
-  // Dosyayı taşı
-  await file.mv(uploadPath);
+  await sharp(file.data).webp().toFile(uploadPath);
 
   return uploadPath;
 };

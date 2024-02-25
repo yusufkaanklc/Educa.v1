@@ -9,21 +9,19 @@ import {
   Card,
   CardBody,
   Image,
-  useToast,
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
+  Avatar,
 } from "@chakra-ui/react";
 import { StarIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
 import dataContext from "../utils/contextApi";
-import InstructorWomen from "./components/Instructor-woman";
-import { getCourses } from "../utils/data/CoursesData";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 
 const AllCourses = () => {
-  const { isLaptop, isMobile, setTargetScroll } = useContext(dataContext);
-  const [courses, setCourses] = useState([]);
+  const { isLaptop, isMobile, setTargetScroll, courses } =
+    useContext(dataContext);
 
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
@@ -41,24 +39,6 @@ const AllCourses = () => {
     setTargetScroll(link);
     navigate("/");
   };
-
-  const toast = useToast();
-
-  useEffect(() => {
-    getCourses()
-      .then((data) => {
-        setCourses(data);
-      })
-      .catch((error) => {
-        toast({
-          title: "Error",
-          description: error.message,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      });
-  }, []);
 
   return (
     <Box
@@ -205,7 +185,10 @@ const AllCourses = () => {
                         justify={"space-between"}
                       >
                         <Flex align={"center"} gap={"0.5em"}>
-                          <InstructorWomen />
+                          <Avatar
+                            size={responsive("", "xs", "sm")}
+                            src={"http://localhost:5000/" + course.ownerImage}
+                          ></Avatar>
                           <Text
                             fontWeight={"600"}
                             maxW={responsive("", "70%", "80%")}

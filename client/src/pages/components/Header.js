@@ -10,7 +10,7 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import dataContext from "../../utils/contextApi";
-import { getAccount, logout } from "../../utils/data/UsersData";
+import { logout } from "../../utils/data/UsersData";
 import Cookies from "js-cookie";
 const Header = () => {
   const handleScroll = (id) => {
@@ -77,24 +77,6 @@ const Header = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-
-    if (Cookies.get("isLoggedIn")) {
-      getAccount()
-        .then((data) => {
-          if (Cookies.get("isLoggedIn")) {
-            setAccount(data);
-          }
-        })
-        .catch((error) => {
-          toast({
-            title: "Error",
-            description: error.message,
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-          });
-        });
-    }
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -255,8 +237,9 @@ const Header = () => {
                       bgColor={"white"}
                       p={".5em 1em"}
                       position={"absolute"}
-                      width={"160%"}
-                      right={0}
+                      left={"50%"}
+                      transform={"translateX(-50%)"}
+                      width={"max-content"}
                       borderRadius={"10px"}
                       mt={".5em"}
                     >
@@ -278,7 +261,7 @@ const Header = () => {
                         <>
                           <ChakraLink
                             as={Link}
-                            to=""
+                            to="/dashboard"
                             fontSize={responsive("", "md", "lg")}
                             transition={"all 0.5s ease"}
                             _hover={{ textDecoration: "none" }}

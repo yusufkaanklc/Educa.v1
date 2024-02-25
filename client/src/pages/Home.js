@@ -18,7 +18,6 @@ import Events from "./components/Events";
 import Footer from "./components/Footer";
 import { useContext, useEffect } from "react";
 import dataContext from "../utils/contextApi";
-import Cookies from "js-cookie";
 
 const Home = () => {
   const handleScroll = (id) => {

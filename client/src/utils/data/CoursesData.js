@@ -5,10 +5,10 @@ const getCourses = async () => {
     const { data } = await axios.get("/courses");
     return data;
   } catch (error) {
-    console.error("Error fetching courses:", error);
+    console.log(error);
     // eslint-disable-next-line no-throw-literal
     throw {
-      message: error.response.data,
+      message: error.response.data.message,
       status: error.response.status,
     };
   }
@@ -19,7 +19,6 @@ const getCourse = async (courseSlug) => {
     const { data } = await axios.get(`/courses/${courseSlug}`);
     return data;
   } catch (error) {
-    console.error("Error fetching courses:", error);
     // eslint-disable-next-line no-throw-literal
     throw {
       message: error.response.data,

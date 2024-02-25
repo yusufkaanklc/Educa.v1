@@ -7,8 +7,7 @@ import errorHandling from "../middlewares/errorHandling.js";
 
 const register = async (req, res) => {
   try {
-    const { username, password, email, avatar, role, profession, introduce } =
-      req.body;
+    const { username, password, email, role, profession, introduce } = req.body;
     if (!username || !password || !email || !role) {
       throw { code: 1, message: "All fields are required" };
     }
@@ -29,7 +28,6 @@ const register = async (req, res) => {
       username,
       password,
       email,
-      avatar,
       role: lowerCaseRole,
     };
 
@@ -134,7 +132,7 @@ const getAllUsers = async (req, res) => {
           _id: "$_id",
           username: { $first: "$username" }, // $first operatörüyle diğer alanları koruyoruz
           email: { $first: "$email" },
-          avatar: { $first: "$avatar" },
+          image: { $first: "$image" },
           role: { $first: "$role" },
           profession: { $first: "$profession" },
           point: {
@@ -178,20 +176,61 @@ const accountUpdate = (req, res) => {
 
 const accountUpdateFunc = async (userId, req, res) => {
   try {
-    const { username, password, email, avatar, role, profession } = req.body;
-    if (!username && !password && !email && !avatar && !role && !profession)
+    const { username, password, email, profession, introduce } = req.body;
+
+    // Gerekli alanların kontrolü
+    if (!username && !password && !email && !profession) {
       throw { code: 1, message: "No field to update" };
-    const userFindAndUpdate = await User.findByIdAndUpdate(userId, {
+    }
+
+    let cryptedPassword;
+
+    // Eğer şifre verilmişse, şifreleme ve karşılaştırma yap
+    if (password && password !== "") {
+      cryptedPassword = await bcrypt.hash(password, 10);
+    }
+
+    const user = await User.findById(userId);
+    const decryptedPassword = await bcrypt.compare(password, user.password);
+
+    if (decryptedPassword) {
+      throw { code: 6, message: " new password must be different" };
+    }
+
+    // Güncellenecek alanların objesi
+    const updatedFields = {
       username,
-      password,
       email,
-      avatar,
-      role,
       profession,
-    });
-    if (!userFindAndUpdate) throw { code: 2, message: "User not found" };
-    res.status(201).json({ "updated user": userFindAndUpdate });
+      introduce,
+    };
+
+    // Eğer şifre değiştirilmişse, güncellenecek alanlara şifreyi ekle
+    if (cryptedPassword && !decryptedPassword) {
+      updatedFields.password = cryptedPassword;
+    }
+
+    // Eğer yüklenmiş bir resim varsa, resmi güncellenecek alanlara ekle
+    if (req.uploadedImageUrl) {
+      updatedFields.image = req.uploadedImageUrl;
+    }
+
+    // Kullanıcıyı güncelle ve yeni veriyi döndür
+    const userFindAndUpdate = await User.findByIdAndUpdate(
+      userId,
+      updatedFields,
+      { new: true }
+    );
+
+    // Kullanıcı bulunamazsa hata fırlat
+    if (!userFindAndUpdate) {
+      throw { code: 2, message: "User not found" };
+    }
+
+    // Başarılı yanıtı gönder
+    res.status(201).json(userFindAndUpdate);
   } catch (error) {
+    // Hata yönetimini çağır
     errorHandling(error, req, res);
   }
 };

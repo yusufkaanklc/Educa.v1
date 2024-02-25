@@ -2,6 +2,7 @@ import express from "express";
 import userControllers from "../controllers/userControllers.js";
 import authMiddlewares from "../middlewares/authMiddlewares.js";
 import validationMiddlewares from "../middlewares/validationMiddlewares.js";
+import fileUploadMiddlewares from "../middlewares/fileUploadMiddlewares.js";
 const router = express.Router();
 
 // Kullanıcı kaydı için POST isteği
@@ -9,7 +10,7 @@ router
   .route("/register")
   .post(
     authMiddlewares.isLoggedOut,
-    validationMiddlewares.validateFormData,
+    validationMiddlewares.validateFunc("register"),
     userControllers.register
   );
 
@@ -29,7 +30,12 @@ router
 // Kullanıcı bilgilerini güncelleme
 router
   .route("/account")
-  .put(authMiddlewares.isLoggedIn, userControllers.accountUpdate);
+  .put(
+    authMiddlewares.isLoggedIn,
+    fileUploadMiddlewares(),
+    validationMiddlewares.validateFunc("updateAccount"),
+    userControllers.accountUpdate
+  );
 
 // Kullanıcıyı silme
 router

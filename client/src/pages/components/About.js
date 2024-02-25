@@ -1,17 +1,9 @@
 import { Box, Flex, Text, Stack, Heading, Center } from "@chakra-ui/react";
 import { useEffect, useContext, useState } from "react";
-import { getUsers } from "../../utils/data/UsersData";
 import dataContext from "../../utils/contextApi";
 const About = () => {
-  const {
-    users,
-    setUsers,
-    courses,
-    teachers,
-    setTeachers,
-    isMobile,
-    isLaptop,
-  } = useContext(dataContext);
+  const { users, courses, teachers, setTeachers, isMobile, isLaptop } =
+    useContext(dataContext);
   const [lessons, setLessons] = useState([]);
 
   const responsive = (mobile, laptop, desktop) => {
@@ -25,14 +17,6 @@ const About = () => {
   };
 
   useEffect(() => {
-    getUsers()
-      .then((data) => {
-        setUsers(data);
-      })
-      .catch((error) => console.log(error));
-  }, []);
-
-  useEffect(() => {
     let filteredTeachers = [];
     for (const user of users) {
       if (user.role === "teacher") filteredTeachers.push(user);
@@ -42,9 +26,11 @@ const About = () => {
 
   useEffect(() => {
     const lessonList = [];
-    for (const course of courses) {
-      for (const lesson of course.lessons) {
-        lessonList.push(lesson);
+    if (courses && courses.length > 0) {
+      for (const course of courses) {
+        for (const lesson of course.lessons) {
+          lessonList.push(lesson);
+        }
       }
     }
     setLessons(lessonList);

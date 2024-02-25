@@ -67,9 +67,12 @@ app.use(
 app.use("/users", userRouters);
 app.use("/courses", courseRouters);
 app.use("/categories", categoryRouters);
+
 app.get("/public/uploads/:file", (req, res) => {
-  console.log(req.params.file);
-  res.sendFile(resolve(__dirname, "public/uploads/", req.params.file));
+  const filePath = resolve(__dirname, "public", "uploads", req.params.file);
+  res.sendFile(filePath, {
+    maxAge: 24 * 60 * 60 * 1000 * 30,
+  });
 });
 
 app.listen(5000, () => {

@@ -18,13 +18,16 @@ const errorHandling = (error, req, res) => {
     case 5:
       statusCode = 404;
       break;
+    case 6:
+      statusCode = 500;
+      break;
     // Diğer hata durumlarını buraya ekleyebilirsiniz
     default:
       statusCode = 500;
       break;
   }
 
-  res.status(statusCode).json({ code: error.code, message });
+  res.status(statusCode).json(message);
 };
 
 export default errorHandling;

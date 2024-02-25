@@ -17,7 +17,6 @@ import dataContext from "../../utils/contextApi";
 const Instructors = () => {
   const { isMobile, isLaptop, teachers } = useContext(dataContext);
   const [instructors, setInstructors] = useState([]);
-
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
       return mobile;
@@ -67,14 +66,32 @@ const Instructors = () => {
         {instructors.length > 0 ? (
           instructors.map((instructor, index) => (
             <Card maxW={responsive("", "xs", "sm")} key={index}>
-              <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
-                <CardBody>
+              <CardBody>
+                <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
                   <Box pos={"relative"}>
-                    <Image
-                      src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-                      alt="Green double couch with wooden legs"
-                      borderRadius="lg"
-                    />
+                    {instructor.image ? (
+                      <Box overflow={"hidden"} borderRadius={"lg"}>
+                        <Image
+                          src={
+                            instructor.image
+                              ? instructor.image
+                              : "http://localhost:5000/" + instructor.image
+                          }
+                          w={responsive("", "18em", "22em")}
+                          h={responsive("", "10.3em", "14em")}
+                          aspectRatio={"1 / 1"}
+                          objectFit={"cover"}
+                          alt={instructor.name}
+                          borderRadius={0}
+                        />
+                      </Box>
+                    ) : (
+                      <Skeleton
+                        borderRadius={"lg"}
+                        h={responsive("", "11em", "14em")}
+                        w={responsive("", "18em", "22em")}
+                      ></Skeleton>
+                    )}
                     <Center
                       position={"absolute"}
                       bottom={"1em"}
@@ -131,8 +148,8 @@ const Instructors = () => {
                       ></i>
                     </Flex>
                   </Stack>
-                </CardBody>
-              </Flex>
+                </Flex>
+              </CardBody>
             </Card>
           ))
         ) : (

@@ -14,6 +14,7 @@ export const DataProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(
     Cookies.get("isLoggedIn") ? true : false
   );
+  const [errors, setErrors] = useState([]);
   const [targetScroll, setTargetScroll] = useState("");
   const [isMobile] = useMediaQuery("(max-width: 768px)");
   const [isLaptop] = useMediaQuery("(max-width: 1568px)");
@@ -38,6 +39,8 @@ export const DataProvider = ({ children }) => {
         setTargetScroll,
         isLogin,
         setIsLogin,
+        errors,
+        setErrors,
         isMobile,
         isLaptop,
         isDesktop,

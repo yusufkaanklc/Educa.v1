@@ -22,7 +22,7 @@ const userSchema = new Schema({
   profession: {
     type: String,
   },
-  avatar: {
+  image: {
     type: String,
   },
   introduce: {

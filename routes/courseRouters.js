@@ -22,11 +22,6 @@ router
 // Kursları getirmek için GET isteği
 router.route("/").get(courseControllers.getAllCourses);
 
-// Sahibi olduğu kursları getirmek için GET isteği
-router
-  .route("/owned-courses")
-  .get(authMiddlewares.isLoggedIn, userControllers.getOwnedCourses);
-
 // Kayıtlı olduğu kursları getirmek için GET isteği
 router
   .route("/enrolled-courses")
