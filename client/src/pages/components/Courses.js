@@ -162,7 +162,7 @@ const Courses = () => {
                           ></Avatar>
                           <Text
                             fontWeight={"600"}
-                            maxW={responsive("", "70%", "80%")}
+                            w={"max-content"}
                             fontSize={responsive("", "sm", "md")}
                           >
                             {course.ownership}

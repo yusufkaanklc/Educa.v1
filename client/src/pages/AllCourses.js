@@ -12,17 +12,30 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
+  InputGroup,
+  InputLeftElement,
+  Input,
+  Button,
   Avatar,
 } from "@chakra-ui/react";
-import { StarIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { StarIcon, ChevronRightIcon, Search2Icon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
 import dataContext from "../utils/contextApi";
-import { useContext } from "react";
+import { useContext, useState } from "react";
+import { getCourses } from "../utils/data/CoursesData";
 
 const AllCourses = () => {
-  const { isLaptop, isMobile, setTargetScroll, courses } =
-    useContext(dataContext);
+  const {
+    isLaptop,
+    isMobile,
+    setTargetScroll,
+    courses,
+    setCourses,
+    setErrors,
+    errors,
+  } = useContext(dataContext);
 
+  const [search, setSearch] = useState("");
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
       return mobile;
@@ -40,6 +53,18 @@ const AllCourses = () => {
     navigate("/");
   };
 
+  const handleSearchSubmit = () => {
+    if (search !== "") {
+      getCourses(search)
+        .then((data) => {
+          setCourses(data);
+        })
+        .catch((error) => {
+          setErrors([...errors, error]);
+        });
+    }
+  };
+
   return (
     <Box
       border={"2px dashed #cfcfcf"}
@@ -49,51 +74,80 @@ const AllCourses = () => {
       mx={responsive("", "8em", "10em")}
       my={responsive("", "2em", "3em")}
     >
-      <Center mb={responsive("", "1em ", "2em")}>
-        <Heading
-          fontSize={responsive("", "xl", "2xl")}
-          fontWeight={"500"}
-          color={"var(--secondary-color)"}
-        >
-          All Courses
-        </Heading>
-      </Center>
-      <Breadcrumb
-        spacing="8px"
-        separator={<ChevronRightIcon color="gray.500" />}
+      <Heading
+        fontSize={responsive("", "xl", "2xl")}
+        fontWeight={"500"}
+        color={"var(--secondary-color)"}
+        mb={responsive("", "1em", "2em")}
       >
-        <BreadcrumbItem>
-          <BreadcrumbLink
-            as={Link}
-            to="/"
-            onClick={() => setTargetScroll("")}
-            fontWeight={500}
-            opacity={0.9}
-          >
-            Home
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbItem>
-          <BreadcrumbLink
-            fontWeight={500}
-            opacity={0.9}
-            onClick={() => handleClick("courses")}
-          >
-            Courses
-          </BreadcrumbLink>
-        </BreadcrumbItem>
+        All Courses
+      </Heading>
+      <Flex align={"center"} justify={"space-between"}>
+        <Breadcrumb
+          spacing="8px"
+          separator={<ChevronRightIcon color="gray.500" />}
+        >
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              as={Link}
+              to="/"
+              onClick={() => setTargetScroll("")}
+              fontWeight={500}
+              opacity={0.9}
+            >
+              Home
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              fontWeight={500}
+              opacity={0.9}
+              onClick={() => handleClick("courses")}
+            >
+              Courses
+            </BreadcrumbLink>
+          </BreadcrumbItem>
 
-        <BreadcrumbItem>
-          <BreadcrumbLink
-            fontWeight={500}
-            opacity={0.9}
-            as={Link}
-            to={"/all-courses"}
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              fontWeight={500}
+              opacity={0.9}
+              as={Link}
+              to={"/all-courses"}
+            >
+              All Courses
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        </Breadcrumb>
+        <Flex w={"max-content"} align={"center"} gap={"1em"}>
+          <InputGroup>
+            <InputLeftElement pointerEvents="none">
+              <Search2Icon opacity={0.7} />
+            </InputLeftElement>
+            <Input
+              type="text"
+              value={search}
+              placeholder="Search Course"
+              _focus={{ border: "2px solid #cfcfcf", boxShadow: "none" }}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </InputGroup>
+          <Button
+            variant={"outline"}
+            border={"1px solid var(--secondary-color)"}
+            onClick={() => handleSearchSubmit()}
+            bgColor={"var(--secondary-color)"}
+            color={"white"}
+            _hover={{
+              bgColor: "var(--bg-color)",
+              color: "var(--secondary-color)",
+            }}
           >
-            All Courses
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-      </Breadcrumb>
+            Search
+          </Button>
+        </Flex>
+      </Flex>
+
       <Flex
         gap={responsive("", "1em", "2em")}
         justify={"center"}

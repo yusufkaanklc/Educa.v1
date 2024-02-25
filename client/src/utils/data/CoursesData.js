@@ -1,14 +1,17 @@
 import axios from "axios";
 
-const getCourses = async () => {
+const getCourses = async (titleQuery) => {
   try {
+    if (titleQuery && titleQuery !== "") {
+      const { data } = await axios.get(`/courses?title=${titleQuery}`);
+      return data;
+    }
     const { data } = await axios.get("/courses");
     return data;
   } catch (error) {
-    console.log(error);
     // eslint-disable-next-line no-throw-literal
     throw {
-      message: error.response.data.message,
+      message: error.response.data,
       status: error.response.status,
     };
   }

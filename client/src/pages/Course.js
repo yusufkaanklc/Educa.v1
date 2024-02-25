@@ -386,7 +386,7 @@ const Course = () => {
                 src={"http://localhost:5000/" + course.ownerImage}
                 bgColor={"var(--secondary-color)"}
                 name={course.ownerName}
-                size={responsive("", "lg", "xl")}
+                size={responsive("", "xl", "xl")}
               ></Avatar>
             </Flex>
 
@@ -536,27 +536,6 @@ const Course = () => {
                   ></i>
                   <Text fontSize={responsive("", "sm", "md")}>
                     {course.lessons && course.lessons.length} Lessons
-                  </Text>
-                </Flex>
-                /
-                <Flex
-                  gap={".5em"}
-                  align={"center"}
-                  fontWeight={500}
-                  opacity={0.9}
-                >
-                  <i
-                    class="fi fi-rr-comment-alt"
-                    style={{
-                      position: "relative",
-                      top: "2px",
-                    }}
-                  ></i>
-                  <Text fontSize={responsive("", "sm", "md")}>
-                    {course.comments && course?.comments.length > 0
-                      ? course.comments.length
-                      : 0}{" "}
-                    Comments
                   </Text>
                 </Flex>
               </Flex>
