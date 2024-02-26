@@ -22,6 +22,7 @@ const Routers = () => {
     setAccount,
     setErrors,
     errors,
+    setCategories,
   } = useContext(dataContext);
 
   const location = useLocation();
@@ -29,13 +30,23 @@ const Routers = () => {
   useEffect(() => {
     setIsLogin(Cookies.get("isLoggedIn") ? true : false);
 
-    getCourses()
-      .then((data) => {
-        setCourses(data);
-      })
-      .catch((error) => {
-        setErrors([...errors, error]);
+    getCourses().then((data) => {
+      const uniqueCategories = [];
+      const slugSet = new Set();
+
+      data.forEach((course) => {
+        if (!slugSet.has(course.categorySlug)) {
+          slugSet.add(course.categorySlug);
+          uniqueCategories.push({
+            title: course.categoryTitle,
+            slug: course.categorySlug,
+          });
+        }
       });
+
+      setCourses(data);
+      setCategories(uniqueCategories);
+    });
 
     getUsers()
       .then((data) => {

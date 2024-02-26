@@ -13,15 +13,15 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   InputGroup,
+  Button,
   InputLeftElement,
   Input,
-  Button,
   Avatar,
 } from "@chakra-ui/react";
 import { StarIcon, ChevronRightIcon, Search2Icon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
 import dataContext from "../utils/contextApi";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getCourses } from "../utils/data/CoursesData";
 
 const AllCourses = () => {
@@ -32,10 +32,12 @@ const AllCourses = () => {
     courses,
     setCourses,
     setErrors,
+    categories,
     errors,
   } = useContext(dataContext);
 
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
       return mobile;
@@ -53,17 +55,15 @@ const AllCourses = () => {
     navigate("/");
   };
 
-  const handleSearchSubmit = () => {
-    if (search !== "") {
-      getCourses(search)
-        .then((data) => {
-          setCourses(data);
-        })
-        .catch((error) => {
-          setErrors([...errors, error]);
-        });
-    }
-  };
+  useEffect(() => {
+    getCourses(search, category)
+      .then((data) => {
+        setCourses(data);
+      })
+      .catch((error) => {
+        setErrors([...errors, error]);
+      });
+  }, [category, search]);
 
   return (
     <Box
@@ -78,7 +78,7 @@ const AllCourses = () => {
         fontSize={responsive("", "xl", "2xl")}
         fontWeight={"500"}
         color={"var(--secondary-color)"}
-        mb={responsive("", "1em", "2em")}
+        mb={responsive("", "1em", "1em")}
       >
         All Courses
       </Heading>
@@ -132,19 +132,6 @@ const AllCourses = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </InputGroup>
-          <Button
-            variant={"outline"}
-            border={"1px solid var(--secondary-color)"}
-            onClick={() => handleSearchSubmit()}
-            bgColor={"var(--secondary-color)"}
-            color={"white"}
-            _hover={{
-              bgColor: "var(--bg-color)",
-              color: "var(--secondary-color)",
-            }}
-          >
-            Search
-          </Button>
         </Flex>
       </Flex>
 
@@ -245,7 +232,7 @@ const AllCourses = () => {
                           ></Avatar>
                           <Text
                             fontWeight={"600"}
-                            maxW={responsive("", "70%", "80%")}
+                            w={"max-content"}
                             fontSize={responsive("", "sm", "md")}
                           >
                             {course.ownership}
@@ -285,6 +272,49 @@ const AllCourses = () => {
           </>
         )}
       </Flex>
+      <Box
+        border={"2px dashed #cfcfcf"}
+        borderLeft={0}
+        borderRight={0}
+        borderBottom={0}
+        mx={responsive("", "5em", "7em")}
+        my={"3em"}
+      ></Box>
+      <Box mx={responsive("", "5em", "7em")}>
+        <Text
+          fontSize={responsive("", "sm", "md")}
+          fontWeight={600}
+          opacity={0.9}
+          mb={"1em"}
+        >
+          Categories
+        </Text>
+        <Flex mx={responsive("", "1em", "2m")} align={"center"} gap={"1em"}>
+          {categories.length > 0
+            ? categories.map((category, index) => (
+                <Button
+                  key={index}
+                  bgColor={"var(--secondary-color)"}
+                  w={"max-content"}
+                  color={"white"}
+                  _hover={{ color: "var(--secondary-color)", bgColor: "white" }}
+                  onClick={() => setCategory(category.slug)}
+                >
+                  {category.title}
+                </Button>
+              ))
+            : ""}
+          <Button
+            bgColor={"var(--secondary-color)"}
+            w={"max-content"}
+            color={"white"}
+            _hover={{ color: "var(--secondary-color)", bgColor: "white" }}
+            onClick={() => setCategory("all")}
+          >
+            All
+          </Button>
+        </Flex>
+      </Box>
     </Box>
   );
 };

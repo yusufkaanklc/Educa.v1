@@ -114,7 +114,11 @@ const Dashboard = () => {
             >
               Your Courses
             </Text>
-            <Box mt={responsive("", ".5em", ".5em")}>
+            <Flex
+              mt={responsive("", ".5em", ".5em")}
+              flexDir={"column"}
+              gap={"1em"}
+            >
               {ownedCourses && ownedCourses.length > 0
                 ? ownedCourses.map((course, index) => (
                     <Flex
@@ -175,7 +179,7 @@ const Dashboard = () => {
                         color={"white"}
                         border={"1px solid var(--accent-color)"}
                         _hover={{
-                          bgColor: "var(--bg-color)",
+                          bgColor: "white",
                           color: "var(--accent-color)",
                         }}
                       >
@@ -184,7 +188,7 @@ const Dashboard = () => {
                     </Flex>
                   ))
                 : ""}
-            </Box>
+            </Flex>
           </GridItem>
           <GridItem colSpan={1} rowSpan={2} bgColor={"var(--bg-color)"}>
             <Center

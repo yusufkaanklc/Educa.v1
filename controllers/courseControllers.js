@@ -90,6 +90,20 @@ const getAllCourses = async (req, res) => {
         $unwind: { path: "$commentDetails", preserveNullAndEmptyArrays: true },
       },
       {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "categoryDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$categoryDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $group: {
           _id: "$_id",
           title: { $first: "$title" },
@@ -121,7 +135,8 @@ const getAllCourses = async (req, res) => {
               $cond: [{ $ifNull: ["$commentDetails", false] }, 1, 0],
             },
           },
-          category: { $first: "$category" },
+          categoryTitle: { $first: "$categoryDetails.title" },
+          categorySlug: { $first: "$categoryDetails.slug" },
           imageUrl: { $first: "$imageUrl" },
           slug: { $first: "$slug" },
         },
