@@ -10,7 +10,6 @@ export const DataProvider = ({ children }) => {
   const [account, setAccount] = useState(null);
   const [teachers, setTeachers] = useState([]);
   const [course, setCourse] = useState({});
-  const [lessons, setLessons] = useState([]);
   const [isLogin, setIsLogin] = useState(
     Cookies.get("isLoggedIn") ? true : false
   );
@@ -36,8 +35,6 @@ export const DataProvider = ({ children }) => {
         setCourse,
         categories,
         setCategories,
-        lessons,
-        setLessons,
         targetScroll,
         setTargetScroll,
         isLogin,

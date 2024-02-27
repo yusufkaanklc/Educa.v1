@@ -95,7 +95,7 @@ const Routers = () => {
     <>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/course/:slug" element={<Course />} />
+        <Route path="/:page/course/:slug" element={<Course />} />
         <Route path="/all-courses" element={<AllCourses />} />
         <Route
           path="/login"

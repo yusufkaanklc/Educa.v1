@@ -18,11 +18,34 @@ import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import { useContext, useEffect, useState } from "react";
 import dataContext from "../utils/contextApi";
 import { Link } from "react-router-dom";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+} from "chart.js";
+import { Line } from "react-chartjs-2";
 
 const Dashboard = () => {
+  ChartJS.register(
+    ArcElement,
+    Tooltip,
+    Legend,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement
+  );
   const { isMobile, isLaptop, setTargetScroll, courses, account } =
     useContext(dataContext);
   const [ownedCourses, setOwnedCourses] = useState([]);
+  const [enrollments, setEnrollments] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [lessons, setLessons] = useState([]);
 
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
@@ -34,11 +57,56 @@ const Dashboard = () => {
     }
   };
 
+  const data = {
+    labels: ["Courses", "Lessons", "Enrollments", "Comments"],
+    datasets: [
+      {
+        label: "Count",
+        data: [
+          ownedCourses.length,
+          lessons.length,
+          enrollments.length,
+          comments.length,
+        ],
+        fill: false,
+        backgroundColor: "rgba(75,192,192,0.2)",
+        borderColor: "#47bb8e",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const options = {
+    scales: {
+      yAxes: [
+        {
+          ticks: {
+            beginAtZero: true,
+          },
+        },
+      ],
+    },
+    plugins: {
+      legend: {
+        display: false, // Label'i gizle
+      },
+    },
+  };
+
   useEffect(() => {
     setOwnedCourses(
       courses.filter((course) => course?.ownership === account?.username)
     );
   }, [courses]);
+
+  useEffect(() => {
+    setLessons(ownedCourses.flatMap((course) => course.lessons));
+    setEnrollments(ownedCourses.flatMap((course) => course.enrollments));
+  }, [ownedCourses]);
+
+  useEffect(() => {
+    setComments(lessons.flatMap((lesson) => lesson.comments));
+  }, [lessons]);
 
   return (
     <>
@@ -82,7 +150,7 @@ const Dashboard = () => {
             fontSize={responsive("", "2xl", "3xl")}
             color={"var(--secondary-color)"}
           >
-            Welcome Kaan
+            Welcome {account?.username}
           </Heading>
         </Box>
         <Grid
@@ -135,7 +203,12 @@ const Dashboard = () => {
                         <Text fontWeight={"500"}>{course.title}</Text>
                       </Flex>
 
-                      <Flex fontWeight={"500"} align={"center"} gap={"1em"}>
+                      <Flex
+                        fontWeight={"500"}
+                        align={"center"}
+                        gap={"1em"}
+                        fontSize={responsive("", "sm", "md")}
+                      >
                         <Flex gap={".5em"} align={"center"}>
                           <i
                             class="fi fi-rr-book-alt"
@@ -174,9 +247,12 @@ const Dashboard = () => {
                         </Flex>
                       </Flex>
                       <Button
+                        as={Link}
+                        to={`/dashboard/course/${course.slug}`}
                         variant={"outline"}
                         bgColor={"var(--accent-color)"}
                         color={"white"}
+                        fontSize={responsive("", "sm", "md")}
                         border={"1px solid var(--accent-color)"}
                         _hover={{
                           bgColor: "white",
@@ -190,7 +266,12 @@ const Dashboard = () => {
                 : ""}
             </Flex>
           </GridItem>
-          <GridItem colSpan={1} rowSpan={2} bgColor={"var(--bg-color)"}>
+          <GridItem
+            colSpan={1}
+            rowSpan={2}
+            bgColor={"var(--bg-color)"}
+            maxH={"4em"}
+          >
             <Center
               fontSize={responsive("", "md", "lg")}
               fontWeight={"500"}
@@ -215,7 +296,26 @@ const Dashboard = () => {
             bgColor={"var(--bg-color)"}
             borderRadius={"10px"}
             p={responsive("", "1em", "1em")}
-          ></GridItem>
+            maxH={responsive("", "15em", "18em")}
+            w={"100%"}
+          >
+            <Text
+              fontWeight={"500"}
+              fontSize={responsive("", "md", "lg")}
+              w={"max-content"}
+              mb={"1em"}
+            >
+              Instructor Summary
+            </Text>
+            <Box w={"100%"} h={"100%"}>
+              <Line
+                data={data}
+                options={options}
+                width={"200%"}
+                height={"95%"}
+              />
+            </Box>
+          </GridItem>
         </Grid>
       </Box>
     </>

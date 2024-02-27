@@ -77,7 +77,7 @@ const Courses = () => {
           popularCourses.map((course, index) => (
             <ChakraLink
               as={Link}
-              to={`/course/${course.slug}`}
+              to={`/courses/course/${course.slug}`}
               key={index}
               border={"2px solid transparent"}
               borderRadius={"10px"}

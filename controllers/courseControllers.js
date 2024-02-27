@@ -110,7 +110,7 @@ const getAllCourses = async (req, res) => {
           description: { $first: "$description" },
           ownership: { $first: "$ownershipDetails.username" },
           ownerImage: { $first: "$ownershipDetails.image" },
-          enrollments: { $addToSet: "$enrollments" },
+          enrollments: { $first: "$enrollments" },
           comments: { $addToSet: "$commentDetails" },
           price: { $first: "$price" },
           lessons: { $addToSet: "$lessonDetails" },
@@ -141,7 +141,7 @@ const getAllCourses = async (req, res) => {
           slug: { $first: "$slug" },
         },
       },
-      { $sort: { point: -1 } },
+      { $sort: { price: -1 } },
     ];
 
     const courses = await Course.aggregate(pipeline);

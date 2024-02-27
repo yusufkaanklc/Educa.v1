@@ -25,21 +25,14 @@ import { getLessons } from "../utils/data/LessonsData";
 import { useToast } from "@chakra-ui/react";
 
 const Course = () => {
-  const {
-    course,
-    setCourse,
-    isMobile,
-    isLaptop,
-    setTargetScroll,
-    lessons,
-    setLessons,
-    account,
-  } = useContext(dataContext);
+  const { course, setCourse, isMobile, isLaptop, setTargetScroll, account } =
+    useContext(dataContext);
   const [isLoading, setIsLoading] = useState(false);
   const [starList, setStarList] = useState([]);
   const [enroll, setEnroll] = useState(null);
+  const [lessons, setLessons] = useState([]);
 
-  const { slug } = useParams();
+  const { slug, page } = useParams();
   const toast = useToast();
 
   const responsive = (mobile, laptop, desktop) => {
@@ -175,16 +168,28 @@ const Course = () => {
                   Home
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  fontWeight={500}
-                  opacity={0.9}
-                  onClick={() => handleClick("courses")}
-                >
-                  Courses
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-
+              {page === "courses" ? (
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    fontWeight={500}
+                    opacity={0.9}
+                    onClick={() => handleClick("courses")}
+                  >
+                    Courses
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+              ) : (
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    fontWeight={500}
+                    opacity={0.9}
+                    as={Link}
+                    to={"/dashboard"}
+                  >
+                    Dashboard
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+              )}
               <BreadcrumbItem>
                 <BreadcrumbLink
                   fontWeight={500}
