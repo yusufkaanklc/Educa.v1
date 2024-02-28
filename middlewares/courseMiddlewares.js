@@ -54,10 +54,21 @@ const ownershipAndEnrollControl = async (req, res, next) => {
   }
 };
 
-const ownershipControlForCommentFunc = async (commentId, req, res, next) => {
+const ownershipControlForCommentFunc = async (
+  commentId,
+  courseSlug,
+  req,
+  res,
+  next
+) => {
   try {
     const comment = await Comment.findById(commentId);
-    if (comment.user.toString() !== req.session.userID.toString())
+    const course = await Course.findOne({ slug: courseSlug });
+
+    if (
+      comment.user.toString() !== req.session.userID.toString() &&
+      course.ownership.toString() !== req.session.userID.toString()
+    )
       throw new Error("Unauthorized");
     next();
   } catch (error) {
@@ -66,8 +77,8 @@ const ownershipControlForCommentFunc = async (commentId, req, res, next) => {
 };
 
 const ownershipControlForComment = (req, res, next) => {
-  const { commentId } = req.params;
-  ownershipControlForCommentFunc(commentId, req, res, next);
+  const { commentId, courseSlug } = req.params;
+  ownershipControlForCommentFunc(commentId, courseSlug, req, res, next);
 };
 
 const ownershipControlForReply = (req, res, next) => {

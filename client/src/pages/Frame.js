@@ -9,6 +9,7 @@ import { useContext, useEffect } from "react";
 import dataContext from "../utils/contextApi";
 import Cookies from "js-cookie";
 import Account from "./Account";
+import CourseCreate from "./CourseCreate";
 import { getCourses } from "../utils/data/CoursesData";
 import { getUsers, getAccount } from "../utils/data/UsersData";
 import { useToast } from "@chakra-ui/react";
@@ -78,8 +79,8 @@ const Routers = () => {
 
       // Tek bir toast çağrısıyla tüm hataları göster
       toast({
-        title: "Errors",
-        description: `Errors: ${errorMessage}`,
+        title: "Error",
+        description: `Error: ${errorMessage}`,
         errorMessage,
         status: "error",
         duration: 5000,
@@ -112,6 +113,10 @@ const Routers = () => {
         <Route
           path="/dashboard"
           element={isLogin ? <Dashboard /> : <Navigate to="/" replace />}
+        ></Route>
+        <Route
+          path="/dashboard/course/create"
+          element={isLogin ? <CourseCreate /> : <Navigate to="/" replace />}
         ></Route>
       </Routes>
     </>

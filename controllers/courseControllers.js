@@ -91,6 +91,20 @@ const getAllCourses = async (req, res) => {
       },
       {
         $lookup: {
+          from: "users",
+          localField: "commentDetails.user",
+          foreignField: "_id",
+          as: "commentUserDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$commentUserDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
           from: "categories",
           localField: "category",
           foreignField: "_id",
@@ -98,10 +112,7 @@ const getAllCourses = async (req, res) => {
         },
       },
       {
-        $unwind: {
-          path: "$categoryDetails",
-          preserveNullAndEmptyArrays: true,
-        },
+        $unwind: { path: "$categoryDetails", preserveNullAndEmptyArrays: true },
       },
       {
         $group: {
@@ -111,22 +122,43 @@ const getAllCourses = async (req, res) => {
           ownership: { $first: "$ownershipDetails.username" },
           ownerImage: { $first: "$ownershipDetails.image" },
           enrollments: { $first: "$enrollments" },
-          comments: { $addToSet: "$commentDetails" },
+          createdAt: { $first: "$createdAt" },
+          lesson: { $first: "$lesson" },
+          comments: {
+            $addToSet: {
+              $cond: [
+                {
+                  $gt: [
+                    { $size: { $ifNull: ["$lessonDetails.comments", []] } },
+                    0,
+                  ],
+                },
+                {
+                  $mergeObjects: [
+                    "$commentDetails",
+                    { user: "$commentUserDetails" },
+                    { lesson: "$lessonDetails" },
+                    { course: "$slug" },
+                  ],
+                },
+                null,
+              ],
+            },
+          },
           price: { $first: "$price" },
           lessons: { $addToSet: "$lessonDetails" },
           point: {
             $avg: {
               $cond: [
-                { $isArray: "$lessonDetails.comments" }, // LessonDetails.comments bir dizi mi kontrol ediyoruz.
+                { $isArray: "$lessonDetails.comments" },
                 {
                   $cond: [
-                    // Eğer bir dizi ise içerisinde eleman var mı kontrol ediyoruz.
-                    { $gt: [{ $size: "$lessonDetails.comments" }, 0] }, // Yorum varsa
+                    { $gt: [{ $size: "$lessonDetails.comments" }, 0] },
                     "$commentDetails.point",
-                    null, // Yorum yoksa null döndür
+                    null,
                   ],
                 },
-                null, // Dizi değilse null döndür
+                null,
               ],
             },
           },
@@ -141,7 +173,7 @@ const getAllCourses = async (req, res) => {
           slug: { $first: "$slug" },
         },
       },
-      { $sort: { price: -1 } },
+      { $sort: { createdAt: -1 } },
     ];
 
     const courses = await Course.aggregate(pipeline);

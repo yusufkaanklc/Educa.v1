@@ -15,6 +15,7 @@ export const DataProvider = ({ children }) => {
   );
   const [errors, setErrors] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [userPoint, setUserPoint] = useState("");
   const [targetScroll, setTargetScroll] = useState("");
   const [isMobile] = useMediaQuery("(max-width: 768px)");
   const [isLaptop] = useMediaQuery("(max-width: 1568px)");
@@ -36,6 +37,8 @@ export const DataProvider = ({ children }) => {
         categories,
         setCategories,
         targetScroll,
+        userPoint,
+        setUserPoint,
         setTargetScroll,
         isLogin,
         setIsLogin,

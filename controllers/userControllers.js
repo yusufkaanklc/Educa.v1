@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import Category from "../models/Category.js";
 import Comment from "../models/Comment.js";
+import { unlink } from "node:fs/promises";
 import bcrypt from "bcrypt";
 import Course from "../models/Course.js";
 import errorHandling from "../middlewares/errorHandling.js";
@@ -19,10 +20,10 @@ const register = async (req, res) => {
       throw { code: 4, message: "Profession is required" };
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw { code: 5, message: "User already exists" };
-    }
+    // const existingUser = await User.findOne({ email });
+    // if (existingUser) {
+    //   throw { code: 5, message: "User already exists" };
+    // }
 
     const userData = {
       username,
@@ -176,26 +177,22 @@ const accountUpdate = (req, res) => {
 
 const accountUpdateFunc = async (userId, req, res) => {
   try {
-    const { username, password, email, profession, introduce } = req.body;
+    const {
+      username,
+      password,
+      email,
+      profession,
+      introduce,
+      currentPassword,
+    } = req.body;
 
     // Gerekli alanların kontrolü
-    if (!username && !password && !email && !profession) {
+    if (!username && !password && !email && !profession && !currentPassword) {
       throw { code: 1, message: "No field to update" };
     }
 
     let cryptedPassword;
-
-    // Eğer şifre verilmişse, şifreleme ve karşılaştırma yap
-    if (password && password !== "") {
-      cryptedPassword = await bcrypt.hash(password, 10);
-    }
-
-    const user = await User.findById(userId);
-    const decryptedPassword = await bcrypt.compare(password, user.password);
-
-    if (decryptedPassword) {
-      throw { code: 6, message: " new password must be different" };
-    }
+    let currentPasswordDecrypted;
 
     // Güncellenecek alanların objesi
     const updatedFields = {
@@ -205,14 +202,46 @@ const accountUpdateFunc = async (userId, req, res) => {
       introduce,
     };
 
-    // Eğer şifre değiştirilmişse, güncellenecek alanlara şifreyi ekle
-    if (cryptedPassword && !decryptedPassword) {
+    const user = await User.findById(userId);
+
+    if (currentPassword && currentPassword !== "") {
+      currentPasswordDecrypted = await bcrypt.compare(
+        currentPassword,
+        user.password
+      );
+    }
+
+    if (!currentPasswordDecrypted && password && password !== "") {
+      throw { code: 2, message: "Invalid current password" };
+    }
+
+    // Eğer şifre verilmişse, şifreleme ve karşılaştırma yap
+    if (
+      password &&
+      password !== "" &&
+      currentPasswordDecrypted &&
+      currentPassword !== password
+    ) {
+      cryptedPassword = await bcrypt.hash(password, 10);
       updatedFields.password = cryptedPassword;
+    }
+    if (
+      password &&
+      password !== "" &&
+      currentPasswordDecrypted &&
+      currentPassword === password
+    ) {
+      throw { code: 6, message: " new password must be different" };
     }
 
     // Eğer yüklenmiş bir resim varsa, resmi güncellenecek alanlara ekle
     if (req.uploadedImageUrl) {
       updatedFields.image = req.uploadedImageUrl;
+
+      // Eski resmi sil
+      if (user.image && user.image !== updatedFields.image) {
+        await unlink(user.image);
+      }
     }
 
     // Kullanıcıyı güncelle ve yeni veriyi döndür

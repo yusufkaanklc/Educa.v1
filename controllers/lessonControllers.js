@@ -17,6 +17,7 @@ const createLesson = async (req, res) => {
       description,
     };
     if (req.uploadedVideoUrl) newLesson.videoUrl = req.uploadedVideoUrl;
+
     const newLessonCreate = new Lesson(newLesson);
 
     if (!newLessonCreate)

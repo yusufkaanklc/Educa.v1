@@ -21,7 +21,6 @@ const commentSchema = new Schema({
       ref: "comments",
     },
   ],
-
   createdAt: {
     type: Date,
     default: Date.now,

@@ -6,37 +6,42 @@ import Lesson from "../models/Lesson.js";
 const addComment = async (req, res) => {
   try {
     const { courseSlug, lessonSlug } = req.params;
-
     const { text, point } = req.body;
-    if (text === "") throw { code: 1, message: "Text cannot be empty" };
+
+    if (!text) {
+      throw { code: 1, message: "Text cannot be empty" };
+    }
+
+    const lesson = await Lesson.findOne({ slug: lessonSlug });
+    if (!lesson) {
+      throw { code: 2, message: "Lesson not found" };
+    }
+
     const newComment = new Comment({
       text,
       user: req.session.userID,
       point,
     });
-    if (!newComment) throw { code: 2, message: "Comment could not be created" };
     await newComment.save();
 
-    const lesson = await Lesson.findOneAndUpdate(
+    await Lesson.findOneAndUpdate(
       { slug: lessonSlug },
-      {
-        $push: { comments: newComment._id },
-      }
+      { $push: { comments: newComment._id } }
     );
 
-    if (!lesson) throw { code: 2, message: "Lesson could not be updated" };
+    const course = await Course.findOne({
+      slug: courseSlug,
+      lessons: lesson._id,
+    });
+    if (!course) {
+      throw { code: 3, message: "Course not found" };
+    }
 
-    const getCoursePoint = await Course.findOne({ slug: courseSlug });
-    const coursePoint = getCoursePoint.point;
-
-    const newCoursePoint = Math.ceil((coursePoint + point) / 2);
-
+    const newCoursePoint = Math.ceil((course.point + point) / 2);
     await Course.findOneAndUpdate(
       { slug: courseSlug },
       { point: newCoursePoint },
-      {
-        new: true,
-      }
+      { new: true }
     );
 
     res.status(200).json({ message: "Comment created successfully" });
@@ -99,7 +104,7 @@ const deleteComment = async (req, res) => {
     );
     if (!course) throw { code: 2, message: "Lesson could not be updated" };
 
-    // Yorumu bul ve sil
+    // Yorumu bul
     const comment = await Comment.findById(commentId);
     if (!comment) throw { code: 2, message: "Comment could not be found" };
 

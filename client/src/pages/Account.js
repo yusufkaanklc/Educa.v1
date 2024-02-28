@@ -33,6 +33,7 @@ const Account = () => {
     username: "",
     email: "",
     password: "",
+    currentPassword: "",
     profession: "",
     introduce: "",
     image: "",
@@ -99,6 +100,14 @@ const Account = () => {
     const { name, files } = e.target;
 
     setFormData({ ...formData, [name]: files[0] });
+
+    toast({
+      title: "Success",
+      description: "Your image has been uploaded!",
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
   };
 
   useEffect(() => {
@@ -114,7 +123,7 @@ const Account = () => {
     if (createdAt) {
       const date = new Date(createdAt);
       setFormattedDate(
-        `${date.getDate() + 1} / ${date.getMonth()} / ${date.getFullYear()}`
+        `${date.getDate()} / ${date.getMonth() + 1} / ${date.getFullYear()}`
       );
     }
 
@@ -125,6 +134,7 @@ const Account = () => {
       image: account?.image,
       introduce: account?.introduce,
       password: "",
+      currentPassword: "",
     });
   }, [account]);
 
@@ -304,15 +314,6 @@ const Account = () => {
                             />
                           </FormControl>
                         )}
-                        <Flex
-                          fontWeight={"500"}
-                          fontSize={responsive("", "xs", "sm")}
-                          gap={"1em"}
-                          mt={responsive("", ".5em", "1em")}
-                        >
-                          <Text>Joined on : </Text>
-                          <Text opacity={0.9}>{formattedDate}</Text>
-                        </Flex>
                       </>
                     ) : (
                       <>
@@ -365,42 +366,63 @@ const Account = () => {
                                 >
                                   {account?.profession}
                                 </Center>
-                                <Flex
-                                  fontWeight={"500"}
-                                  fontSize={responsive("", "xs", "sm")}
-                                  gap={"1em"}
-                                >
-                                  <Text>Joined on : </Text>
-                                  <Text opacity={0.9}>{formattedDate}</Text>
-                                </Flex>
                               </>
                             )}
                           </>
                         )}
                       </>
                     )}
+                    <Flex
+                      fontWeight={"500"}
+                      fontSize={responsive("", "xs", "sm")}
+                      gap={"1em"}
+                      mt={responsive("", ".5em", "1em")}
+                    >
+                      <Text>Joined on : </Text>
+                      <Text opacity={0.9}>{formattedDate}</Text>
+                    </Flex>
                   </Stack>
                 </Flex>
               </Box>
               <Box>
                 {isEditing && (
-                  <FormControl>
-                    <Input
-                      type={"text"}
-                      placeholder="Enter new password"
-                      name="password"
-                      variant={"flushed"}
-                      fontWeight={"600"}
-                      fontFamily={"Montserrat, sans-serif;"}
-                      fontSize={responsive("", "sm", "md")}
-                      onChange={(e) => handleChange(e)}
-                      _focus={{
-                        borderColor: "#cdcdcd",
-                        outline: 0,
-                        boxShadow: "none",
-                      }}
-                    />
-                  </FormControl>
+                  <>
+                    <FormControl>
+                      <Input
+                        type={"text"}
+                        placeholder="Enter current password"
+                        name="currentPassword"
+                        variant={"flushed"}
+                        fontWeight={"600"}
+                        fontFamily={"Montserrat, sans-serif;"}
+                        fontSize={responsive("", "sm", "md")}
+                        onChange={(e) => handleChange(e)}
+                        _focus={{
+                          borderColor: "#cdcdcd",
+                          outline: 0,
+                          boxShadow: "none",
+                        }}
+                      />
+                    </FormControl>
+                    <br />
+                    <FormControl>
+                      <Input
+                        type={"text"}
+                        placeholder="Enter new password"
+                        name="password"
+                        variant={"flushed"}
+                        fontWeight={"600"}
+                        fontFamily={"Montserrat, sans-serif;"}
+                        fontSize={responsive("", "sm", "md")}
+                        onChange={(e) => handleChange(e)}
+                        _focus={{
+                          borderColor: "#cdcdcd",
+                          outline: 0,
+                          boxShadow: "none",
+                        }}
+                      />
+                    </FormControl>
+                  </>
                 )}
               </Box>
               {account && account.role === "teacher" && (
@@ -466,6 +488,7 @@ const Account = () => {
                             introduce: account.introduce,
                             image: account.image,
                             password: "",
+                            currentPassword: "",
                           });
                         }}
                         bgColor={"var(--accent-color)"}
