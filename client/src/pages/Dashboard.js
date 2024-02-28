@@ -15,6 +15,7 @@ import {
   useToast,
   Image,
   Center,
+  Textarea,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import { useContext, useEffect, useState } from "react";
@@ -62,7 +63,7 @@ const Dashboard = () => {
   const [commentsEdit, setCommentsEdit] = useState(false);
   const [commentDeleteList, setCommentDeleteList] = useState([]);
   const [activeButtonIndices, setActiveButtonIndices] = useState([]);
-
+  const [commentTextList, setCommentTextList] = useState([]);
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
       return mobile;
@@ -146,6 +147,8 @@ const Dashboard = () => {
     });
   };
 
+  const handleCommentsSubmit = () => {};
+
   useEffect(() => {
     setOwnedCourses(
       courses.filter((course) => course?.ownership === account?.username)
@@ -175,7 +178,17 @@ const Dashboard = () => {
 
   useEffect(() => {
     setActiveButtonIndices(Array(comments.length).fill(false));
+
+    const updatedCommentTextList = comments.map((comment) => ({
+      commentId: comment?._id,
+      text: comment.text,
+    }));
+    setCommentTextList(updatedCommentTextList);
   }, [comments]);
+
+  useEffect(() => {
+    console.log(commentTextList);
+  }, [commentTextList]);
 
   useEffect(() => {
     const starLisst = [];
@@ -385,6 +398,7 @@ const Dashboard = () => {
               p={responsive("", "1em", "1em")}
               color={"white"}
               transition={"all .3s ease"}
+              style={{ fontSize: responsive("", "sm", "md") }}
             >
               Your Point &nbsp;
               {starList.map((star) => (
@@ -513,141 +527,167 @@ const Dashboard = () => {
             bgColor={"var(--bg-color)"}
             border={"2px dashed var(--secondary-color)"}
           >
-            <Flex align={"center"} justify={"space-between"} mr={"1em"}>
-              <Text fontWeight={"500"} fontSize={responsive("", "md", "lg")}>
-                Your Comments
-              </Text>
-              <ButtonGroup>
-                {commentsEdit && (
+            <form onSubmit={handleCommentsSubmit()}>
+              <Flex align={"center"} justify={"space-between"} mr={"1em"}>
+                <Text fontWeight={"500"} fontSize={responsive("", "md", "lg")}>
+                  Your Comments
+                </Text>
+                <ButtonGroup>
+                  {commentsEdit && (
+                    <Button
+                      variant={"outline"}
+                      onClick={() => {
+                        setCommentsEdit(!commentsEdit);
+                        commentsDeleteFunc();
+                      }}
+                      bgColor={"var(--secondary-color)"}
+                      type="submit"
+                      color={"white"}
+                      fontSize={responsive("", "sm", "md")}
+                      border={"1px solid var(--secondary-color)"}
+                      _hover={{
+                        bgColor: "white",
+                        color: "var(--secondary-color)",
+                      }}
+                    >
+                      Save
+                    </Button>
+                  )}
                   <Button
                     variant={"outline"}
                     onClick={() => {
                       setCommentsEdit(!commentsEdit);
-                      commentsDeleteFunc();
+                      setActiveButtonIndices(
+                        Array(comments.length).fill(false)
+                      );
+                      setCommentDeleteList([]);
                     }}
-                    bgColor={"var(--secondary-color)"}
+                    bgColor={"var(--accent-color)"}
                     color={"white"}
                     fontSize={responsive("", "sm", "md")}
-                    border={"1px solid var(--secondary-color)"}
+                    border={"1px solid var(--accent-color)"}
                     _hover={{
                       bgColor: "white",
-                      color: "var(--secondary-color)",
+                      color: "var(--accent-color)",
                     }}
                   >
-                    Save
+                    {commentsEdit ? "Reset" : "Edit"}
                   </Button>
-                )}
-                <Button
-                  variant={"outline"}
-                  onClick={() => {
-                    setCommentsEdit(!commentsEdit);
-                    setActiveButtonIndices(Array(comments.length).fill(false));
-                    setCommentDeleteList([]);
-                  }}
-                  bgColor={"var(--accent-color)"}
-                  color={"white"}
-                  fontSize={responsive("", "sm", "md")}
-                  border={"1px solid var(--accent-color)"}
-                  _hover={{
-                    bgColor: "white",
-                    color: "var(--accent-color)",
-                  }}
-                >
-                  {commentsEdit ? "Reset" : "Edit"}
-                </Button>
-              </ButtonGroup>
-            </Flex>
-            <Flex
-              pr={"1em"}
-              overflow={"auto"}
-              mt={responsive("", ".5em", ".5em")}
-              flexDir={"column"}
-              gap={"1em"}
-            >
-              {comments &&
-                comments.length > 0 &&
-                comments.map((comment, index) => (
-                  <Flex
-                    bgColor="white"
-                    p={responsive("", ".5em", "1em")}
-                    borderRadius="10px"
-                    justify="space-between"
-                    transition="all .3s ease"
-                    key={index}
-                    flexDir="column"
-                    gap="1em"
-                  >
-                    <Flex align="center" justify="space-between">
-                      <Flex gap=".5em" align="center">
-                        <Avatar
-                          src={`http://localhost:5000/${comment.user.image}`}
-                          bgColor="var(--secondary-color)"
-                          name={comment.user?.username}
-                          size={responsive("", "sm", "sm")}
-                        />
-                        <Text
-                          fontWeight="500"
-                          fontSize={responsive("", "sm", "md")}
-                          opacity={0.9}
+                </ButtonGroup>
+              </Flex>
+              <Flex
+                pr={"1em"}
+                overflow={"auto"}
+                mt={responsive("", ".5em", ".5em")}
+                flexDir={"column"}
+                gap={"1em"}
+              >
+                {comments &&
+                  comments.length > 0 &&
+                  comments.map(
+                    (comment, index) =>
+                      !commentDeleteList.includes(comment) && (
+                        <Flex
+                          bgColor="white"
+                          p={responsive("", ".5em", "1em")}
+                          borderRadius="10px"
+                          justify="space-between"
+                          transition="all .3s ease"
+                          key={index}
+                          flexDir="column"
+                          gap="1em"
                         >
-                          {comment.user?.username}
-                        </Text>
-                      </Flex>
-                      {commentsEdit && (
-                        <Button
-                          variant="outline"
-                          p=".5em"
-                          minH="max-content"
-                          minW="max-content"
-                          onClick={() =>
-                            handleCommentButtonClick(index, comment)
-                          }
-                          fontSize={responsive("", "sm", "md")}
-                          _hover={{
-                            bgColor: activeButtonIndices[index]
-                              ? "var(--accent-color)"
-                              : "unset",
-                          }}
-                          bgColor={
-                            activeButtonIndices[index]
-                              ? "var(--accent-color)"
-                              : "unset"
-                          }
-                        >
-                          <i
-                            className="fi fi-rr-trash"
-                            style={{ position: "relative", top: "2px" }}
-                          />
-                        </Button>
-                      )}
-                    </Flex>
+                          <Flex align="center" justify="space-between">
+                            <Flex gap=".5em" align="center">
+                              <Avatar
+                                src={`http://localhost:5000/${comment.user.image}`}
+                                bgColor="var(--secondary-color)"
+                                name={comment.user?.username}
+                                size={responsive("", "sm", "sm")}
+                              />
+                              <Text
+                                fontWeight="500"
+                                fontSize={responsive("", "sm", "md")}
+                                opacity={0.9}
+                              >
+                                {comment.user?.username}
+                              </Text>
+                            </Flex>
+                            {commentsEdit && (
+                              <Button
+                                variant="outline"
+                                p=".5em"
+                                minH="max-content"
+                                minW="max-content"
+                                onClick={() =>
+                                  handleCommentButtonClick(index, comment)
+                                }
+                                fontSize={responsive("", "sm", "md")}
+                                _hover={{
+                                  bgColor: activeButtonIndices[index]
+                                    ? "var(--accent-color)"
+                                    : "unset",
+                                }}
+                                bgColor={
+                                  activeButtonIndices[index]
+                                    ? "var(--accent-color)"
+                                    : "unset"
+                                }
+                              >
+                                <i
+                                  className="fi fi-rr-trash"
+                                  style={{ position: "relative", top: "2px" }}
+                                />
+                              </Button>
+                            )}
+                          </Flex>
 
-                    <Text
-                      p=".5em 1em"
-                      border="2px dashed #cfcfcf"
-                      borderRadius="10px"
-                    >
-                      {comment.text}
-                    </Text>
-                    <Flex align="center" justify="space-between">
-                      <Text
-                        fontWeight="500"
-                        fontSize={responsive("", "sm", "md")}
-                        opacity={0.9}
-                      >
-                        {comment.lesson?.title}
-                      </Text>
-                      <Text
-                        fontWeight="500"
-                        opacity={0.9}
-                        fontSize={responsive("", "sm", "md")}
-                      >
-                        {getDate(comment.createdAt)}
-                      </Text>
-                    </Flex>
-                  </Flex>
-                ))}
-            </Flex>
+                          {commentsEdit ? (
+                            commentTextList.map((comment) => (
+                              <Textarea
+                                key={comment._id}
+                                value={comment.text}
+                                onChange={(e) =>
+                                  setCommentTextList([
+                                    ...commentTextList,
+                                    {
+                                      commentId: comment?._id,
+                                      text: e.target.value,
+                                    },
+                                  ])
+                                }
+                              ></Textarea>
+                            ))
+                          ) : (
+                            <Text
+                              p=".5em 1em"
+                              border="2px dashed #cfcfcf"
+                              borderRadius="10px"
+                            >
+                              {comment.text}
+                            </Text>
+                          )}
+                          <Flex align="center" justify="space-between">
+                            <Text
+                              fontWeight="500"
+                              fontSize={responsive("", "sm", "md")}
+                              opacity={0.9}
+                            >
+                              {comment.lesson?.title}
+                            </Text>
+                            <Text
+                              fontWeight="500"
+                              opacity={0.9}
+                              fontSize={responsive("", "sm", "md")}
+                            >
+                              {getDate(comment.createdAt)}
+                            </Text>
+                          </Flex>
+                        </Flex>
+                      )
+                  )}
+              </Flex>
+            </form>
           </GridItem>
         </Grid>
       </Box>
