@@ -115,7 +115,7 @@ const Routers = () => {
           element={isLogin ? <Dashboard /> : <Navigate to="/" replace />}
         ></Route>
         <Route
-          path="/dashboard/course/create"
+          path="/create-course"
           element={isLogin ? <CourseCreate /> : <Navigate to="/" replace />}
         ></Route>
       </Routes>
