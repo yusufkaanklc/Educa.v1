@@ -29,4 +29,25 @@ const deleteComment = async (courseSlug, lessonSlug, commentId) => {
   }
 };
 
-export { getComments, deleteComment };
+const updateComment = async (
+  courseSlug,
+  lessonSlug,
+  commentId,
+  commentText
+) => {
+  try {
+    const { data } = await axios.put(
+      `/courses/${courseSlug}/lessons/${lessonSlug}/comments/${commentId}`,
+      commentText
+    );
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data.message,
+      status: error.response.status,
+    };
+  }
+};
+
+export { getComments, deleteComment, updateComment };

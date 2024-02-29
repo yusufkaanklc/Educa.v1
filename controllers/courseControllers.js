@@ -154,7 +154,7 @@ const getAllCourses = async (req, res) => {
                 {
                   $cond: [
                     { $gt: [{ $size: "$lessonDetails.comments" }, 0] },
-                    "$commentDetails.point",
+                    { $trunc: { $avg: "$commentDetails.point" } },
                     null,
                   ],
                 },
@@ -180,9 +180,11 @@ const getAllCourses = async (req, res) => {
 
     for (const course of courses) {
       // Burada her bir belgeyi güncellemek için MongoDB sorgusu yapın
+
       await Course.updateOne(
         { _id: course._id },
-        { $set: { point: course.point } }
+        { $set: { point: course.point } },
+        { new: true }
       );
     }
 

@@ -76,16 +76,17 @@ const updateComment = async (req, res) => {
     const { commentId } = req.params;
     const { text, point } = req.body;
     if (text === "") throw { code: 1, message: "Text cannot be empty" };
-    const commment = await Comment.findByIdAndUpdate(
-      commentId,
-      { text, point },
-      {
-        new: true,
-      }
-    );
-    if (!commment) throw { code: 2, message: "Comment could not be updated" };
-
-    res.status(200).json({ message: "Comment updated successfully" });
+    const updateFields = {
+      text: text,
+    };
+    if (point) {
+      updateFields.point = point;
+    }
+    const comment = await Comment.findByIdAndUpdate(commentId, updateFields, {
+      new: true,
+    });
+    if (!comment) throw { code: 2, message: "Comment could not be updated" };
+    res.status(200).json(comment);
   } catch (error) {
     errorHandling(error, req, res);
   }

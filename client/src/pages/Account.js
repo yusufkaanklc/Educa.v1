@@ -438,6 +438,7 @@ const Account = () => {
                         border={"2px dashed var(--secondary-color)"}
                         _focus={{
                           borderColor: "var(--secondary-color)",
+                          boxShadow: "none",
                         }}
                       />
                     </FormControl>
@@ -451,6 +452,7 @@ const Account = () => {
                       border={"2px dashed var(--secondary-color)"}
                       _focus={{
                         borderColor: "var(--secondary-color)",
+                        boxShadow: "none",
                       }}
                     />
                   )}
