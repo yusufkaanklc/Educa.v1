@@ -649,7 +649,11 @@ const Course = () => {
                       fontWeight={500}
                       fontSize={responsive("", "sm", "md")}
                     >
-                      {lesson.duration ? lesson.duration + "min" : "0min"}
+                      {lesson.duration
+                        ? lesson.duration < 60
+                          ? lesson.duration + " sec"
+                          : Math.round(lesson.duration / 60) + " min"
+                        : "0 min"}
                     </Text>
                   </Flex>
                 ))}

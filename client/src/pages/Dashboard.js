@@ -562,7 +562,11 @@ const Dashboard = () => {
                           class="fi fi-rr-clock-three"
                           style={{ position: "relative", top: "2px" }}
                         ></i>
-                        <Text>{lesson.duration} min</Text>
+                        <Text>
+                          {lesson.duration < 60
+                            ? lesson.duration + " sec"
+                            : Math.round(lesson.duration / 60) + " min"}
+                        </Text>
                       </Flex>
                     </Flex>
                     <Button
