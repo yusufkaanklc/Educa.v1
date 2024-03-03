@@ -5,11 +5,14 @@ import sharp from "sharp";
 const uploadFile = async (file, fileType) => {
   const uploadDir = join("public", "uploads");
   const fileName = file.name;
-  const uploadPath = join(
-    uploadDir,
-    `${fileType}_${fileName.split(".").slice(0, -1).join(".")}.webp`
-  );
-
+  console.log(file.name);
+  let uploadPath;
+  fileType === "image"
+    ? (uploadPath = join(
+        uploadDir,
+        `${fileType}_${fileName.split(".").slice(0, -1).join(".")}.webp`
+      ))
+    : (uploadPath = join(uploadDir, `${fileType}_${fileName}`));
   // Dosya yolu kontrol ediliyor, eğer yoksa oluşturuluyor
   try {
     await access(uploadPath, constants.F_OK); // Burada uploadPath kontrol ediliyor
@@ -26,7 +29,9 @@ const uploadFile = async (file, fileType) => {
     }
   }
 
-  await sharp(file.data).webp().toFile(uploadPath);
+  fileType === "image"
+    ? await sharp(file.data).webp().toFile(uploadPath)
+    : file.mv(uploadPath);
 
   return uploadPath;
 };
@@ -55,6 +60,7 @@ const fileUpload = () => {
 
       next();
     } catch (error) {
+      console.log(error);
       res.status(500).json({ message: error.message });
     }
   };

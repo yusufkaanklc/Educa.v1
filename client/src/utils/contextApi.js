@@ -16,7 +16,27 @@ export const DataProvider = ({ children }) => {
   const [errors, setErrors] = useState([]);
   const [categories, setCategories] = useState([]);
   const [userPoint, setUserPoint] = useState("");
+  const [courseCreateData, setCourseCreateData] = useState({
+    title: "",
+    description: "",
+    image: "",
+    category: "",
+    price: "",
+  });
+  const [lessonCreateData, setLessonCreateData] = useState({
+    title: "",
+    description: "",
+    video: "",
+    notes: "",
+  });
+  const [courseUpdateData, setCourseUpdateData] = useState({
+    title: "",
+    description: "",
+    price: "",
+  });
+  const [searchQuery, setSearchQuery] = useState("");
   const [targetScroll, setTargetScroll] = useState("");
+  const [createdLessonsList, setCreatedLessonsList] = useState([]);
   const [isMobile] = useMediaQuery("(max-width: 768px)");
   const [isLaptop] = useMediaQuery("(max-width: 1568px)");
   const [isDesktop] = useMediaQuery("(max-width: 1920px)");
@@ -29,7 +49,11 @@ export const DataProvider = ({ children }) => {
         users,
         setUsers,
         teachers,
+        searchQuery,
+        setSearchQuery,
         setTeachers,
+        lessonCreateData,
+        setLessonCreateData,
         account,
         setAccount,
         course,
@@ -38,10 +62,16 @@ export const DataProvider = ({ children }) => {
         setCategories,
         targetScroll,
         userPoint,
+        courseCreateData,
+        setCourseCreateData,
+        setCreatedLessonsList,
+        createdLessonsList,
         setUserPoint,
         setTargetScroll,
         isLogin,
         setIsLogin,
+        courseUpdateData,
+        setCourseUpdateData,
         errors,
         setErrors,
         isMobile,

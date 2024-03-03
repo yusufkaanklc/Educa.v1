@@ -18,6 +18,9 @@ const lessonSchema = new Schema({
   duration: {
     type: Number,
   },
+  Notes: {
+    type: String,
+  },
   comments: [
     {
       type: Schema.Types.ObjectId,

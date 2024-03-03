@@ -8,7 +8,6 @@ import errorHandling from "../middlewares/errorHandling.js";
 const createCourse = async (req, res) => {
   try {
     const { title, description, category, price, point } = req.body;
-
     // Gelen verilerin boş olup olmadığını kontrol edin
     if (!title || !description || !price)
       throw { code: 1, message: "Fields cannot be empty" };
@@ -29,8 +28,9 @@ const createCourse = async (req, res) => {
     await newCourse.save();
 
     // Başarılı yanıtı döndürün
-    res.status(201).json({ message: "Created course", course: newCourse });
+    res.status(201).json(newCourse);
   } catch (error) {
+    console.log(error);
     // Hata durumunda uygun bir hata yanıtı döndürün
     errorHandling(error, req, res);
   }
@@ -374,10 +374,38 @@ const deleteCourse = async (req, res) => {
   }
 };
 
+const getAllCategories = async (req, res) => {
+  try {
+    const categoryName = req.query.categoryName;
+    let filter = {};
+
+    // Eğer categoryName parametresi varsa ve boş değilse filtreye ekle
+    if (categoryName && categoryName.trim() !== "") {
+      const regexPattern = new RegExp(categoryName, "i");
+      filter.title = regexPattern;
+    }
+
+    // Kategori adı parametresi boşsa, tüm kategorileri getirmek için filtre oluşturulmaz
+    const categories = await Category.find(filter);
+
+    // Kategoriler bulunamadığında hata fırlat
+    if (!categories || categories.length === 0) {
+      throw { code: 2, message: "Category not found" };
+    }
+
+    // Kategorileri başarıyla bulduğunda 200 OK yanıtı gönder
+    res.status(200).json(categories);
+  } catch (error) {
+    // Hata durumunda 500 hatası gönder
+    errorHandling(error, req, res);
+  }
+};
+
 export default {
   createCourse,
   getAllCourses,
   getCourse,
   updateCourse,
   deleteCourse,
+  getAllCategories,
 };

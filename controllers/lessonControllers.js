@@ -5,7 +5,7 @@ import errorHandling from "../middlewares/errorHandling.js";
 
 const createLesson = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, notes, duration } = req.body;
     const { courseSlug } = req.params;
 
     if (title === "" || description === "" || courseSlug === "") {
@@ -16,7 +16,10 @@ const createLesson = async (req, res) => {
       title,
       description,
     };
+
     if (req.uploadedVideoUrl) newLesson.videoUrl = req.uploadedVideoUrl;
+    if (notes) newLesson.notes = notes;
+    if (duration) newLesson.duration = duration;
 
     const newLessonCreate = new Lesson(newLesson);
 
@@ -32,7 +35,7 @@ const createLesson = async (req, res) => {
 
     if (!course) throw { code: 3, message: "Lesson could not add" };
 
-    res.status(200).json({ "created lesson": newLessonCreate });
+    res.status(200).json(newLessonCreate);
   } catch (error) {
     errorHandling(error, req, res);
   }
@@ -87,14 +90,14 @@ const getLesson = async (req, res) => {
 const updateLesson = async (req, res) => {
   try {
     const { courseSlug, lessonSlug } = req.params;
-    const { title, description, isFinished } = req.body;
+    const { title, description, isFinished, notes } = req.body;
 
     const [course, lesson] = await Promise.all([
       Course.findOne({ slug: courseSlug }),
       Lesson.findOne({ slug: lessonSlug }),
     ]);
 
-    if (!title && !description && !isFinished)
+    if (!title && !description && !notes)
       throw { code: 1, message: "All fields required" };
 
     if (!course || !lesson || !course.lessons.includes(lesson?._id))
@@ -114,9 +117,9 @@ const updateLesson = async (req, res) => {
       {
         title,
         description,
+        notes: notes ? notes : "",
         newVideoUrl,
         isFinished,
-
         slug: title !== "" ? newSlug : lessonSlug,
       },
       { new: true }

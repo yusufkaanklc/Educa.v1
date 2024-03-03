@@ -91,11 +91,18 @@ const Courses = () => {
                 <CardBody h={"100%"}>
                   <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
                     <Box>
-                      <Image
-                        src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-                        alt="Green double couch with wooden legs"
-                        borderRadius="lg"
-                      />
+                      {course.imageUrl ? (
+                        <Image
+                          src={"http://localhost:5000/" + course.imageUrl}
+                          borderRadius="lg"
+                        />
+                      ) : (
+                        <Skeleton
+                          h={responsive("", "9em", "11em")}
+                          w={responsive("", "2xs", "xs")}
+                          borderRadius={"10px"}
+                        />
+                      )}
                       <Flex
                         my={"1em"}
                         justify={"space-between"}

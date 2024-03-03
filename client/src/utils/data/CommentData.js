@@ -35,6 +35,7 @@ const updateComment = async (
   commentId,
   commentText
 ) => {
+  console.log(courseSlug, lessonSlug, commentId, commentText);
   try {
     const { data } = await axios.put(
       `/courses/${courseSlug}/lessons/${lessonSlug}/comments/${commentId}`,

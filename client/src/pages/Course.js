@@ -13,24 +13,38 @@ import {
   Stack,
   Grid,
   Link as ChakraLink,
+  ButtonGroup,
   GridItem,
   Progress,
   Skeleton,
+  Input,
+  FormControl,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import dataContext from "../utils/contextApi";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { getCourse } from "../utils/data/CoursesData";
+import { getCourse, updateCourse } from "../utils/data/CoursesData";
 import { getLessons } from "../utils/data/LessonsData";
 import { useToast } from "@chakra-ui/react";
 
 const Course = () => {
-  const { course, setCourse, isMobile, isLaptop, setTargetScroll, account } =
-    useContext(dataContext);
+  const {
+    course,
+    setCourse,
+    isMobile,
+    isLaptop,
+    setTargetScroll,
+    account,
+    courseUpdateData,
+    setCourseUpdateData,
+    errors,
+    setErrors,
+  } = useContext(dataContext);
   const [isLoading, setIsLoading] = useState(false);
   const [starList, setStarList] = useState([]);
   const [enroll, setEnroll] = useState(null);
   const [lessons, setLessons] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
 
   const { slug, page } = useParams();
   const toast = useToast();
@@ -51,6 +65,7 @@ const Course = () => {
     setTargetScroll(link);
     navigate("/");
   };
+
   const handleLessonClick = () => {
     if (!account) {
       toast({
@@ -73,21 +88,39 @@ const Course = () => {
     }
   };
 
+  const handleCourseChange = (e) => {
+    const { name, value } = e.target;
+    setCourseUpdateData({ ...courseUpdateData, [name]: value });
+  };
+
+  const handleCourseUpdateSubmit = () => {
+    const courseUpdateFormData = new FormData();
+    courseUpdateFormData.append("title", courseUpdateData.title);
+    courseUpdateFormData.append("description", courseUpdateData.description);
+    courseUpdateFormData.append("price", courseUpdateData.price);
+    updateCourse(slug, courseUpdateFormData)
+      .then(() => {
+        toast({
+          title: "Success",
+          description: "Course updated successfully",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        setIsEditing(false);
+        handleClick("courses");
+      })
+      .catch((error) => setErrors([...errors, error]));
+  };
+
   useEffect(() => {
     setIsLoading(true);
-
     getCourse(slug)
       .then((data) => {
         setCourse(data);
       })
       .catch((error) => {
-        toast({
-          title: "Error",
-          description: error.message,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
+        setErrors([...errors, error]);
       });
 
     getLessons(slug)
@@ -95,13 +128,7 @@ const Course = () => {
         setLessons(data);
       })
       .catch((error) => {
-        toast({
-          title: "Error",
-          description: error.message,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
+        setErrors([...errors, error]);
       });
 
     window.scrollTo(0, 0);
@@ -113,6 +140,11 @@ const Course = () => {
       newStarList.push(i);
     }
     setStarList(newStarList);
+    setCourseUpdateData({
+      title: course.title,
+      description: course.description,
+      price: course.price,
+    });
   }, [course]);
 
   useEffect(() => {
@@ -301,12 +333,33 @@ const Course = () => {
             p={responsive("", "1em", "2em 1em")}
           >
             <Stack gap={responsive("", ".75em", "1em")}>
-              <Heading
-                fontSize={responsive("", "xl", "2xl")}
-                fontWeight={"600"}
-              >
-                {course.title}
-              </Heading>
+              {isEditing ? (
+                <FormControl>
+                  <Input
+                    autoFocus
+                    type={"text"}
+                    name="title"
+                    variant={"flushed"}
+                    fontWeight={"600"}
+                    value={courseUpdateData.title}
+                    fontFamily={"Montserrat, sans-serif;"}
+                    fontSize={responsive("", "xl", "2xl")}
+                    onChange={(e) => handleCourseChange(e)}
+                    _focus={{
+                      borderColor: "#cdcdcd",
+                      outline: 0,
+                      boxShadow: "none",
+                    }}
+                  />
+                </FormControl>
+              ) : (
+                <Heading
+                  fontSize={responsive("", "xl", "2xl")}
+                  fontWeight={"600"}
+                >
+                  {course.title}
+                </Heading>
+              )}
               <Flex gap={".5em"}>
                 <Text opacity={0.9}>{course.point ? course.point : 0}</Text>
                 {starList.length > 0 ? (
@@ -325,31 +378,107 @@ const Course = () => {
                   ></i>
                 )}
               </Flex>
-              <Text fontSize={responsive("", "sm", "md")}>
-                {course.description}
-              </Text>
+              {isEditing ? (
+                <FormControl>
+                  <Input
+                    type={"text"}
+                    name="description"
+                    value={courseUpdateData.description}
+                    variant={"flushed"}
+                    fontSize={responsive("", "sm", "md")}
+                    onChange={(e) => handleCourseChange(e)}
+                    _focus={{
+                      borderColor: "#cdcdcd",
+                      outline: 0,
+                      boxShadow: "none",
+                    }}
+                  />
+                </FormControl>
+              ) : (
+                <Text fontSize={responsive("", "sm", "md")}>
+                  {course.description}
+                </Text>
+              )}
             </Stack>
-            <Flex justify={"flex-end"}>
-              <Button
-                mt={"1em"}
-                border={"1px solid transparent"}
-                bgColor={"var(--accent-color)"}
-                fontSize={responsive("", "sm", "md")}
-                color={"white"}
-                _hover={{
-                  bgColor: "var(--bg-color)",
-                  color: "orange",
-                  border: "1px solid var(--accent-color)",
-                }}
-              >
-                {account
-                  ? course.ownerName === account.username
-                    ? "Edit"
-                    : enroll
-                    ? "Continue"
-                    : "Enroll now"
-                  : "Login to enroll"}
-              </Button>
+            <Flex align={"center"} justify={"space-between"}>
+              {isEditing ? (
+                <FormControl>
+                  <Input
+                    type={"text"}
+                    name="price"
+                    variant={"flushed"}
+                    fontWeight={"600"}
+                    value={courseUpdateData.price}
+                    fontFamily={"Montserrat, sans-serif;"}
+                    opacity={"0.9"}
+                    fontSize={responsive("", "sm", "md")}
+                    onChange={(e) => handleCourseChange(e)}
+                    _focus={{
+                      borderColor: "#cdcdcd",
+                      outline: 0,
+                      boxShadow: "none",
+                    }}
+                  />
+                </FormControl>
+              ) : (
+                <Text
+                  fontSize={responsive("", "sm", "md")}
+                  fontWeight={"500"}
+                  opacity={"0.9"}
+                >
+                  {course.price}$
+                </Text>
+              )}
+              <ButtonGroup>
+                {isEditing && (
+                  <Button
+                    border={"1px solid transparent"}
+                    bgColor={"var(--secondary-color)"}
+                    fontSize={responsive("", "sm", "md")}
+                    onClick={() => handleCourseUpdateSubmit()}
+                    color={"white"}
+                    _hover={{
+                      bgColor: "var(--bg-color)",
+                      color: "var(--secondary-color)",
+                      border: "1px solid var(--secondary-color)",
+                    }}
+                  >
+                    Save
+                  </Button>
+                )}
+                <Button
+                  border={"1px solid transparent"}
+                  bgColor={"var(--accent-color)"}
+                  fontSize={responsive("", "sm", "md")}
+                  onClick={() => {
+                    account &&
+                      course.ownerName === account.username &&
+                      setIsEditing(!isEditing);
+                    isEditing &&
+                      setCourseUpdateData({
+                        title: course.title,
+                        description: course.description,
+                        price: course.price,
+                      });
+                  }}
+                  color={"white"}
+                  _hover={{
+                    bgColor: "var(--bg-color)",
+                    color: "orange",
+                    border: "1px solid var(--accent-color)",
+                  }}
+                >
+                  {account
+                    ? course.ownerName === account.username
+                      ? isEditing
+                        ? "Reset"
+                        : "Edit"
+                      : enroll
+                      ? "Continue"
+                      : "Enroll now"
+                    : "Login to enroll"}
+                </Button>
+              </ButtonGroup>
             </Flex>
           </GridItem>
           <GridItem
@@ -407,14 +536,71 @@ const Course = () => {
             bgColor={"var(--bg-color)"}
             p={responsive("", "1em", "2em 1em")}
           >
-            <Flex align={"center"} gap={".5em"}>
-              <i
-                class="fi fi-rr-book-alt"
-                style={{ position: "relative", top: "2px", fontSize: "1.5em" }}
-              ></i>
-              <Heading fontSize={responsive("", "xl", "2xl")} fontWeight={600}>
-                Lessons
-              </Heading>
+            <Flex align={"center"} justify={"space-between"}>
+              <Flex align={"center"} gap={".5em"}>
+                <i
+                  class="fi fi-rr-book-alt"
+                  style={{
+                    position: "relative",
+                    top: "2px",
+                    fontSize: "1.5em",
+                  }}
+                ></i>
+                <Heading
+                  fontSize={responsive("", "xl", "2xl")}
+                  fontWeight={600}
+                >
+                  Lessons
+                </Heading>
+              </Flex>
+              <ButtonGroup>
+                {isEditing && (
+                  <Button
+                    border={"1px solid transparent"}
+                    bgColor={"var(--secondary-color)"}
+                    fontSize={responsive("", "sm", "md")}
+                    onClick={() => handleCourseUpdateSubmit()}
+                    color={"white"}
+                    _hover={{
+                      bgColor: "var(--bg-color)",
+                      color: "var(--secondary-color)",
+                      border: "1px solid var(--secondary-color)",
+                    }}
+                  >
+                    Save
+                  </Button>
+                )}
+                <Button
+                  border={"1px solid transparent"}
+                  bgColor={"var(--accent-color)"}
+                  fontSize={responsive("", "sm", "md")}
+                  onClick={() => {
+                    account &&
+                      course.ownerName === account.username &&
+                      setIsEditing(!isEditing);
+                    isEditing &&
+                      setCourseUpdateData({
+                        title: course.title,
+                        description: course.description,
+                        price: course.price,
+                      });
+                  }}
+                  color={"white"}
+                  _hover={{
+                    bgColor: "var(--bg-color)",
+                    color: "orange",
+                    border: "1px solid var(--accent-color)",
+                  }}
+                >
+                  {account
+                    ? course.ownerName === account.username
+                      ? "Edit"
+                      : enroll
+                      ? "Continue"
+                      : "Enroll now"
+                    : "Login to enroll"}
+                </Button>
+              </ButtonGroup>
             </Flex>
             <Flex
               flexDir={"column"}
@@ -452,11 +638,18 @@ const Course = () => {
                       </ChakraLink>
                     </Flex>
                     <Text
+                      maxW={"20%"}
+                      textOverflow={"ellipsis"}
+                      whiteSpace={"nowrap"}
+                    >
+                      {lesson.description}
+                    </Text>
+                    <Text
                       opacity={0.9}
                       fontWeight={500}
                       fontSize={responsive("", "sm", "md")}
                     >
-                      {lesson.duration ? lesson.duration + "min" : "140 min"}
+                      {lesson.duration ? lesson.duration + "min" : "0min"}
                     </Text>
                   </Flex>
                 ))}

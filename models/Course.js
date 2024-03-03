@@ -17,6 +17,7 @@ const courseSchema = new Schema({
 
   imageUrl: {
     type: String,
+    required: true,
   },
   price: {
     type: Number,

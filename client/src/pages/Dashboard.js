@@ -8,7 +8,6 @@ import {
   BreadcrumbLink,
   Skeleton,
   ButtonGroup,
-  Link as ChakraLink,
   Text,
   Heading,
   Button,
@@ -17,6 +16,7 @@ import {
   Image,
   Center,
   Textarea,
+  position,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import { useContext, useEffect, useState } from "react";
@@ -33,7 +33,7 @@ import {
   LineElement,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { deleteComment } from "../utils/data/CommentData";
+import { deleteComment, updateComment } from "../utils/data/CommentData";
 
 const Dashboard = () => {
   ChartJS.register(
@@ -131,12 +131,16 @@ const Dashboard = () => {
   };
 
   const commentsDeleteFunc = () => {
-    commentDeleteList.map(async (comment) => {
-      await deleteComment(comment.course, comment.lesson.slug, comment._id)
+    if (commentDeleteList.length > 0) {
+      const promise = commentDeleteList.map(async (comment) => {
+        await deleteComment(comment.course, comment.lesson.slug, comment._id);
+      });
+
+      Promise.all(promise)
         .then(() =>
           toast({
             title: "Success",
-            description: `Comment Deleted Successfully`,
+            description: `Comments Deleted Successfully`,
             status: "success",
             duration: 5000,
             isClosable: true,
@@ -145,10 +149,54 @@ const Dashboard = () => {
         .catch((error) => {
           setErrors([...errors, error]);
         });
-    });
+    }
   };
 
-  const handleCommentsSubmit = () => {};
+  const handleCommentsSubmit = () => {
+    const promises = commentTextList.map(async (comment) => {
+      const formDataText = new FormData();
+      formDataText.append("text", comment.text);
+
+      // Güncellenmiş yorumu almak için updateComment fonksiyonunu bekleyin
+      const updatedComment = await updateComment(
+        comment.course,
+        comment.lesson.slug,
+        comment.commentId,
+        formDataText
+      );
+
+      return updatedComment; // Güncellenmiş yorumu promise zinciri boyunca geçirin
+    });
+
+    Promise.all(promises)
+      .then((updatedComments) => {
+        // Tüm güncellenmiş yorumları aldıktan sonra commentTextList'i güncelleyin
+        const updatedCommentTextList = commentTextList.map((comment) => {
+          const updatedComment = updatedComments.find(
+            (updatedComment) => updatedComment._id === comment.commentId
+          );
+          if (updatedComment) {
+            return { ...comment, text: updatedComment.text };
+          }
+          return comment;
+        });
+
+        setCommentTextList(updatedCommentTextList);
+
+        // Başarılı tost mesajını gösterin
+        toast({
+          title: "Success",
+          description: `Comments Update Successfully`,
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .catch((error) => {
+        // Hata durumunda hatayı kaydedin
+        setErrors([...errors, error]);
+      });
+  };
 
   useEffect(() => {
     setOwnedCourses(
@@ -162,14 +210,18 @@ const Dashboard = () => {
 
     const pointList = ownedCourses
       .map((course) => course.point)
-      .filter((c) => c !== null);
+      .filter((point) => point !== null);
 
     if (pointList.length > 0) {
-      setUserPoint(
-        Math.ceil(
-          pointList.reduce((acc, curr) => acc + curr, 0) / pointList.length
-        )
-      );
+      if (pointList.length > 1) {
+        setUserPoint(
+          Math.round(
+            pointList.reduce((acc, curr) => acc + curr, 0) / pointList.length
+          )
+        );
+      } else {
+        setUserPoint(Math.round(pointList[0]));
+      }
     }
 
     setComments(
@@ -179,14 +231,20 @@ const Dashboard = () => {
     );
   }, [ownedCourses]);
 
+  const updatedCommentTextList = comments.map((comment) => ({
+    commentId: comment?._id,
+    text: comment.text,
+    lesson: comment.lesson,
+    course: comment.course,
+  }));
+
+  const updatedCommentTextListFunc = () => {
+    setCommentTextList(updatedCommentTextList);
+  };
+
   useEffect(() => {
     setActiveButtonIndices(Array(comments.length).fill(false));
-
-    const updatedCommentTextList = comments.map((comment) => ({
-      commentId: comment?._id,
-      text: comment.text,
-    }));
-    setCommentTextList(updatedCommentTextList);
+    updatedCommentTextListFunc();
   }, [comments]);
 
   useEffect(() => {
@@ -284,100 +342,105 @@ const Dashboard = () => {
               flexDir={"column"}
               gap={"1em"}
             >
-              {ownedCourses && ownedCourses.length > 0
-                ? ownedCourses.map((course, index) => (
-                    <Flex
-                      bgColor={"white"}
-                      p={responsive("", ".5em", "1em")}
-                      borderRadius={"10px"}
-                      key={index}
-                      align={"center"}
-                      justify={"space-between"}
-                      transition={"all .3s ease"}
-                    >
-                      <Flex>
-                        <Image />
-                        <Text fontWeight={"500"}>{course.title}</Text>
-                      </Flex>
-
-                      <Flex
-                        fontWeight={"500"}
-                        align={"center"}
-                        gap={"1em"}
-                        fontSize={responsive("", "sm", "md")}
-                      >
-                        <Flex gap={".5em"} align={"center"}>
-                          <i
-                            class="fi fi-rr-book-alt"
-                            style={{ position: "relative", top: "2px" }}
-                          ></i>
-                          <Text>{course.lessons.length}</Text>
-                        </Flex>
-                        <Flex gap={".5em"} align={"center"}>
-                          <i
-                            class="fi fi-rr-users-alt"
-                            style={{ position: "relative", top: "2px" }}
-                          ></i>
-                          <Text>{course.enrollments.length}</Text>
-                        </Flex>
-                        <Flex gap={".5em"} align={"center"}>
-                          <i
-                            class="fi fi-rr-clock-three"
-                            style={{ position: "relative", top: "2px" }}
-                          ></i>
-                          <Text>45h</Text>
-                        </Flex>
-                        <Flex gap={".5em"} align={"center"}>
-                          <i
-                            class="fi fi-rr-comment-alt"
-                            style={{ position: "relative", top: "2px" }}
-                          ></i>
-                          <Text>
-                            {course.comments[0] !== null
-                              ? course.comments.length
-                              : 0}
-                          </Text>
-                        </Flex>
-                        <Flex
-                          gap={".5em"}
-                          align={"center"}
-                          color={"var(--accent-color)"}
-                        >
-                          <StarIcon pos={"relative"} bottom={"2px"} />
-                          <Text>{course.point ? course.point : 0}</Text>
-                        </Flex>
-                      </Flex>
-                      <Button
-                        as={Link}
-                        to={`/dashboard/course/${course.slug}`}
-                        variant={"outline"}
-                        bgColor={"var(--accent-color)"}
-                        color={"white"}
-                        fontSize={responsive("", "sm", "md")}
-                        border={"1px solid var(--accent-color)"}
-                        _hover={{
-                          bgColor: "white",
-                          color: "var(--accent-color)",
-                        }}
-                      >
-                        View
-                      </Button>
+              {ownedCourses && ownedCourses.length > 0 ? (
+                ownedCourses.map((course, index) => (
+                  <Flex
+                    bgColor={"white"}
+                    p={responsive("", ".5em", "1em")}
+                    borderRadius={"10px"}
+                    key={index}
+                    align={"center"}
+                    justify={"space-between"}
+                    transition={"all .3s ease"}
+                  >
+                    <Flex>
+                      <Image />
+                      <Text fontWeight={"500"}>{course.title}</Text>
                     </Flex>
-                  ))
-                : ""}
+
+                    <Flex
+                      fontWeight={"500"}
+                      align={"center"}
+                      gap={"1em"}
+                      fontSize={responsive("", "sm", "md")}
+                    >
+                      <Flex gap={".5em"} align={"center"}>
+                        <i
+                          class="fi fi-rr-book-alt"
+                          style={{ position: "relative", top: "2px" }}
+                        ></i>
+                        <Text>{course.lessons.length}</Text>
+                      </Flex>
+                      <Flex gap={".5em"} align={"center"}>
+                        <i
+                          class="fi fi-rr-users-alt"
+                          style={{ position: "relative", top: "2px" }}
+                        ></i>
+                        <Text>{course.enrollments.length}</Text>
+                      </Flex>
+                      <Flex gap={".5em"} align={"center"}>
+                        <i
+                          class="fi fi-rr-clock-three"
+                          style={{ position: "relative", top: "2px" }}
+                        ></i>
+                        <Text>45h</Text>
+                      </Flex>
+                      <Flex gap={".5em"} align={"center"}>
+                        <i
+                          class="fi fi-rr-comment-alt"
+                          style={{ position: "relative", top: "2px" }}
+                        ></i>
+                        <Text>
+                          {course.comments[0] !== null
+                            ? course.comments.length
+                            : 0}
+                        </Text>
+                      </Flex>
+                      <Flex
+                        gap={".5em"}
+                        align={"center"}
+                        color={"var(--accent-color)"}
+                      >
+                        <StarIcon pos={"relative"} bottom={"2px"} />
+                        <Text>{course.point ? course.point : 0}</Text>
+                      </Flex>
+                    </Flex>
+                    <Button
+                      as={Link}
+                      to={`/dashboard/course/${course.slug}`}
+                      variant={"outline"}
+                      bgColor={"var(--accent-color)"}
+                      color={"white"}
+                      fontSize={responsive("", "sm", "md")}
+                      border={"1px solid var(--accent-color)"}
+                      _hover={{
+                        bgColor: "white",
+                        color: "var(--accent-color)",
+                      }}
+                    >
+                      View
+                    </Button>
+                  </Flex>
+                ))
+              ) : (
+                <Text
+                  fontSize={responsive("", "sm", "md")}
+                  fontWeight={"500"}
+                  opacity={"0.9"}
+                >
+                  You dont have any course
+                </Text>
+              )}
             </Flex>
           </GridItem>
           <GridItem colSpan={1} rowSpan={2}>
-            <ChakraLink
-              display={"flex"}
+            <Center
               fontSize={responsive("", "md", "lg")}
               fontWeight={"500"}
               borderRadius={"10px"}
-              as={Link}
-              justifyContent={"center"}
-              alignItems={"center"}
-              to="/create-course"
               border={"2px dashed var(--secondary-color)"}
+              as={Link}
+              to="/create-course"
               p={responsive("", "1em", "1em")}
               color={"white"}
               bgColor={"var(--secondary-color)"}
@@ -389,7 +452,7 @@ const Dashboard = () => {
               }}
             >
               Create Course
-            </ChakraLink>
+            </Center>
           </GridItem>
           <GridItem colSpan={1} rowSpan={2}>
             <Center
@@ -403,16 +466,22 @@ const Dashboard = () => {
               style={{ fontSize: responsive("", "sm", "md") }}
             >
               Your Point &nbsp;
-              {starList.map((star) => (
-                <StarIcon pos={"relative"} bottom={"2px"} key={star} />
-              ))}
+              {starList.length > 0 ? (
+                starList.map((star) => (
+                  <StarIcon pos={"relative"} bottom={"2px"} key={star} />
+                ))
+              ) : (
+                <i
+                  class="fi fi-rr-star"
+                  style={{ position: "relative", top: "2px" }}
+                ></i>
+              )}
             </Center>
           </GridItem>
           <GridItem
             colSpan={1}
             rowSpan={8}
             bgColor={"var(--bg-color)"}
-            border={"2px dashed var(--secondary-color)"}
             borderRadius={"10px"}
             p={responsive("", "1em", "1em")}
             w={"100%"}
@@ -462,60 +531,67 @@ const Dashboard = () => {
               flexDir={"column"}
               gap={"1em"}
             >
-              {lessons && lessons.length > 0
-                ? lessons.map((lesson, index) => (
-                    <Flex
-                      bgColor={"white"}
-                      p={responsive("", ".5em", "1em")}
-                      borderRadius={"10px"}
-                      key={index}
-                      align={"center"}
-                      justify={"space-between"}
-                      transition={"all .3s ease"}
-                    >
-                      <Text fontWeight={"500"}>{lesson.title}</Text>
+              {lessons && lessons.length > 0 ? (
+                lessons.map((lesson, index) => (
+                  <Flex
+                    bgColor={"white"}
+                    p={responsive("", ".5em", "1em")}
+                    borderRadius={"10px"}
+                    key={index}
+                    align={"center"}
+                    justify={"space-between"}
+                    transition={"all .3s ease"}
+                  >
+                    <Text fontWeight={"500"}>{lesson.title}</Text>
 
-                      <Flex
-                        fontWeight={"500"}
-                        align={"center"}
-                        gap={"1em"}
-                        fontSize={responsive("", "sm", "md")}
-                      >
-                        <Flex gap={".5em"} align={"center"}>
-                          <i
-                            class="fi fi-rr-comment-alt"
-                            style={{ position: "relative", top: "2px" }}
-                          ></i>
-                          <Text>{lesson.comments.length}</Text>
-                        </Flex>
-                        <Flex gap={".5em"} align={"center"}>
-                          <i
-                            class="fi fi-rr-clock-three"
-                            style={{ position: "relative", top: "2px" }}
-                          ></i>
-                          <Text>4h</Text>
-                        </Flex>
+                    <Flex
+                      fontWeight={"500"}
+                      align={"center"}
+                      gap={"1em"}
+                      fontSize={responsive("", "sm", "md")}
+                    >
+                      <Flex gap={".5em"} align={"center"}>
+                        <i
+                          class="fi fi-rr-comment-alt"
+                          style={{ position: "relative", top: "2px" }}
+                        ></i>
+                        <Text>{lesson.comments.length}</Text>
                       </Flex>
-                      <Button
-                        as={Link}
-                        to={``}
-                        variant={"outline"}
-                        bgColor={"var(--accent-color)"}
-                        color={"white"}
-                        fontSize={responsive("", "sm", "md")}
-                        border={"1px solid var(--accent-color)"}
-                        _hover={{
-                          bgColor: "white",
-                          color: "var(--accent-color)",
-                        }}
-                      >
-                        View
-                      </Button>
+                      <Flex gap={".5em"} align={"center"}>
+                        <i
+                          class="fi fi-rr-clock-three"
+                          style={{ position: "relative", top: "2px" }}
+                        ></i>
+                        <Text>{lesson.duration} min</Text>
+                      </Flex>
                     </Flex>
-                  ))
-                : ""}
+                    <Button
+                      variant={"outline"}
+                      bgColor={"var(--accent-color)"}
+                      color={"white"}
+                      fontSize={responsive("", "sm", "md")}
+                      border={"1px solid var(--accent-color)"}
+                      _hover={{
+                        bgColor: "white",
+                        color: "var(--accent-color)",
+                      }}
+                    >
+                      View
+                    </Button>
+                  </Flex>
+                ))
+              ) : (
+                <Text
+                  fontSize={responsive("", "sm", "md")}
+                  fontWeight={"500"}
+                  opacity={"0.9"}
+                >
+                  You dont have any lesson
+                </Text>
+              )}
             </Flex>
           </GridItem>
+
           <GridItem
             rowSpan={20}
             colSpan={1}
@@ -530,147 +606,156 @@ const Dashboard = () => {
             bgColor={"var(--bg-color)"}
             border={"2px dashed var(--secondary-color)"}
           >
-            <form onSubmit={handleCommentsSubmit()}>
-              <Flex align={"center"} justify={"space-between"} mr={"1em"}>
-                <Text fontWeight={"500"} fontSize={responsive("", "md", "lg")}>
-                  Your Comments
-                </Text>
-                <ButtonGroup>
-                  {commentsEdit && (
-                    <Button
-                      variant={"outline"}
-                      onClick={() => {
-                        setCommentsEdit(!commentsEdit);
-                        commentsDeleteFunc();
-                      }}
-                      bgColor={"var(--secondary-color)"}
-                      type="submit"
-                      color={"white"}
-                      fontSize={responsive("", "sm", "md")}
-                      border={"1px solid var(--secondary-color)"}
-                      _hover={{
-                        bgColor: "white",
-                        color: "var(--secondary-color)",
-                      }}
-                    >
-                      Save
-                    </Button>
-                  )}
+            <Flex align={"center"} justify={"space-between"} mr={"1em"}>
+              <Text fontWeight={"500"} fontSize={responsive("", "md", "lg")}>
+                Your Comments
+              </Text>
+              <ButtonGroup>
+                {commentsEdit && (
                   <Button
                     variant={"outline"}
                     onClick={() => {
                       setCommentsEdit(!commentsEdit);
-                      setActiveButtonIndices(
-                        Array(comments.length).fill(false)
-                      );
-                      setCommentDeleteList([]);
+                      commentsDeleteFunc();
+                      handleCommentsSubmit();
                     }}
-                    bgColor={"var(--accent-color)"}
+                    bgColor={"var(--secondary-color)"}
+                    type={"submit"}
                     color={"white"}
                     fontSize={responsive("", "sm", "md")}
-                    border={"1px solid var(--accent-color)"}
+                    border={"1px solid var(--secondary-color)"}
                     _hover={{
                       bgColor: "white",
-                      color: "var(--accent-color)",
+                      color: "var(--secondary-color)",
                     }}
                   >
-                    {commentsEdit ? "Reset" : "Edit"}
+                    Save
                   </Button>
-                </ButtonGroup>
-              </Flex>
-              <Flex
-                pr={"1em"}
-                overflow={"auto"}
-                mt={responsive("", ".5em", ".5em")}
-                flexDir={"column"}
-                gap={"1em"}
-              >
-                {comments &&
-                  comments.length > 0 &&
-                  comments.map(
-                    (comment, index) =>
-                      !commentDeleteList.includes(comment) && (
-                        <Flex
-                          bgColor="white"
-                          p={responsive("", ".5em", "1em")}
-                          borderRadius="10px"
-                          justify="space-between"
-                          transition="all .3s ease"
-                          key={index}
-                          flexDir="column"
-                          gap="1em"
-                        >
-                          <Flex align="center" justify="space-between">
-                            <Flex gap=".5em" align="center">
-                              <Avatar
-                                src={`http://localhost:5000/${comment.user.image}`}
-                                bgColor="var(--secondary-color)"
-                                name={comment.user?.username}
-                                size={responsive("", "sm", "sm")}
-                              />
-                              <Text
-                                fontWeight="500"
-                                fontSize={responsive("", "sm", "md")}
-                                opacity={0.9}
-                              >
-                                {comment.user?.username}
-                              </Text>
-                            </Flex>
-                            {commentsEdit && (
-                              <Button
-                                variant="outline"
-                                p=".5em"
-                                minH="max-content"
-                                minW="max-content"
-                                onClick={() =>
-                                  handleCommentButtonClick(index, comment)
-                                }
-                                fontSize={responsive("", "sm", "md")}
-                                _hover={{
-                                  bgColor: activeButtonIndices[index]
-                                    ? "var(--accent-color)"
-                                    : "unset",
-                                }}
-                                bgColor={
-                                  activeButtonIndices[index]
-                                    ? "var(--accent-color)"
-                                    : "unset"
-                                }
-                              >
-                                <i
-                                  className="fi fi-rr-trash"
-                                  style={{ position: "relative", top: "2px" }}
-                                />
-                              </Button>
-                            )}
-                          </Flex>
-
-                          {commentsEdit ? (
-                            commentTextList.map((comment) => (
-                              <Textarea
-                                key={comment._id}
-                                value={comment.text}
-                                onChange={(e) =>
-                                  setCommentTextList([
-                                    ...commentTextList,
-                                    {
-                                      commentId: comment?._id,
-                                      text: e.target.value,
-                                    },
-                                  ])
-                                }
-                              ></Textarea>
-                            ))
-                          ) : (
+                )}
+                <Button
+                  variant={"outline"}
+                  onClick={() => {
+                    setCommentsEdit(!commentsEdit);
+                    setActiveButtonIndices(Array(comments.length).fill(false));
+                    setCommentDeleteList([]);
+                    updatedCommentTextListFunc();
+                  }}
+                  bgColor={"var(--accent-color)"}
+                  color={"white"}
+                  fontSize={responsive("", "sm", "md")}
+                  border={"1px solid var(--accent-color)"}
+                  _hover={{
+                    bgColor: "var(--bg-color)",
+                    color: "var(--accent-color)",
+                  }}
+                >
+                  {commentsEdit ? "Reset" : "Edit"}
+                </Button>
+              </ButtonGroup>
+            </Flex>
+            <Flex
+              maxH={"100%"}
+              overflow={"auto"}
+              pr={"1em"}
+              h={"100%"}
+              mt={responsive("", ".5em", ".5em")}
+              flexDir={"column"}
+              gap={"1em"}
+            >
+              {comments && comments.length > 0 ? (
+                comments.map((comment, index) => {
+                  const updatedComment = commentTextList.find((c) => {
+                    if (
+                      c.text !== comment.text &&
+                      c.commentId === comment._id
+                    ) {
+                      return c;
+                    } else {
+                      return null;
+                    }
+                  });
+                  return (
+                    !commentDeleteList.includes(comment) && (
+                      <Flex
+                        key={index}
+                        bgColor="white"
+                        p={responsive("", ".5em", "1em")}
+                        borderRadius="10px"
+                        justify="space-between"
+                        transition="all .3s ease"
+                        flexDir="column"
+                        gap="1em"
+                      >
+                        <Flex align="center" justify="space-between">
+                          <Flex gap=".5em" align="center">
+                            <Avatar
+                              src={`http://localhost:5000/${comment?.user.image}`}
+                              bgColor="var(--secondary-color)"
+                              name={comment?.user.username}
+                              size={responsive("", "sm", "sm")}
+                            />
                             <Text
-                              p=".5em 1em"
-                              border="2px dashed #cfcfcf"
-                              borderRadius="10px"
+                              fontWeight="500"
+                              fontSize={responsive("", "sm", "md")}
+                              opacity={0.9}
                             >
-                              {comment.text}
+                              {comment?.user.username}
                             </Text>
+                          </Flex>
+                          {commentsEdit && (
+                            <Button
+                              variant="outline"
+                              p=".5em"
+                              minH="max-content"
+                              minW="max-content"
+                              onClick={() =>
+                                handleCommentButtonClick(index, comment)
+                              }
+                              fontSize={responsive("", "sm", "md")}
+                              _hover={{
+                                bgColor: activeButtonIndices[index]
+                                  ? "var(--accent-color)"
+                                  : "unset",
+                              }}
+                              bgColor={
+                                activeButtonIndices[index]
+                                  ? "var(--accent-color)"
+                                  : "unset"
+                              }
+                            >
+                              <i
+                                className="fi fi-rr-trash"
+                                style={{ position: "relative", top: "2px" }}
+                              />
+                            </Button>
                           )}
-                          <Flex align="center" justify="space-between">
+                        </Flex>
+
+                        <Textarea
+                          border={"2px dashed #cfcfcf"}
+                          readOnly={!commentsEdit}
+                          value={
+                            updatedComment ? updatedComment.text : comment.text
+                          }
+                          _focus={{
+                            boxShadow: "none",
+                            border: "2px dashed #cfcfcf",
+                          }}
+                          onChange={(e) => {
+                            const updatedCommentTextList = [...commentTextList];
+                            const commentIndex =
+                              updatedCommentTextList.findIndex(
+                                (c) => c.commentId === comment._id
+                              );
+                            if (commentIndex !== -1) {
+                              updatedCommentTextList[commentIndex].text =
+                                e.target.value;
+                              setCommentTextList(updatedCommentTextList);
+                            }
+                          }}
+                        ></Textarea>
+                        <Flex align="center" justify="space-between">
+                          <Flex align={"center"} gap={"1em"}>
                             <Text
                               fontWeight="500"
                               fontSize={responsive("", "sm", "md")}
@@ -678,19 +763,43 @@ const Dashboard = () => {
                             >
                               {comment.lesson?.title}
                             </Text>
-                            <Text
-                              fontWeight="500"
-                              opacity={0.9}
+                            <Flex
                               fontSize={responsive("", "sm", "md")}
+                              fontWeight={500}
+                              opacity={0.9}
+                              color={"var(--accent-color)"}
+                              gap={".3em"}
+                              align={"center"}
                             >
-                              {getDate(comment.createdAt)}
-                            </Text>
+                              <Text>{comment.point}</Text>
+                              <StarIcon
+                                pos={"relative"}
+                                bottom={"2px"}
+                              ></StarIcon>
+                            </Flex>
                           </Flex>
+                          <Text
+                            fontWeight="500"
+                            opacity={0.9}
+                            fontSize={responsive("", "sm", "md")}
+                          >
+                            {getDate(comment.createdAt)}
+                          </Text>
                         </Flex>
-                      )
-                  )}
-              </Flex>
-            </form>
+                      </Flex>
+                    )
+                  );
+                })
+              ) : (
+                <Text
+                  fontSize={responsive("", "sm", "md")}
+                  fontWeight={"500"}
+                  opacity={"0.9"}
+                >
+                  You dont have any comment
+                </Text>
+              )}
+            </Flex>
           </GridItem>
         </Grid>
       </Box>

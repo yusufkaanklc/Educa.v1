@@ -1,5 +1,9 @@
 import {
   Flex,
+  Heading,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
   Box,
   Center,
   Input,
@@ -12,6 +16,7 @@ import {
   InputGroup,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
+import { ChevronRightIcon } from "@chakra-ui/icons";
 import { useState, useContext, useEffect } from "react";
 import dataContext from "../utils/contextApi";
 import { loginUser } from "../utils/data/UsersData";
@@ -72,6 +77,45 @@ const Login = () => {
   return (
     <>
       <Center h={"100vh"} bgPos={"center"} position={"relative"}>
+        <Box
+          pos={"absolute"}
+          top={responsive("", "1.5em", "2em")}
+          left={responsive("", "1.5em", "2em")}
+          p={responsive("", "1em", "1em 2em")}
+          bgColor={"var(--secondary-color)"}
+          w={"max-content"}
+        >
+          <Heading
+            color={"white"}
+            fontSize={responsive("", "xl", "2xl")}
+            fontWeight={"600"}
+            mb={"1em"}
+          >
+            Login
+          </Heading>
+          <Breadcrumb
+            color={"white"}
+            spacing="8px"
+            separator={<ChevronRightIcon color="white" />}
+          >
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                as={Link}
+                to="/"
+                onClick={() => setTargetScroll("")}
+                fontWeight={500}
+              >
+                Home
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbItem>
+              <BreadcrumbLink fontWeight={500} as={Link} to={"/login"}>
+                Login
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </Breadcrumb>
+        </Box>
         <Box position={"relative"} w={"35%"}>
           <Box
             pos={"absolute"}

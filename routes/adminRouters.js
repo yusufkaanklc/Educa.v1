@@ -20,9 +20,6 @@ router.route("/remove-users").delete(adminControllers.removeUsers);
 // Bir kurs oluşturmak için POST isteği
 router.route("/add-course").post(courseControllers.createCourse);
 
-// Kursları getiren GET isteği
-router.route("/courses").get(courseControllers.getAllCourses);
-
 // Bir kursu getiren GET isteği
 router.route("/courses/:courseSlug").get(courseControllers.getCourse);
 

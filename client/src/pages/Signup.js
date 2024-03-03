@@ -6,6 +6,10 @@ import {
   Button,
   FormControl,
   InputRightElement,
+  Breadcrumb,
+  Heading,
+  BreadcrumbItem,
+  BreadcrumbLink,
   Select,
   Link as ChakraLink,
   FormLabel,
@@ -15,6 +19,7 @@ import {
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
+import { ChevronRightIcon } from "@chakra-ui/icons";
 import dataContext from "../utils/contextApi";
 import { registerUser } from "../utils/data/UsersData";
 const Signup = () => {
@@ -96,6 +101,45 @@ const Signup = () => {
   }, []);
   return (
     <Center h={"100vh"} bgPos={"center"} position={"relative"}>
+      <Box
+        pos={"absolute"}
+        top={responsive("", "1.5em", "2em")}
+        left={responsive("", "1.5em", "2em")}
+        p={responsive("", "1em", "1em 2em")}
+        bgColor={"var(--secondary-color)"}
+        w={"max-content"}
+      >
+        <Heading
+          color={"white"}
+          fontSize={responsive("", "xl", "2xl")}
+          fontWeight={"600"}
+          mb={"1em"}
+        >
+          Signup
+        </Heading>
+        <Breadcrumb
+          color={"white"}
+          spacing="8px"
+          separator={<ChevronRightIcon color="white" />}
+        >
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              as={Link}
+              to="/"
+              onClick={() => setTargetScroll("")}
+              fontWeight={500}
+            >
+              Home
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+
+          <BreadcrumbItem>
+            <BreadcrumbLink fontWeight={500} as={Link} to={"/signup"}>
+              Signup
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        </Breadcrumb>
+      </Box>
       <Box position={"relative"} zIndex={2} w={"35%"}>
         <Box
           pos={"absolute"}

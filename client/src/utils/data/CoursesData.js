@@ -45,4 +45,34 @@ const getCourse = async (courseSlug) => {
   }
 };
 
-export { getCourses, getCourse };
+const createCourse = async (courseData) => {
+  try {
+    const { data } = await axios.post("/courses/add-course", courseData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
+
+const updateCourse = async (courseSlug, courseData) => {
+  try {
+    const { data } = await axios.put(`/courses/${courseSlug}`, courseData);
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
+
+export { getCourses, getCourse, createCourse, updateCourse };

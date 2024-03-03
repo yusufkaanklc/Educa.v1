@@ -5,13 +5,33 @@ const getLessons = async (courseSlug) => {
     const { data } = await axios.get(`/courses/${courseSlug}/lessons`);
     return data;
   } catch (error) {
-    console.error("Error fetching lessons:", error);
     // eslint-disable-next-line no-throw-literal
     throw {
-      message: error.response.data,
+      message: error.response.data.message,
       status: error.response.status,
     };
   }
 };
 
-export { getLessons };
+const createLesson = async (courseSlug, lessonData) => {
+  try {
+    const { data } = await axios.post(
+      `/courses/${courseSlug}/add-lesson`,
+      lessonData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data.message,
+      status: error.response.status,
+    };
+  }
+};
+
+export { getLessons, createLesson };

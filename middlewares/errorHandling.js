@@ -22,7 +22,9 @@ const errorHandling = (error, req, res) => {
       statusCode = 500;
       break;
     case 11000:
-      message = `${error.keyValue["email" || "title"]} already exists`;
+      message = `${
+        error.keyValue["email"] || error.keyValue["title"]
+      } already exists`;
       break;
     // Diğer hata durumlarını buraya ekleyebilirsiniz
     default:
