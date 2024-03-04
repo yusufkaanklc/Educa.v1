@@ -1,7 +1,9 @@
 import slugify from "slugify";
 import Course from "../models/Course.js";
 import Lesson from "../models/Lesson.js";
+import Comment from "../models/Comment.js";
 import errorHandling from "../middlewares/errorHandling.js";
+import { unlink } from "fs/promises";
 
 const createLesson = async (req, res) => {
   try {
@@ -154,19 +156,23 @@ const deleteLesson = async (req, res) => {
       $pull: { lessons: lesson._id },
     });
 
+    unlink(lesson.videoUrl);
+
     // Kursa ait yorumları al
     const comments = await Comment.find({
       _id: { $in: deletedLesson.comments },
     });
 
     // Her yorum için
-    for (const comment of comments) {
-      // Yorumu sil
-      await Comment.findByIdAndDelete(comment._id);
+    if (comments) {
+      for (const comment of comments) {
+        // Yorumu sil
+        await Comment.findByIdAndDelete(comment._id);
 
-      // Yoruma ait cevapları sil
-      for (const replyId of comment.replies) {
-        await Comment.findByIdAndDelete(replyId);
+        // Yoruma ait cevapları sil
+        for (const replyId of comment.replies) {
+          await Comment.findByIdAndDelete(replyId);
+        }
       }
     }
 

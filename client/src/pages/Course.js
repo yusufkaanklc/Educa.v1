@@ -14,8 +14,10 @@ import {
   Grid,
   Link as ChakraLink,
   ButtonGroup,
+  Image,
   GridItem,
   Progress,
+  FormLabel,
   Skeleton,
   Input,
   FormControl,
@@ -24,7 +26,8 @@ import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import dataContext from "../utils/contextApi";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getCourse, updateCourse } from "../utils/data/CoursesData";
-import { getLessons } from "../utils/data/LessonsData";
+import { enrollCourse, getAccount } from "../utils/data/UsersData";
+import { deleteLesson, getLessons } from "../utils/data/LessonsData";
 import { useToast } from "@chakra-ui/react";
 
 const Course = () => {
@@ -35,6 +38,7 @@ const Course = () => {
     isLaptop,
     setTargetScroll,
     account,
+    setAccount,
     courseUpdateData,
     setCourseUpdateData,
     errors,
@@ -44,7 +48,10 @@ const Course = () => {
   const [starList, setStarList] = useState([]);
   const [enroll, setEnroll] = useState(null);
   const [lessons, setLessons] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
+  const [filteredLessonList, setFilteredLessonList] = useState([]);
+  const [deletedLessonList, setDeletedLessonList] = useState([]);
+  const [isCourseEditing, setIsCourseEditing] = useState(false);
+  const [isLessonsEditing, setIsLessonsEditing] = useState(false);
 
   const { slug, page } = useParams();
   const toast = useToast();
@@ -93,11 +100,26 @@ const Course = () => {
     setCourseUpdateData({ ...courseUpdateData, [name]: value });
   };
 
+  const handleCourseChangeImage = (e) => {
+    const { name, files } = e.target;
+    setCourseUpdateData({ ...courseUpdateData, [name]: files[0] });
+    if (e.target.files.length > 0) {
+      toast({
+        title: "Success",
+        description: "Image uploaded successfully",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
   const handleCourseUpdateSubmit = () => {
     const courseUpdateFormData = new FormData();
     courseUpdateFormData.append("title", courseUpdateData.title);
     courseUpdateFormData.append("description", courseUpdateData.description);
     courseUpdateFormData.append("price", courseUpdateData.price);
+    courseUpdateFormData.append("image", courseUpdateData.image);
     updateCourse(slug, courseUpdateFormData)
       .then(() => {
         toast({
@@ -107,10 +129,85 @@ const Course = () => {
           duration: 5000,
           isClosable: true,
         });
-        setIsEditing(false);
+        setIsCourseEditing(false);
         handleClick("courses");
       })
       .catch((error) => setErrors([...errors, error]));
+  };
+
+  const handleDeleteLesson = (lessonTitle) => {
+    const updatedLessons = filteredLessonList.filter(
+      (lesson) => lesson.title !== lessonTitle
+    );
+    const deletedLesson = lessons.find(
+      (lesson) => lesson.title === lessonTitle
+    );
+    setFilteredLessonList(updatedLessons);
+    setDeletedLessonList((prevDeletedList) => [
+      ...prevDeletedList,
+      deletedLesson,
+    ]);
+  };
+
+  const handleLessonDeleteSubmit = async () => {
+    try {
+      if (deletedLessonList.length > 0) {
+        const deletionPromises = deletedLessonList.map(async (lesson) => {
+          await deleteLesson(slug, lesson.slug);
+        });
+        await Promise.all(deletionPromises);
+        toast({
+          title: "Success",
+          description: "Lessons Deleted successfully",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        setIsLessonsEditing(false);
+        // Sildikten sonra filteredLessonList'i güncelle
+        setFilteredLessonList((prevLessons) =>
+          prevLessons.filter(
+            (lesson) =>
+              !deletedLessonList.some(
+                (deleted) => deleted.title === lesson.title
+              )
+          )
+        );
+        // deletedLessonList'i boşalt
+        setDeletedLessonList([]);
+      } else {
+        setIsLessonsEditing(false);
+      }
+    } catch (error) {
+      setErrors([...errors, error]);
+    }
+  };
+
+  const refreshLessons = () => {
+    getLessons(slug)
+      .then((data) => {
+        setLessons(data);
+      })
+      .catch((error) => {
+        setErrors([...errors, error]);
+      });
+  };
+
+  const handleEnrollCourse = async () => {
+    try {
+      await enrollCourse(slug);
+      toast({
+        title: "Success",
+        description: "enrolled in the course",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+      const courseData = await getCourse(slug);
+      setCourse(courseData);
+    } catch (error) {
+      setErrors([...errors, error]);
+    }
   };
 
   useEffect(() => {
@@ -144,14 +241,19 @@ const Course = () => {
       title: course.title,
       description: course.description,
       price: course.price,
+      image: course.imageUrl,
     });
   }, [course]);
 
   useEffect(() => {
-    if (course && lessons.length > 0) {
+    if (course) {
       setIsLoading(false);
     }
-  }, [course, lessons]);
+  }, [course]);
+
+  useEffect(() => {
+    setFilteredLessonList(lessons);
+  }, [lessons]);
 
   useEffect(() => {
     if (course && course.enrollments && account && account._id) {
@@ -210,6 +312,17 @@ const Course = () => {
                     Courses
                   </BreadcrumbLink>
                 </BreadcrumbItem>
+              ) : page === "all-courses" ? (
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    fontWeight={500}
+                    opacity={0.9}
+                    as={Link}
+                    to={"/all-courses"}
+                  >
+                    All courses
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
               ) : (
                 <BreadcrumbItem>
                   <BreadcrumbLink
@@ -227,7 +340,7 @@ const Course = () => {
                   fontWeight={500}
                   opacity={0.9}
                   as={Link}
-                  to={`/course/${slug}`}
+                  to={`/courses/course/${slug}`}
                 >
                   {course.title}
                 </BreadcrumbLink>
@@ -242,30 +355,32 @@ const Course = () => {
             borderRadius={"10px"}
           />
         ) : (
-          <Flex
-            flexDir={"column"}
-            align={"flex-end"}
-            gap={responsive("", ".75em", "1em")}
-          >
-            <Flex align={"center"} gap={responsive("", "1em", "2em")}>
-              <Heading
-                fontSize={responsive("", "xl", "2xl")}
-                fontWeight={600}
-                opacity={0.9}
-              >
-                progress
-              </Heading>
-              <Progress
-                value={course.lessonProgressRatio * 100}
-                colorScheme="orange"
-                w={responsive("", "15em", "20em")}
-                borderRadius={"10px"}
-                size={responsive("", "md", "lg")}
-                bgColor={"var(--bg-color)"}
-              />
-              <Text>{course.lessonProgressRatio * 100 + "%"}</Text>
+          enroll && (
+            <Flex
+              flexDir={"column"}
+              align={"flex-end"}
+              gap={responsive("", ".75em", "1em")}
+            >
+              <Flex align={"center"} gap={responsive("", "1em", "2em")}>
+                <Heading
+                  fontSize={responsive("", "xl", "2xl")}
+                  fontWeight={600}
+                  opacity={0.9}
+                >
+                  progress
+                </Heading>
+                <Progress
+                  value={course.lessonProgressRatio * 100}
+                  colorScheme="orange"
+                  w={responsive("", "15em", "20em")}
+                  borderRadius={"10px"}
+                  size={responsive("", "md", "lg")}
+                  bgColor={"var(--bg-color)"}
+                />
+                <Text>{course.lessonProgressRatio * 100 + "%"}</Text>
+              </Flex>
             </Flex>
-          </Flex>
+          )
         )}
       </Flex>
       {isLoading ? (
@@ -333,7 +448,56 @@ const Course = () => {
             p={responsive("", "1em", "2em 1em")}
           >
             <Stack gap={responsive("", ".75em", "1em")}>
-              {isEditing ? (
+              <FormControl pos={"relative"}>
+                {course.imageUrl !== "" && course.imageUrl ? (
+                  <Image
+                    src={"http://localhost:5000/" + course.imageUrl}
+                    borderRadius={"10px"}
+                    pos={"relative"}
+                    top={0}
+                    left={0}
+                  ></Image>
+                ) : (
+                  <Skeleton
+                    h={responsive("", "1em", "10em")}
+                    w={responsive("", "10em", "15em")}
+                    borderRadius={"10px"}
+                  />
+                )}
+                <FormLabel
+                  htmlFor="image"
+                  pos={"absolute"}
+                  top={"0"}
+                  left={0}
+                  w={"100%"}
+                  h={"100%"}
+                  opacity={0.5}
+                  display={"flex"}
+                  alignItems={"center"}
+                  justifyContent={"center"}
+                  cursor={"pointer"}
+                >
+                  {isCourseEditing && (
+                    <i
+                      class="fi fi-rr-camera"
+                      style={{
+                        position: "relative",
+                        top: "2px",
+                        fontSize: responsive("", "8em", "10em"),
+                      }}
+                    ></i>
+                  )}
+                </FormLabel>
+                <Input
+                  type="file"
+                  onChange={(e) => handleCourseChangeImage(e)}
+                  accept="image/*"
+                  name="image"
+                  display={"none"}
+                  id="image"
+                ></Input>
+              </FormControl>
+              {isCourseEditing ? (
                 <FormControl>
                   <Input
                     autoFocus
@@ -360,25 +524,8 @@ const Course = () => {
                   {course.title}
                 </Heading>
               )}
-              <Flex gap={".5em"}>
-                <Text opacity={0.9}>{course.point ? course.point : 0}</Text>
-                {starList.length > 0 ? (
-                  starList.map((star) => (
-                    <StarIcon
-                      key={star}
-                      color={"var(--accent-color)"}
-                      pos={"relative"}
-                      top={"2.5px"}
-                    ></StarIcon>
-                  ))
-                ) : (
-                  <i
-                    class="fi fi-rr-star"
-                    style={{ position: "relative", top: "2px" }}
-                  ></i>
-                )}
-              </Flex>
-              {isEditing ? (
+
+              {isCourseEditing ? (
                 <FormControl>
                   <Input
                     type={"text"}
@@ -399,9 +546,27 @@ const Course = () => {
                   {course.description}
                 </Text>
               )}
+              <Flex gap={".5em"}>
+                <Text opacity={0.9}>{course.point ? course.point : 0}</Text>
+                {starList.length > 0 ? (
+                  starList.map((star) => (
+                    <StarIcon
+                      key={star}
+                      color={"var(--accent-color)"}
+                      pos={"relative"}
+                      top={"2.5px"}
+                    ></StarIcon>
+                  ))
+                ) : (
+                  <i
+                    class="fi fi-rr-star"
+                    style={{ position: "relative", top: "2px" }}
+                  ></i>
+                )}
+              </Flex>
             </Stack>
             <Flex align={"center"} justify={"space-between"}>
-              {isEditing ? (
+              {isCourseEditing ? (
                 <FormControl>
                   <Input
                     type={"text"}
@@ -430,7 +595,7 @@ const Course = () => {
                 </Text>
               )}
               <ButtonGroup>
-                {isEditing && (
+                {isCourseEditing && (
                   <Button
                     border={"1px solid transparent"}
                     bgColor={"var(--secondary-color)"}
@@ -451,26 +616,36 @@ const Course = () => {
                   bgColor={"var(--accent-color)"}
                   fontSize={responsive("", "sm", "md")}
                   onClick={() => {
-                    account &&
-                      course.ownerName === account.username &&
-                      setIsEditing(!isEditing);
-                    isEditing &&
-                      setCourseUpdateData({
-                        title: course.title,
-                        description: course.description,
-                        price: course.price,
-                      });
+                    if (account && course.ownerName === account.username) {
+                      setIsCourseEditing(!isCourseEditing);
+                      if (isCourseEditing) {
+                        setCourseUpdateData({
+                          title: course.title,
+                          description: course.description,
+                          price: course.price,
+                        });
+                        setLessons();
+                      }
+                    } else if (
+                      account &&
+                      course.ownerName !== account.username &&
+                      !enroll
+                    ) {
+                      handleEnrollCourse();
+                    } else if (!account) {
+                      navigate("/login");
+                    }
                   }}
                   color={"white"}
                   _hover={{
                     bgColor: "var(--bg-color)",
-                    color: "orange",
+                    color: "var(--accent-color)",
                     border: "1px solid var(--accent-color)",
                   }}
                 >
                   {account
                     ? course.ownerName === account.username
-                      ? isEditing
+                      ? isCourseEditing
                         ? "Reset"
                         : "Edit"
                       : enroll
@@ -485,6 +660,7 @@ const Course = () => {
             borderRadius={"10px"}
             rowSpan={6}
             colSpan={1}
+            border={"2px dashed var(--secondary-color)"}
             bgColor={"var(--bg-color)"}
             p={responsive("", "1em", "2em 1em")}
           >
@@ -532,6 +708,7 @@ const Course = () => {
           <GridItem
             borderRadius={"10px"}
             rowSpan={19}
+            border={"2px dashed var(--secondary-color)"}
             colSpan={1}
             bgColor={"var(--bg-color)"}
             p={responsive("", "1em", "2em 1em")}
@@ -554,12 +731,12 @@ const Course = () => {
                 </Heading>
               </Flex>
               <ButtonGroup>
-                {isEditing && (
+                {isLessonsEditing && (
                   <Button
                     border={"1px solid transparent"}
                     bgColor={"var(--secondary-color)"}
                     fontSize={responsive("", "sm", "md")}
-                    onClick={() => handleCourseUpdateSubmit()}
+                    onClick={() => handleLessonDeleteSubmit()}
                     color={"white"}
                     _hover={{
                       bgColor: "var(--bg-color)",
@@ -570,46 +747,46 @@ const Course = () => {
                     Save
                   </Button>
                 )}
-                <Button
-                  border={"1px solid transparent"}
-                  bgColor={"var(--accent-color)"}
-                  fontSize={responsive("", "sm", "md")}
-                  onClick={() => {
-                    account &&
-                      course.ownerName === account.username &&
-                      setIsEditing(!isEditing);
-                    isEditing &&
-                      setCourseUpdateData({
-                        title: course.title,
-                        description: course.description,
-                        price: course.price,
-                      });
-                  }}
-                  color={"white"}
-                  _hover={{
-                    bgColor: "var(--bg-color)",
-                    color: "orange",
-                    border: "1px solid var(--accent-color)",
-                  }}
-                >
-                  {account
-                    ? course.ownerName === account.username
-                      ? "Edit"
-                      : enroll
-                      ? "Continue"
-                      : "Enroll now"
-                    : "Login to enroll"}
-                </Button>
+
+                {account?.username === course?.ownerName && (
+                  <Button
+                    border={"1px solid transparent"}
+                    bgColor={"var(--accent-color)"}
+                    fontSize={responsive("", "sm", "md")}
+                    onClick={() => {
+                      account &&
+                        course.ownerName === account.username &&
+                        setIsLessonsEditing(!isLessonsEditing);
+                      if (isLessonsEditing) {
+                        setCourseUpdateData({
+                          title: course.title,
+                          description: course.description,
+                          price: course.price,
+                        });
+                      }
+
+                      refreshLessons();
+                      setDeletedLessonList([]);
+                    }}
+                    color={"white"}
+                    _hover={{
+                      bgColor: "var(--bg-color)",
+                      color: "orange",
+                      border: "1px solid var(--accent-color)",
+                    }}
+                  >
+                    {isLessonsEditing ? "Reset" : "Edit"}
+                  </Button>
+                )}
               </ButtonGroup>
             </Flex>
             <Flex
               flexDir={"column"}
               gap={responsive("", "1em", "2em")}
               mt={responsive("", "1em", "2em")}
-              px={responsive("", "1em", "2em")}
             >
-              {lessons &&
-                lessons.map((lesson, index) => (
+              {filteredLessonList.length > 0 &&
+                filteredLessonList.map((lesson, index) => (
                   <Flex key={index} align={"center"} justify={"space-between"}>
                     <Flex
                       gap={".5em"}
@@ -622,20 +799,9 @@ const Course = () => {
                         borderRadius={"full"}
                         bgColor={"var(--accent-color)"}
                       ></Box>
-                      <ChakraLink
-                        as={Link}
-                        onClick={() => handleLessonClick()}
-                        to={
-                          enroll ||
-                          (account && account.username === course.ownerName)
-                            ? `/lesson/${lesson.slug}`
-                            : ""
-                        }
-                        fontWeight={500}
-                        opacity={0.9}
-                      >
+                      <Text fontWeight={500} opacity={0.9}>
                         {lesson.title}
-                      </ChakraLink>
+                      </Text>
                     </Flex>
                     <Text
                       maxW={"20%"}
@@ -655,8 +821,84 @@ const Course = () => {
                           : Math.round(lesson.duration / 60) + " min"
                         : "0 min"}
                     </Text>
+                    <Flex align={"center"} gap={"1em"}>
+                      <Button
+                        border={"1px solid transparent"}
+                        bgColor={"var(--accent-color)"}
+                        fontSize={responsive("", "sm", "md")}
+                        color={"white"}
+                        _hover={{
+                          bgColor: "var(--bg-color)",
+                          color: "orange",
+                          border: "1px solid var(--accent-color)",
+                        }}
+                      >
+                        <ChakraLink
+                          as={Link}
+                          onClick={() => handleLessonClick()}
+                          to={
+                            enroll ||
+                            (account && account.username === course.ownerName)
+                              ? `/${page}/course/${slug}/lessons/${lesson.slug}`
+                              : ""
+                          }
+                        >
+                          View
+                        </ChakraLink>
+                      </Button>
+                      {isLessonsEditing && (
+                        <Button
+                          variant="outline"
+                          p=".5em"
+                          minH="max-content"
+                          minW="max-content"
+                          color={"white"}
+                          onClick={() => handleDeleteLesson(lesson.title)}
+                          fontSize={responsive("", "sm", "md")}
+                          _hover={{
+                            bgColor: "var(--bg-color)",
+                            color: "var(--accent-color)",
+                          }}
+                          bgColor={"var(--accent-color)"}
+                        >
+                          <i
+                            className="fi fi-rr-trash"
+                            style={{ position: "relative", top: "2px" }}
+                          />
+                        </Button>
+                      )}
+                    </Flex>
                   </Flex>
                 ))}
+              {isLessonsEditing && (
+                <Button
+                  border={"2px dashed transparent"}
+                  borderRadius={"7px"}
+                  bgColor={"var(--secondary-color)"}
+                  color={"white"}
+                  px={responsive("", "1em", "1em")}
+                  fontSize={responsive("", "sm", "md")}
+                  transition={"0.3s ease"}
+                  _hover={{
+                    bgColor: "var(--bg-color)",
+                    color: "var(--secondary-color)",
+                    border: "2px dashed var(--secondary-color)",
+                  }}
+                >
+                  <ChakraLink
+                    as={Link}
+                    to={`/create-course?course=${slug}`}
+                    w={"100%"}
+                    h={"100%"}
+                    display={"flex"}
+                    _hover={{ textDecor: "none" }}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                  >
+                    Add lesson
+                  </ChakraLink>
+                </Button>
+              )}
             </Flex>
           </GridItem>
           <GridItem

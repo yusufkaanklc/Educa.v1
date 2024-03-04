@@ -5,6 +5,7 @@ import Login from "./Login";
 import Course from "./Course";
 import AllCourses from "./AllCourses";
 import Dashboard from "./Dashboard";
+import Lesson from "./Lesson";
 import { useContext, useEffect } from "react";
 import dataContext from "../utils/contextApi";
 import Cookies from "js-cookie";
@@ -80,7 +81,7 @@ const Routers = () => {
       // Tek bir toast çağrısıyla tüm hataları göster
       toast({
         title: "Error",
-        description: `Error: ${errorMessage}`,
+        description: errorMessage,
         errorMessage,
         status: "error",
         duration: 5000,
@@ -98,6 +99,10 @@ const Routers = () => {
         <Route path="/" element={<Home />} />
         <Route path="/:page/course/:slug" element={<Course />} />
         <Route path="/all-courses" element={<AllCourses />} />
+        <Route
+          path="/:page/course/:courseSlug/lessons/:lessonSlug"
+          element={<Lesson />}
+        />
         <Route
           path="/login"
           element={isLogin ? <Navigate to="/" replace /> : <Login />}

@@ -34,4 +34,19 @@ const createLesson = async (courseSlug, lessonData) => {
   }
 };
 
-export { getLessons, createLesson };
+const deleteLesson = async (courseSlug, lessonSlug) => {
+  try {
+    const { data } = await axios.delete(
+      `/courses/${courseSlug}/lessons/${lessonSlug}`
+    );
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
+
+export { getLessons, createLesson, deleteLesson };

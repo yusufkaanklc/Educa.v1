@@ -2,7 +2,8 @@ import Category from "../models/Category.js";
 import Course from "../models/Course.js";
 import Lesson from "../models/Lesson.js";
 import slugify from "slugify";
-import fs from "node:fs/promises";
+import { unlink } from "fs/promises";
+
 import errorHandling from "../middlewares/errorHandling.js";
 
 const createCourse = async (req, res) => {
@@ -310,31 +311,35 @@ const getCourse = async (req, res) => {
 const updateCourse = async (req, res) => {
   try {
     const courseSlug = req.params.courseSlug;
-    const { title, description, category, imageUrl, price } = req.body;
-    if (
-      title === "" &&
-      description === "" &&
-      price === "" &&
-      category === "" &&
-      imageUrl === ""
-    )
+    const { title, description, price } = req.body;
+
+    if (title === "" && description === "" && price === "")
       throw { code: 1, message: "Fields cannot be empty" };
 
     const newSlug = slugify(title, { lower: true, strict: true });
+
+    let updateData = {};
+    if (title !== "" && description) {
+      updateData.title = title;
+      updateData.slug = newSlug;
+    }
+    if (description !== "" && description) updateData.description = description;
+    if (req.uploadedImageUrl) updateData.imageUrl = req.uploadedImageUrl;
+
+    const beforeCourse = await Course.findOne({ slug: courseSlug });
+
     const course = await Course.findOneAndUpdate(
       { slug: courseSlug },
-      {
-        title,
-        description,
-        category,
-        imageUrl,
-        price,
-        slug: newSlug,
-      },
+      updateData,
       { new: true }
     );
+
     if (!course) {
       throw { code: 2, message: "Course couldnt be updated" };
+    }
+
+    if (course.imageUrl && course.imageUrl !== beforeCourse.imageUrl) {
+      await unlink(beforeCourse.imageUrl);
     }
     res.status(200).json({ message: "Course updated" });
   } catch (error) {

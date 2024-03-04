@@ -105,4 +105,25 @@ const updateAccount = async (input) => {
   }
 };
 
-export { getUsers, registerUser, loginUser, getAccount, logout, updateAccount };
+const enrollCourse = async (courseSlug) => {
+  try {
+    const { data } = await axios.post(`/courses/${courseSlug}/enroll`);
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
+
+export {
+  getUsers,
+  registerUser,
+  loginUser,
+  getAccount,
+  logout,
+  updateAccount,
+  enrollCourse,
+};

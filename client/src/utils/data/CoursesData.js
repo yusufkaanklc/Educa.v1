@@ -64,7 +64,11 @@ const createCourse = async (courseData) => {
 
 const updateCourse = async (courseSlug, courseData) => {
   try {
-    const { data } = await axios.put(`/courses/${courseSlug}`, courseData);
+    const { data } = await axios.put(`/courses/${courseSlug}`, courseData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal

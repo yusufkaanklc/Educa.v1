@@ -5,7 +5,6 @@ import sharp from "sharp";
 const uploadFile = async (file, fileType) => {
   const uploadDir = join("public", "uploads");
   const fileName = file.name;
-  console.log(file.name);
   let uploadPath;
   fileType === "image"
     ? (uploadPath = join(
@@ -52,7 +51,6 @@ const fileUpload = () => {
         }
 
         const uploadPath = await uploadFile(uploadedFile, fileType);
-
         // Middleware'den sonraki fonksiyona dosya yolu bilgisini ekleyin
         req[fileType === "image" ? "uploadedImageUrl" : "uploadedVideoUrl"] =
           uploadPath;
@@ -60,7 +58,6 @@ const fileUpload = () => {
 
       next();
     } catch (error) {
-      console.log(error);
       res.status(500).json({ message: error.message });
     }
   };

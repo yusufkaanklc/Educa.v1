@@ -20,10 +20,11 @@ import {
   Center,
   Button,
   useToast,
+  Skeleton,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
-import { Link } from "react-router-dom";
-import { createCourse } from "../utils/data/CoursesData";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { createCourse, getCourse } from "../utils/data/CoursesData";
 import { createLesson } from "../utils/data/LessonsData";
 import { getCategories } from "../utils/data/CategoryData";
 const CourseCreate = () => {
@@ -34,6 +35,8 @@ const CourseCreate = () => {
     setCourseCreateData,
     courseCreateData,
     setErrors,
+    course,
+    setCourse,
     setSearchQuery,
     searchQuery,
     errors,
@@ -45,6 +48,9 @@ const CourseCreate = () => {
 
   const [categories, setCategories] = useState([]);
   const [showOptions, setShowOptions] = useState(false);
+
+  const [searchParams] = useSearchParams();
+  const courseSlug = searchParams.get("course");
 
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
@@ -62,6 +68,13 @@ const CourseCreate = () => {
       ...courseCreateData,
       [name]: value,
     });
+  };
+
+  const navigate = useNavigate();
+
+  const handleClick = (link) => {
+    setTargetScroll(link);
+    navigate("/");
   };
 
   const toast = useToast();
@@ -107,9 +120,9 @@ const CourseCreate = () => {
         .catch((error) => setErrors([...errors, error]));
     } else {
       toast({
-        title: "Error",
+        title: "Warning",
         description: "Course fields or lessons is empty ",
-        status: "error",
+        status: "warning",
         duration: 5000,
         isClosable: true,
       });
@@ -134,42 +147,51 @@ const CourseCreate = () => {
 
   const handleLessonCreateSubmit = async (courseSlug) => {
     try {
-      for (const lesson of createdLessonsList) {
-        const lessonFormData = new FormData();
-        lessonFormData.append("title", lesson.title);
-        lessonFormData.append("description", lesson.description);
-        lessonFormData.append("notes", lesson.notes);
-        lessonFormData.append("video", lesson.video);
+      if (createdLessonsList.length > 0) {
+        for (const lesson of createdLessonsList) {
+          const lessonFormData = new FormData();
+          lessonFormData.append("title", lesson.title);
+          lessonFormData.append("description", lesson.description);
+          lessonFormData.append("notes", lesson.notes);
+          lessonFormData.append("video", lesson.video);
 
-        const getDuration = async () => {
-          const url = URL.createObjectURL(lesson.video);
-          return new Promise((resolve) => {
-            const video = document.createElement("video");
-            video.muted = true;
-            const videoSource = document.createElement("source");
-            videoSource.src = url;
-            video.preload = "metadata";
-            video.appendChild(videoSource);
-            video.onloadedmetadata = () => {
-              resolve(Math.round(video.duration));
-            };
-          });
-        };
+          const getDuration = async () => {
+            const url = URL.createObjectURL(lesson.video);
+            return new Promise((resolve) => {
+              const video = document.createElement("video");
+              video.muted = true;
+              const videoSource = document.createElement("source");
+              videoSource.src = url;
+              video.preload = "metadata";
+              video.appendChild(videoSource);
+              video.onloadedmetadata = () => {
+                resolve(Math.round(video.duration));
+              };
+            });
+          };
 
-        console.log(await getDuration());
-        lessonFormData.append("duration", await getDuration());
+          lessonFormData.append("duration", await getDuration());
 
-        await createLesson(courseSlug, lessonFormData);
+          await createLesson(courseSlug, lessonFormData);
+        }
+
+        setCreatedLessonsList([]);
+        toast({
+          title: "Success",
+          description: "Lessons created successfully",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Warning",
+          description: "No lesson saved",
+          status: "warning",
+          duration: 5000,
+          isClosable: true,
+        });
       }
-
-      setCreatedLessonsList([]);
-      toast({
-        title: "Success",
-        description: "Lessons created successfully",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
     } catch (error) {
       setErrors([...errors, error]);
       toast({
@@ -188,10 +210,10 @@ const CourseCreate = () => {
     );
     if (areFieldsEmpty) {
       toast({
-        title: "Error",
+        title: "Warning",
         description:
           "Course creation information is missing (title, description and video required)",
-        status: "error",
+        status: "warning",
         duration: 5000,
         isClosable: true,
       });
@@ -200,9 +222,9 @@ const CourseCreate = () => {
       createdLessonsList.includes(lessonCreateData)
     ) {
       toast({
-        title: "Error",
+        title: "Warning",
         description: "This Lesson already exist",
-        status: "error",
+        status: "warning",
         duration: 5000,
         isClosable: true,
       });
@@ -225,6 +247,12 @@ const CourseCreate = () => {
       })
       .catch((error) => setErrors([...errors, error]));
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (courseSlug) {
+      getCourse(courseSlug).then((data) => setCourse(data));
+    }
+  }, [courseSlug]);
 
   return (
     <Box
@@ -250,25 +278,42 @@ const CourseCreate = () => {
             Home
           </BreadcrumbLink>
         </BreadcrumbItem>
+        {courseSlug && (
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              as={Link}
+              to="/"
+              onClick={() => handleClick("courses")}
+              fontWeight={500}
+              opacity={0.9}
+            >
+              Courses
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        )}
         <BreadcrumbItem>
           <BreadcrumbLink
             fontWeight={500}
             opacity={0.9}
             as={Link}
-            to="/dashboard"
+            to={courseSlug ? `/courses/course/${courseSlug}` : "/dashboard"}
           >
-            Dashboard
+            {courseSlug ? course?.title : "Dashboard"}
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbItem>
           <BreadcrumbLink
             as={Link}
-            to="/create-course"
+            to={
+              courseSlug
+                ? `/create-course?course=${courseSlug}`
+                : "/create-course"
+            }
             onClick={() => setTargetScroll("")}
             fontWeight={500}
             opacity={0.9}
           >
-            Create Course
+            {courseSlug ? "Create lessons" : "Create course"}
           </BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
@@ -278,7 +323,7 @@ const CourseCreate = () => {
           fontSize={responsive("", "2xl", "3xl")}
           color={"var(--secondary-color)"}
         >
-          Create Course
+          {courseSlug ? "Create lessons" : "Create course"}
         </Heading>
       </Box>
       <Grid
@@ -288,6 +333,7 @@ const CourseCreate = () => {
         gap={10}
       >
         <GridItem
+          position={"relative"}
           rowSpan={10}
           colSpan={2}
           display={"flex"}
@@ -298,6 +344,25 @@ const CourseCreate = () => {
           bgColor={"var(--bg-color)"}
           border={"2px dashed var(--secondary-color)"}
         >
+          {courseSlug && (
+            <Center
+              backdropFilter={"blur(10px)"}
+              zIndex={1}
+              pos={"absolute"}
+              top={0}
+              left={0}
+              w={"100%"}
+              h={"100%"}
+            >
+              <Text
+                fontWeight={"500"}
+                opacity={"0.9"}
+                fontSize={responsive("", "sm", "md")}
+              >
+                currently unavailable
+              </Text>
+            </Center>
+          )}
           <Text
             fontWeight={"500"}
             fontSize={responsive("", "md", "lg")}
@@ -464,7 +529,11 @@ const CourseCreate = () => {
             fontSize={responsive("", "md", "lg")}
             fontWeight={"500"}
             borderRadius={"10px"}
-            onClick={() => handleCreateCourseSubmit()}
+            onClick={() =>
+              courseSlug
+                ? handleLessonCreateSubmit(courseSlug)
+                : handleCreateCourseSubmit()
+            }
             border={"2px dashed var(--secondary-color)"}
             p={responsive("", "1em", "1em")}
             color={"white"}
@@ -476,7 +545,7 @@ const CourseCreate = () => {
               cursor: "pointer",
             }}
           >
-            Create Course
+            Create
           </Center>
         </GridItem>
 

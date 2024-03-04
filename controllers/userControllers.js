@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import Category from "../models/Category.js";
 import Comment from "../models/Comment.js";
-import { unlink } from "node:fs/promises";
+import { unlink } from "fs/promises";
 import bcrypt from "bcrypt";
 import Course from "../models/Course.js";
 import errorHandling from "../middlewares/errorHandling.js";
@@ -19,11 +19,6 @@ const register = async (req, res) => {
     if (lowerCaseRole === "teacher" && !profession) {
       throw { code: 4, message: "Profession is required" };
     }
-
-    // const existingUser = await User.findOne({ email });
-    // if (existingUser) {
-    //   throw { code: 5, message: "User already exists" };
-    // }
 
     const userData = {
       username,

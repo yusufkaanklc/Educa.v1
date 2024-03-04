@@ -1,5 +1,5 @@
 const errorHandling = (error, req, res) => {
-  let message = `Bir hata oluştu: ${error.message}.`;
+  let message = error.message;
   let statusCode = 500; // Varsayılan olarak iç sunucu hatası
 
   switch (error.code) {

@@ -543,7 +543,15 @@ const Dashboard = () => {
                     transition={"all .3s ease"}
                   >
                     <Text fontWeight={"500"}>{lesson.title}</Text>
-
+                    <Text
+                      fontWeight={"500"}
+                      textOverflow={"ellipsis"}
+                      overflow={"hidden"}
+                      maxW={"30%"}
+                      whiteSpace={"nowrap"}
+                    >
+                      {lesson.description}
+                    </Text>
                     <Flex
                       fontWeight={"500"}
                       align={"center"}
@@ -569,6 +577,7 @@ const Dashboard = () => {
                         </Text>
                       </Flex>
                     </Flex>
+
                     <Button
                       variant={"outline"}
                       bgColor={"var(--accent-color)"}
