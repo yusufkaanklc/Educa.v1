@@ -6,7 +6,6 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-  Skeleton,
   ButtonGroup,
   Text,
   Heading,
@@ -16,7 +15,6 @@ import {
   Image,
   Center,
   Textarea,
-  position,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import { useContext, useEffect, useState } from "react";

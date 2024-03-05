@@ -5,13 +5,17 @@ import sharp from "sharp";
 const uploadFile = async (file, fileType) => {
   const uploadDir = join("public", "uploads");
   const fileName = file.name;
+  const cleanedFileName = fileName.replace(/[#]/g, ""); // Remove all '#' characters
   let uploadPath;
-  fileType === "image"
-    ? (uploadPath = join(
-        uploadDir,
-        `${fileType}_${fileName.split(".").slice(0, -1).join(".")}.webp`
-      ))
-    : (uploadPath = join(uploadDir, `${fileType}_${fileName}`));
+  if (fileType === "image") {
+    uploadPath = join(
+      uploadDir,
+      `${fileType}_${cleanedFileName.split(".").slice(0, -1).join(".")}.webp`
+    );
+  } else {
+    uploadPath = join(uploadDir, `${fileType}_${fileName}`);
+  }
+
   // Dosya yolu kontrol ediliyor, eğer yoksa oluşturuluyor
   try {
     await access(uploadPath, constants.F_OK); // Burada uploadPath kontrol ediliyor

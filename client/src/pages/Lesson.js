@@ -3,10 +3,17 @@ import {
   Grid,
   GridItem,
   Breadcrumb,
+  Flex,
   BreadcrumbItem,
+  Text,
+  Heading,
+  Center,
+  Button,
+  Stack,
   BreadcrumbLink,
 } from "@chakra-ui/react";
-import { ChevronRightIcon } from "@chakra-ui/icons";
+import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
+import ReactPlayer from "react-player";
 import { useContext, useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import dataContext from "../utils/contextApi";
@@ -24,6 +31,8 @@ const Lesson = () => {
   } = useContext(dataContext);
   const [lessons, setLessons] = useState([]);
   const [lesson, setLesson] = useState({});
+  const [lessonPoint, setLessonPoint] = useState(null);
+  const [starList, setStarList] = useState([]);
 
   const { page, courseSlug, lessonSlug } = useParams();
   const responsive = (mobile, laptop, desktop) => {
@@ -53,7 +62,16 @@ const Lesson = () => {
   useEffect(() => {
     const currentLesson = lessons.filter((el) => el.slug === lessonSlug)[0];
     setLesson(currentLesson);
+    setLessonPoint(currentLesson && currentLesson.point);
   }, [lessons]);
+
+  useEffect(() => {
+    let starLisst = [];
+    for (let i = 0; i < lessonPoint; i++) {
+      starLisst.push(i);
+    }
+    setStarList(starLisst);
+  }, [lessonPoint]);
 
   return (
     <Box
@@ -133,6 +151,121 @@ const Lesson = () => {
           </BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
+      <Grid
+        mt={responsive("", "2em", "3em")}
+        templateRows="repeat(auto-fill, minmax(1em, auto))"
+        templateColumns={responsive("1fr", "repeat(4, 1fr)", "repeat(4, 1fr)")}
+        gap={10}
+      >
+        <GridItem
+          colSpan={1}
+          rowSpan={17}
+          display={"flex"}
+          flexDir={"column"}
+          gap={"1em"}
+          maxW={"22em"}
+          p={"1em"}
+          borderRadius={"10px"}
+          bgColor={"var(--bg-color)"}
+          border={"2px dashed var(--secondary-color)"}
+        >
+          <Heading fontSize={responsive("", "md", "lg")} fontWeight={"600"}>
+            Lessons
+          </Heading>
+          {lessons &&
+            lessons.map((lesson, index) => (
+              <Flex
+                opacity={lesson.slug === lessonSlug ? 1 : 0.9}
+                _hover={{ border: "2px dashed #cfcfcf", opacity: "1" }}
+                border={
+                  lesson.slug === lessonSlug
+                    ? "2px dashed #cfcfcf"
+                    : "2px dashed transparent"
+                }
+                key={index}
+                align={"center"}
+                justify={"space-between"}
+                bgColor={"white"}
+                borderRadius={"7px"}
+                p={".5em"}
+              >
+                <Flex gap={".5em"} align={"center"}>
+                  <Box
+                    w={".5em"}
+                    h={".5em"}
+                    borderRadius={".5em"}
+                    bgColor={"var(--accent-color)"}
+                  ></Box>
+                  <Text
+                    fontWeight={500}
+                    overflow={"hidden"}
+                    textOverflow={"ellipsis"}
+                    whiteSpace={"nowrap"}
+                    fontSize={responsive("", "sm", "md")}
+                  >
+                    {lesson.title}
+                  </Text>
+                </Flex>
+              </Flex>
+            ))}
+        </GridItem>
+        <GridItem
+          colSpan={3}
+          rowSpan={7}
+          p={"1em"}
+          borderRadius={"10px"}
+          bgColor={"var(--bg-color)"}
+          border={"2px dashed var(--secondary-color)"}
+        >
+          <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
+            <Flex flexDir={"column"} gap={"1em"}>
+              <Heading
+                fontSize={responsive("", "2xl", "3xl")}
+                fontWeight={600}
+                color={"var(--secondary-color)"}
+              >
+                {lesson?.title}
+              </Heading>
+              <Text>{lesson?.description}</Text>
+            </Flex>
+            <Flex
+              align={"center"}
+              gap={".5em"}
+              fontSize={responsive("", "sm", "md")}
+            >
+              <Box color={"var(--accent-color)"}>
+                {starList.length > 0 &&
+                  starList.map((star) => (
+                    <StarIcon
+                      key={star}
+                      style={{ position: "relative", bottom: "3px" }}
+                    ></StarIcon>
+                  ))}
+              </Box>
+              <Text>({lesson?.comments && lesson.comments.length})</Text>
+            </Flex>
+          </Flex>
+        </GridItem>
+        <GridItem
+          colSpan={3}
+          rowSpan={10}
+          p={"1em"}
+          borderRadius={"10px"}
+          bgColor={"var(--bg-color)"}
+          border={"2px dashed var(--secondary-color)"}
+        >
+          <Center h={"100%"} borderRadius={"10px"} overflow={"hidden"}>
+            {lesson && lesson.videoUrl && (
+              <ReactPlayer
+                controls
+                width={"100%"}
+                height={"100%"}
+                url={"http://localhost:5000/" + lesson.videoUrl}
+              ></ReactPlayer>
+            )}
+          </Center>
+        </GridItem>
+      </Grid>
     </Box>
   );
 };

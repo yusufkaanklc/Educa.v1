@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import Category from "../models/Category.js";
 import Comment from "../models/Comment.js";
-import { unlink } from "fs/promises";
+import { unlink, access, constants } from "fs/promises";
 import bcrypt from "bcrypt";
 import Course from "../models/Course.js";
 import errorHandling from "../middlewares/errorHandling.js";
@@ -235,7 +235,9 @@ const accountUpdateFunc = async (userId, req, res) => {
 
       // Eski resmi sil
       if (user.image && user.image !== updatedFields.image) {
-        await unlink(user.image);
+        if (await access(lesson.videoUrl, constants.F_OK)) {
+          await unlink(lesson.videoUrl);
+        }
       }
     }
 

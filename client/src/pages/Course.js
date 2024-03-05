@@ -691,13 +691,28 @@ const Course = () => {
                   {course.ownerName}
                 </Center>
               </Box>
-              <Avatar
-                border={"2px dashed var(--secondary-color)"}
-                src={"http://localhost:5000/" + course.ownerImage}
-                bgColor={"var(--secondary-color)"}
-                name={course.ownerName}
-                size={responsive("", "xl", "xl")}
-              ></Avatar>
+              {course.ownerImage ? (
+                <Box
+                  border={"2px solid var(--secondary-color)"}
+                  w={responsive("", "5.5em", "6.5em")}
+                  h={responsive("", "5.5em", "6.5em")}
+                  borderRadius={"full"}
+                  overflow={"hidden"}
+                >
+                  <Image
+                    src={"http://localhost:5000/" + course.ownerImage}
+                    bgColor={"var(--secondary-color)"}
+                    name={course.ownerName}
+                  />
+                </Box>
+              ) : (
+                <Avatar
+                  border={"2px dashed var(--secondary-color)"}
+                  bgColor={"var(--secondary-color)"}
+                  name={course.ownerName}
+                  size={responsive("", "xl", "xl")}
+                ></Avatar>
+              )}
             </Flex>
 
             <Text fontSize={responsive("", "xs", "sm")}>

@@ -106,8 +106,21 @@ const CourseCreate = () => {
     );
 
     if (!areFieldsEmptyCourse && createdLessonsList.length > 0) {
+      // Show loading toast
+      const loadingToastId = toast({
+        title: "Loading",
+        description: "Creating course...",
+        status: "info",
+        duration: null, // Set duration to null to keep the toast until it's manually closed
+        isClosable: false,
+      });
+
       createCourse(courseFormData)
         .then((data) => {
+          // Hide loading toast
+          toast.close(loadingToastId);
+
+          // Show success toast
           toast({
             title: "Success",
             description: "Course created successfully",
@@ -115,13 +128,28 @@ const CourseCreate = () => {
             duration: 5000,
             isClosable: true,
           });
+
           handleLessonCreateSubmit(data.slug);
         })
-        .catch((error) => setErrors([...errors, error]));
+        .catch((error) => {
+          // Hide loading toast
+          toast.close(loadingToastId);
+
+          // Show error toast
+          toast({
+            title: "Error",
+            description: "An error occurred while creating the course",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+
+          setErrors([...errors, error]);
+        });
     } else {
       toast({
         title: "Warning",
-        description: "Course fields or lessons is empty ",
+        description: "Course fields or lessons are empty",
         status: "warning",
         duration: 5000,
         isClosable: true,
@@ -147,6 +175,13 @@ const CourseCreate = () => {
 
   const handleLessonCreateSubmit = async (courseSlug) => {
     try {
+      const loadingToastId = toast({
+        title: "Loading",
+        description: "Creating lessons...",
+        status: "info",
+        duration: null, // Set duration to null to keep the toast until it's manually closed
+        isClosable: false,
+      });
       if (createdLessonsList.length > 0) {
         for (const lesson of createdLessonsList) {
           const lessonFormData = new FormData();
@@ -172,7 +207,9 @@ const CourseCreate = () => {
 
           lessonFormData.append("duration", await getDuration());
 
-          await createLesson(courseSlug, lessonFormData);
+          const data = await createLesson(courseSlug, lessonFormData);
+
+          data && toast.close(loadingToastId);
         }
 
         setCreatedLessonsList([]);
@@ -184,6 +221,7 @@ const CourseCreate = () => {
           isClosable: true,
         });
       } else {
+        toast.close(loadingToastId);
         toast({
           title: "Warning",
           description: "No lesson saved",

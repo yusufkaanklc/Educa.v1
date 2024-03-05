@@ -18,7 +18,7 @@ const lessonSchema = new Schema({
   duration: {
     type: Number,
   },
-  Notes: {
+  notes: {
     type: String,
   },
   comments: [

@@ -4,7 +4,7 @@ import Lesson from "../models/Lesson.js";
 import Comment from "../models/Comment.js";
 import errorHandling from "../middlewares/errorHandling.js";
 import { unlink } from "fs/promises";
-
+import fs from "fs";
 const createLesson = async (req, res) => {
   try {
     const { title, description, notes, duration } = req.body;
@@ -47,18 +47,71 @@ const getLessons = async (req, res) => {
   try {
     const { courseSlug } = req.params;
 
-    // Kursu bulun
+    // Kursu bul
     const course = await Course.findOne({ slug: courseSlug });
 
     // Kurs bulunamazsa 404 hatası dön
-    if (!course) throw { code: 2, message: "Course not found" };
+    if (!course) throw { code: 404, message: "Course not found" };
 
-    // Kursun derslerini bul ve liste oluştur
-    const lessonList = await Lesson.find({
-      _id: { $in: course.lessons },
-    }).populate({ path: "comments", select: " text point" });
+    // Kursun derslerini bul, yorum detaylarını dahil et ve ortalama puan hesapla
+    const lessons = await Lesson.aggregate([
+      {
+        $match: {
+          _id: { $in: course.lessons },
+        },
+      },
+      {
+        $lookup: {
+          from: "comments",
+          localField: "comments",
+          foreignField: "_id", // Yorumların hangi alana göre ilişkilendirildiğini kontrol et
+          as: "commentDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$commentDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id", // Gruplama için belirleyici bir alan (örneğin, dersin ID'si)
+          comments: { $addToSet: "$commentDetails" }, // Benzersiz yorumları bir diziye ekler
+          title: { $first: "$title" },
+          description: { $first: "$description" },
+          videoUrl: { $first: "$videoUrl" },
+          duration: { $first: "$duration" },
+          notes: { $first: "$notes" },
+          slug: { $first: "$slug" },
+          createdAt: { $first: "$createdAt" },
+          isFinished: { $first: "$isFinished" },
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          description: 1,
+          videoUrl: 1,
+          duration: 1,
+          notes: 1,
+          slug: 1,
+          createdAt: 1,
+          isFinished: 1,
+          comments: 1,
+          point: {
+            $cond: [
+              { $ne: [{ $size: "$comments" }, 0] }, // Burada "$comments" kullanılmalıdır.
+              { $avg: "$comments.point" }, // "$comments.point" üzerinden ortalama alınır.
+              null,
+            ],
+          },
+        },
+      },
+      { $sort: { createdAt: +1 } },
+    ]);
 
-    res.status(200).json(lessonList);
+    res.status(200).json(lessons);
   } catch (error) {
     errorHandling(error, req, res);
   }
@@ -156,7 +209,9 @@ const deleteLesson = async (req, res) => {
       $pull: { lessons: lesson._id },
     });
 
-    unlink(lesson.videoUrl);
+    if (fs.existsSync(lesson.videoUrl)) {
+      await unlink(lesson.videoUrl);
+    }
 
     // Kursa ait yorumları al
     const comments = await Comment.find({
