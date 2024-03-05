@@ -26,8 +26,12 @@ import {
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import dataContext from "../utils/contextApi";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { getCourse, updateCourse } from "../utils/data/CoursesData";
-import { enrollCourse, getAccount } from "../utils/data/UsersData";
+import {
+  getCourse,
+  getCourseState,
+  updateCourse,
+} from "../utils/data/CoursesData";
+import { enrollCourse } from "../utils/data/UsersData";
 import { deleteLesson, getLessons } from "../utils/data/LessonsData";
 import { useToast } from "@chakra-ui/react";
 
@@ -52,6 +56,8 @@ const Course = () => {
   const [deletedLessonList, setDeletedLessonList] = useState([]);
   const [isCourseEditing, setIsCourseEditing] = useState(false);
   const [isLessonsEditing, setIsLessonsEditing] = useState(false);
+  const [courseStates, setCourseStates] = useState(null);
+  const [progressValue, setProgressValue] = useState(null);
 
   const { slug, page } = useParams();
   const toast = useToast();
@@ -84,9 +90,9 @@ const Course = () => {
       });
     } else if (course.ownerName !== account.username && !enroll) {
       toast({
-        title: "Error",
+        title: "Warning",
         description: "Please enroll",
-        status: "error",
+        status: "warning",
         duration: 5000,
         isClosable: true,
       });
@@ -115,6 +121,13 @@ const Course = () => {
   };
 
   const handleCourseUpdateSubmit = () => {
+    const loadingToastId = toast({
+      title: "Loading",
+      description: "Updating course...",
+      status: "info",
+      duration: null, // Set duration to null to keep the toast until it's manually closed
+      isClosable: false,
+    });
     const courseUpdateFormData = new FormData();
     courseUpdateFormData.append("title", courseUpdateData.title);
     courseUpdateFormData.append("description", courseUpdateData.description);
@@ -122,6 +135,7 @@ const Course = () => {
     courseUpdateFormData.append("image", courseUpdateData.image);
     updateCourse(slug, courseUpdateFormData)
       .then(() => {
+        toast.close(loadingToastId);
         toast({
           title: "Success",
           description: "Course updated successfully",
@@ -132,7 +146,10 @@ const Course = () => {
         setIsCourseEditing(false);
         handleClick("courses");
       })
-      .catch((error) => setErrors([...errors, error]));
+      .catch((error) => {
+        toast.close(loadingToastId);
+        setErrors([...errors, error]);
+      });
   };
 
   const handleDeleteLesson = (lessonTitle) => {
@@ -150,12 +167,20 @@ const Course = () => {
   };
 
   const handleLessonDeleteSubmit = async () => {
+    const loadingToastId = toast({
+      title: "Loading",
+      description: "Updating course...",
+      status: "info",
+      duration: null, // Set duration to null to keep the toast until it's manually closed
+      isClosable: false,
+    });
     try {
       if (deletedLessonList.length > 0) {
         const deletionPromises = deletedLessonList.map(async (lesson) => {
           await deleteLesson(slug, lesson.slug);
         });
         await Promise.all(deletionPromises);
+        toast.close(loadingToastId);
         toast({
           title: "Success",
           description: "Lessons Deleted successfully",
@@ -179,6 +204,7 @@ const Course = () => {
         setIsLessonsEditing(false);
       }
     } catch (error) {
+      toast.close(loadingToastId);
       setErrors([...errors, error]);
     }
   };
@@ -243,13 +269,29 @@ const Course = () => {
       price: course.price,
       image: course.imageUrl,
     });
-  }, [course]);
-
-  useEffect(() => {
     if (course) {
       setIsLoading(false);
     }
+    if (course.slug) {
+      getCourseState(course.slug).then((data) => setCourseStates(data));
+    }
   }, [course]);
+
+  useEffect(() => {
+    const lessonStatesList =
+      courseStates?.lessonsStates.map((lesson) => lesson.state) ?? [];
+
+    const completedLessonCount = lessonStatesList.filter(
+      (state) => state
+    ).length;
+    const totalLessonCount = lessonStatesList.length;
+
+    const progress =
+      totalLessonCount > 0
+        ? (completedLessonCount / totalLessonCount) * 100
+        : 0;
+    setProgressValue(progress);
+  }, [courseStates]);
 
   useEffect(() => {
     setFilteredLessonList(lessons);
@@ -370,14 +412,14 @@ const Course = () => {
                   progress
                 </Heading>
                 <Progress
-                  value={course.lessonProgressRatio * 100}
+                  value={progressValue}
                   colorScheme="orange"
                   w={responsive("", "15em", "20em")}
                   borderRadius={"10px"}
                   size={responsive("", "md", "lg")}
                   bgColor={"var(--bg-color)"}
                 />
-                <Text>{course.lessonProgressRatio * 100 + "%"}</Text>
+                <Text>{progressValue + "%"}</Text>
               </Flex>
             </Flex>
           )
@@ -450,24 +492,30 @@ const Course = () => {
             <Stack gap={responsive("", ".75em", "1em")}>
               <FormControl pos={"relative"}>
                 {course.imageUrl !== "" && course.imageUrl ? (
-                  <Image
-                    src={"http://localhost:5000/" + course.imageUrl}
+                  <Center
                     borderRadius={"10px"}
-                    pos={"relative"}
-                    top={0}
-                    left={0}
-                  ></Image>
+                    maxH={responsive("", "16em", "20em")}
+                    overflow={"hidden"}
+                  >
+                    <Image
+                      src={"http://localhost:5000/" + course.imageUrl}
+                      borderRadius={"10px"}
+                      pos={"relative"}
+                      top={0}
+                      left={0}
+                    ></Image>
+                  </Center>
                 ) : (
                   <Skeleton
-                    h={responsive("", "1em", "10em")}
-                    w={responsive("", "10em", "15em")}
+                    h={responsive("", "16em", "20em")}
+                    w={responsive("", "36em", "44em")}
                     borderRadius={"10px"}
                   />
                 )}
                 <FormLabel
                   htmlFor="image"
                   pos={"absolute"}
-                  top={"0"}
+                  top={0}
                   left={0}
                   w={"100%"}
                   h={"100%"}
@@ -483,7 +531,7 @@ const Course = () => {
                       style={{
                         position: "relative",
                         top: "2px",
-                        fontSize: responsive("", "8em", "10em"),
+                        fontSize: responsive("", "5em", "7em"),
                       }}
                     ></i>
                   )}
@@ -624,7 +672,7 @@ const Course = () => {
                           description: course.description,
                           price: course.price,
                         });
-                        setLessons();
+                        setLessons([]);
                       }
                     } else if (
                       account &&

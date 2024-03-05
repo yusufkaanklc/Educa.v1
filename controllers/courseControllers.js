@@ -5,6 +5,7 @@ import slugify from "slugify";
 import { unlink } from "fs/promises";
 
 import errorHandling from "../middlewares/errorHandling.js";
+import CourseStates from "../models/CourseStates.js";
 
 const createCourse = async (req, res) => {
   try {
@@ -261,12 +262,6 @@ const getCourse = async (req, res) => {
           point: { $first: "$point" },
           duration: { $sum: "$lessonDetails.duration" },
           slug: { $first: "$slug" },
-          totalFinishedLessons: {
-            $sum: {
-              $cond: [{ $eq: ["$lessonDetails.isFinished", true] }, 1, 0],
-            },
-          }, // Tamamlanmış ders sayısı
-          totalLessons: { $sum: 1 }, // Toplam ders sayısı
         },
       },
       {
@@ -285,17 +280,6 @@ const getCourse = async (req, res) => {
           imageUrl: 1,
           point: 1,
           slug: 1,
-          totalLessons: 1,
-          totalFinishedLessons: 1,
-          lessonProgressRatio: {
-            $cond: [
-              { $eq: ["$totalLessons", 0] },
-              0,
-              {
-                $divide: ["$totalFinishedLessons", "$totalLessons"],
-              },
-            ],
-          },
         },
       },
     ];
@@ -394,18 +378,79 @@ const getAllCategories = async (req, res) => {
       filter.title = regexPattern;
     }
 
-    // Kategori adı parametresi boşsa, tüm kategorileri getirmek için filtre oluşturulmaz
     const categories = await Category.find(filter);
 
-    // Kategoriler bulunamadığında hata fırlat
     if (!categories || categories.length === 0) {
       throw { code: 2, message: "Category not found" };
     }
 
-    // Kategorileri başarıyla bulduğunda 200 OK yanıtı gönder
     res.status(200).json(categories);
   } catch (error) {
-    // Hata durumunda 500 hatası gönder
+    errorHandling(error, req, res);
+  }
+};
+
+const updateCourseOrLessonState = async (req, res) => {
+  try {
+    const { courseSlug, lessonSlug } = req.params;
+    const { stateType } = req.query;
+
+    if (!courseSlug || !lessonSlug)
+      throw { code: 1, message: "Course or Lesson slug is missing" };
+
+    if (stateType === "course") {
+      const course = await Course.findOne({ slug: courseSlug });
+      if (!course) throw { code: 2, message: "Course not found" };
+
+      const setState = await CourseStates.findOneAndUpdate(
+        { course: course._id, user: req.session.userID },
+        { courseState: true },
+        { new: true } // Güncellenmiş belgeyi döndür
+      );
+
+      if (setState) {
+        res.status(200).json({ message: "Course state updated successfully" });
+      } else {
+        throw { code: 6, message: "Course state could not be updated" };
+      }
+    }
+
+    if (stateType === "lesson") {
+      const lesson = await Lesson.findOne({ slug: lessonSlug });
+      if (!lesson) throw { code: 2, message: "Lesson not found" };
+
+      const setState = await CourseStates.findOneAndUpdate(
+        { user: req.session.userID, "lessonsStates.lesson": lesson._id },
+        { $set: { "lessonsStates.$.state": true } },
+        { new: true }
+      );
+
+      if (setState) {
+        res.status(200).json({ message: "Lesson state updated successfully" });
+      } else {
+        throw { code: 6, message: "Lesson state could not be updated" };
+      }
+    }
+  } catch (error) {
+    errorHandling(error, req, res);
+  }
+};
+
+const getCourseOrLessonState = async (req, res) => {
+  try {
+    const { courseSlug } = req.params;
+    console.log(courseSlug);
+    const course = await Course.findOne({ slug: courseSlug });
+    if (!course) throw { code: 2, message: "Course not found" };
+    const findState = await CourseStates.findOne({
+      course: course._id,
+      user: req.session.userID,
+    });
+    if (!findState)
+      throw { code: 2, message: "Course state relation not found" };
+
+    res.status(200).json(findState);
+  } catch (error) {
     errorHandling(error, req, res);
   }
 };
@@ -417,4 +462,6 @@ export default {
   updateCourse,
   deleteCourse,
   getAllCategories,
+  updateCourseOrLessonState,
+  getCourseOrLessonState,
 };

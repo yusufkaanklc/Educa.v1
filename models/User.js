@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import CourseStates from "./CourseStates.js";
 import bcrypt from "bcrypt";
 
 const userSchema = new Schema({
@@ -25,6 +26,10 @@ const userSchema = new Schema({
   },
   image: {
     type: String,
+  },
+  courseStates: {
+    type: Schema.Types.ObjectId,
+    ref: "coursestates",
   },
   introduce: {
     type: String,

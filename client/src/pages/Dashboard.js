@@ -20,7 +20,7 @@ import {
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import { useContext, useEffect, useState } from "react";
 import dataContext from "../utils/contextApi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -197,6 +197,19 @@ const Dashboard = () => {
       });
   };
 
+  const navigate = useNavigate();
+
+  const navigateLesson = (clickedLesson) => {
+    const findCourse = ownedCourses.find((course) =>
+      course.lessons.includes(clickedLesson)
+    );
+    if (findCourse) {
+      navigate(
+        `/dashboard/course/${findCourse.slug}/lessons/${clickedLesson.slug}`
+      );
+    }
+  };
+
   useEffect(() => {
     setOwnedCourses(
       courses.filter((course) => course?.ownership === account?.username)
@@ -229,10 +242,6 @@ const Dashboard = () => {
         .filter((comment) => comment !== null)
     );
   }, [ownedCourses]);
-
-  useEffect(() => {
-    console.log(lessons);
-  }, [lessons]);
 
   const updatedCommentTextList = comments.map((comment) => ({
     commentId: comment?._id,
@@ -386,7 +395,16 @@ const Dashboard = () => {
                           class="fi fi-rr-clock-three"
                           style={{ position: "relative", top: "2px" }}
                         ></i>
-                        <Text>45h</Text>
+                        <Text>
+                          {course.duration
+                            ? course.duration < 60
+                              ? course.duration + " sec"
+                              : Math.floor(course.duration / 60) +
+                                " min " +
+                                (course.duration % 60) +
+                                " sec"
+                            : "0 min"}
+                        </Text>
                       </Flex>
                       <Flex gap={".5em"} align={"center"}>
                         <i
@@ -581,30 +599,20 @@ const Dashboard = () => {
                       </Flex>
                     </Flex>
 
-                    <ChakraLink
-                      as={Link}
-                      // to={`/dashboard/course/${slug}/lessons/${lesson.slug}`}
-                      to={ownedCourses
-                        .filter((course) => course.lessons.includes(lesson))
-                        .map(
-                          (course) =>
-                            `/dashboard/course/${course.slug}/lessons/${lesson.slug}`
-                        )}
+                    <Button
+                      variant={"outline"}
+                      bgColor={"var(--accent-color)"}
+                      color={"white"}
+                      onClick={() => navigateLesson(lesson)}
+                      fontSize={responsive("", "sm", "md")}
+                      border={"1px solid var(--accent-color)"}
+                      _hover={{
+                        bgColor: "white",
+                        color: "var(--accent-color)",
+                      }}
                     >
-                      <Button
-                        variant={"outline"}
-                        bgColor={"var(--accent-color)"}
-                        color={"white"}
-                        fontSize={responsive("", "sm", "md")}
-                        border={"1px solid var(--accent-color)"}
-                        _hover={{
-                          bgColor: "white",
-                          color: "var(--accent-color)",
-                        }}
-                      >
-                        View
-                      </Button>
-                    </ChakraLink>
+                      View
+                    </Button>
                   </Flex>
                 ))
               ) : (

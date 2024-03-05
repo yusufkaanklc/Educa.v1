@@ -11,13 +11,14 @@ import {
   Button,
   Stack,
   BreadcrumbLink,
+  useToast,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import ReactPlayer from "react-player";
 import { useContext, useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import dataContext from "../utils/contextApi";
-import { getLessons } from "../utils/data/LessonsData";
+import { getLessons, updateLessonState } from "../utils/data/LessonsData";
 import { getCourse } from "../utils/data/CoursesData";
 const Lesson = () => {
   const {
@@ -27,12 +28,15 @@ const Lesson = () => {
     setErrors,
     errors,
     course,
+    account,
     setCourse,
   } = useContext(dataContext);
   const [lessons, setLessons] = useState([]);
   const [lesson, setLesson] = useState({});
   const [lessonPoint, setLessonPoint] = useState(null);
   const [starList, setStarList] = useState([]);
+  const [currentVideoTime, setCurrentVideoTime] = useState(null);
+  const [isLessonFinished, setIsLessonFinished] = useState(false);
 
   const { page, courseSlug, lessonSlug } = useParams();
   const responsive = (mobile, laptop, desktop) => {
@@ -44,10 +48,44 @@ const Lesson = () => {
       return desktop;
     }
   };
+
   const navigate = useNavigate();
   const handleClick = (link) => {
     setTargetScroll(link);
     navigate("/");
+  };
+
+  const navigateLesson = (lessonSlug) => {
+    navigate(`/${page}/course/${courseSlug}/lessons/${lessonSlug}`);
+  };
+
+  const toast = useToast();
+
+  const updateLessonStateFunc = (lessonSlug) => {
+    if (isLessonFinished) {
+      updateLessonState(courseSlug, lessonSlug, "lesson")
+        .then(() => {
+          toast({
+            title: "Success",
+            description: "The course was completed successfully",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+          });
+          navigate(`/${page}/course/${courseSlug}`);
+        })
+        .catch((error) => {
+          setErrors([...errors, error]);
+        });
+    } else {
+      toast({
+        title: "Warning",
+        description: "Please complete the course",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   useEffect(() => {
@@ -57,13 +95,13 @@ const Lesson = () => {
     getLessons(courseSlug)
       .then((data) => setLessons(data))
       .catch((error) => setErrors([...errors, error]));
-  }, []);
+  }, [courseSlug]);
 
   useEffect(() => {
     const currentLesson = lessons.filter((el) => el.slug === lessonSlug)[0];
     setLesson(currentLesson);
     setLessonPoint(currentLesson && currentLesson.point);
-  }, [lessons]);
+  }, [lessons, lessonSlug]);
 
   useEffect(() => {
     let starLisst = [];
@@ -72,6 +110,12 @@ const Lesson = () => {
     }
     setStarList(starLisst);
   }, [lessonPoint]);
+
+  useEffect(() => {
+    if ((currentVideoTime / lesson?.duration) * 100 >= 80) {
+      setIsLessonFinished(true);
+    }
+  }, [currentVideoTime]);
 
   return (
     <Box
@@ -175,6 +219,8 @@ const Lesson = () => {
           {lessons &&
             lessons.map((lesson, index) => (
               <Flex
+                onClick={() => navigateLesson(lesson.slug)}
+                cursor={"pointer"}
                 opacity={lesson.slug === lessonSlug ? 1 : 0.9}
                 _hover={{ border: "2px dashed #cfcfcf", opacity: "1" }}
                 border={
@@ -263,6 +309,9 @@ const Lesson = () => {
           <Center h={"100%"} borderRadius={"10px"} overflow={"hidden"}>
             {lesson && lesson.videoUrl && (
               <ReactPlayer
+                onProgress={(state) =>
+                  setCurrentVideoTime(state.playedSeconds.toFixed(0))
+                }
                 controls
                 width={"100%"}
                 height={"100%"}
@@ -270,6 +319,49 @@ const Lesson = () => {
               ></ReactPlayer>
             )}
           </Center>
+        </GridItem>
+        <GridItem
+          colSpan={1}
+          rowSpan={7}
+          p={"1em"}
+          borderRadius={"10px"}
+        ></GridItem>
+        <GridItem
+          colSpan={3}
+          rowSpan={7}
+          p={"1em"}
+          borderRadius={"10px"}
+          bgColor={"var(--bg-color)"}
+          border={"2px dashed var(--secondary-color)"}
+        >
+          <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
+            <Stack>
+              <Heading fontSize={responsive("", "md", "lg")} fontWeight={"600"}>
+                Course Note
+              </Heading>
+              <Text fontWeight={500} fontSize={responsive("", "sm", "md")}>
+                {lesson?.title}
+              </Text>
+            </Stack>
+            <Flex justify={"flex-end"}>
+              {account?.username !== course?.ownerName && (
+                <Button
+                  variant={"outline"}
+                  bgColor={"var(--accent-color)"}
+                  color={"white"}
+                  onClick={() => updateLessonStateFunc(lesson.slug)}
+                  fontSize={responsive("", "sm", "md")}
+                  border={"1px solid var(--accent-color)"}
+                  _hover={{
+                    bgColor: "white",
+                    color: "var(--accent-color)",
+                  }}
+                >
+                  Finish
+                </Button>
+              )}
+            </Flex>
+          </Flex>
         </GridItem>
       </Grid>
     </Box>

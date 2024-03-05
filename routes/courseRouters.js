@@ -170,4 +170,15 @@ router
     commentControllers.deleteReply
   );
 
+router
+  .route("/:courseSlug/state")
+  .get(courseControllers.getCourseOrLessonState);
+
+router
+  .route("/:courseSlug/lessons/:lessonSlug/update-state")
+  .put(
+    authMiddlewares.isLoggedIn,
+    courseMiddlewares.ownershipAndEnrollControl,
+    courseControllers.updateCourseOrLessonState
+  );
 export default router;

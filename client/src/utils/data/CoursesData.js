@@ -79,4 +79,17 @@ const updateCourse = async (courseSlug, courseData) => {
   }
 };
 
-export { getCourses, getCourse, createCourse, updateCourse };
+const getCourseState = async (courseSlug) => {
+  try {
+    const { data } = await axios.get(`/courses/${courseSlug}/state`);
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
+
+export { getCourses, getCourse, createCourse, updateCourse, getCourseState };

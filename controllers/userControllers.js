@@ -6,6 +6,7 @@ import fs from "fs";
 import bcrypt from "bcrypt";
 import Course from "../models/Course.js";
 import errorHandling from "../middlewares/errorHandling.js";
+import CourseStates from "../models/CourseStates.js";
 
 const register = async (req, res) => {
   try {
@@ -329,6 +330,29 @@ const enrollCourse = async (req, res) => {
     );
 
     if (!course) throw { code: 2, message: "Course not found" };
+
+    const newCourseStatesData = {
+      user: req.session.userID,
+      course: course._id,
+      lessonsStates: [],
+    };
+
+    const isCourseStatesExist = await CourseStates.findOne({
+      course: course._id,
+      user: req.session.userID,
+    });
+    if (!isCourseStatesExist) {
+      for (const lesson of course.lessons) {
+        newCourseStatesData.lessonsStates.push({
+          lesson: lesson._id,
+        });
+      }
+
+      const newCourseStates = await CourseStates.create(newCourseStatesData);
+
+      if (!newCourseStates)
+        throw { code: 2, message: "Course state relation could not created" };
+    }
 
     // Başarılı yanıt
     res.status(200).json({ message: "Course enrolled" });

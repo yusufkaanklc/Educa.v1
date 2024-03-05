@@ -145,7 +145,7 @@ const getLesson = async (req, res) => {
 const updateLesson = async (req, res) => {
   try {
     const { courseSlug, lessonSlug } = req.params;
-    const { title, description, isFinished, notes } = req.body;
+    const { title, description, notes } = req.body;
 
     const [course, lesson] = await Promise.all([
       Course.findOne({ slug: courseSlug }),
@@ -174,7 +174,6 @@ const updateLesson = async (req, res) => {
         description,
         notes: notes ? notes : "",
         newVideoUrl,
-        isFinished,
         slug: title !== "" ? newSlug : lessonSlug,
       },
       { new: true }

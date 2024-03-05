@@ -28,7 +28,7 @@ const createLesson = async (courseSlug, lessonData) => {
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
     throw {
-      message: error.response.data.message,
+      message: error.response.data,
       status: error.response.status,
     };
   }
@@ -49,4 +49,20 @@ const deleteLesson = async (courseSlug, lessonSlug) => {
   }
 };
 
-export { getLessons, createLesson, deleteLesson };
+const updateLessonState = async (courseSlug, lessonSlug, stateType) => {
+  try {
+    const { data } = await axios.put(
+      `/courses/${courseSlug}/lessons/${lessonSlug}/update-state?stateType=${stateType}`
+    );
+    return data;
+  } catch (error) {
+    console.log("sdfsd", error);
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
+
+export { getLessons, createLesson, deleteLesson, updateLessonState };
