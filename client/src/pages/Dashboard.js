@@ -1,6 +1,7 @@
 import {
   Grid,
   GridItem,
+  Link as ChakraLink,
   Box,
   Flex,
   Breadcrumb,
@@ -228,6 +229,10 @@ const Dashboard = () => {
         .filter((comment) => comment !== null)
     );
   }, [ownedCourses]);
+
+  useEffect(() => {
+    console.log(lessons);
+  }, [lessons]);
 
   const updatedCommentTextList = comments.map((comment) => ({
     commentId: comment?._id,
@@ -576,19 +581,30 @@ const Dashboard = () => {
                       </Flex>
                     </Flex>
 
-                    <Button
-                      variant={"outline"}
-                      bgColor={"var(--accent-color)"}
-                      color={"white"}
-                      fontSize={responsive("", "sm", "md")}
-                      border={"1px solid var(--accent-color)"}
-                      _hover={{
-                        bgColor: "white",
-                        color: "var(--accent-color)",
-                      }}
+                    <ChakraLink
+                      as={Link}
+                      // to={`/dashboard/course/${slug}/lessons/${lesson.slug}`}
+                      to={ownedCourses
+                        .filter((course) => course.lessons.includes(lesson))
+                        .map(
+                          (course) =>
+                            `/dashboard/course/${course.slug}/lessons/${lesson.slug}`
+                        )}
                     >
-                      View
-                    </Button>
+                      <Button
+                        variant={"outline"}
+                        bgColor={"var(--accent-color)"}
+                        color={"white"}
+                        fontSize={responsive("", "sm", "md")}
+                        border={"1px solid var(--accent-color)"}
+                        _hover={{
+                          bgColor: "white",
+                          color: "var(--accent-color)",
+                        }}
+                      >
+                        View
+                      </Button>
+                    </ChakraLink>
                   </Flex>
                 ))
               ) : (

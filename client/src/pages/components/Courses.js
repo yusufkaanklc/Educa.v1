@@ -92,10 +92,15 @@ const Courses = () => {
                   <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
                     <Box>
                       {course.imageUrl ? (
-                        <Image
-                          src={"http://localhost:5000/" + course.imageUrl}
+                        <Center
+                          maxH={responsive("", "10em", "12em")}
+                          overflow={"hidden"}
                           borderRadius="lg"
-                        />
+                        >
+                          <Image
+                            src={"http://localhost:5000/" + course.imageUrl}
+                          />
+                        </Center>
                       ) : (
                         <Skeleton
                           h={responsive("", "9em", "11em")}
@@ -154,7 +159,17 @@ const Courses = () => {
                             class="fi fi-rr-clock-three"
                             style={{ position: "relative", top: "2px" }}
                           ></i>
-                          <Text>24 h 40 min</Text>
+                          <Text>
+                            {" "}
+                            {course.duration
+                              ? course.duration < 60
+                                ? course.duration + " sec"
+                                : Math.floor(course.duration / 60) +
+                                  " min " +
+                                  (course.duration % 60) +
+                                  " sec"
+                              : "0 min"}
+                          </Text>
                         </Flex>
                       </Flex>
                       <Flex

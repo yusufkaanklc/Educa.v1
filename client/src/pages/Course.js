@@ -11,6 +11,7 @@ import {
   Avatar,
   Center,
   Stack,
+  Tooltip,
   Grid,
   Link as ChakraLink,
   ButtonGroup,
@@ -38,7 +39,6 @@ const Course = () => {
     isLaptop,
     setTargetScroll,
     account,
-    setAccount,
     courseUpdateData,
     setCourseUpdateData,
     errors,
@@ -692,7 +692,7 @@ const Course = () => {
                 </Center>
               </Box>
               {course.ownerImage ? (
-                <Box
+                <Center
                   border={"2px solid var(--secondary-color)"}
                   w={responsive("", "5.5em", "6.5em")}
                   h={responsive("", "5.5em", "6.5em")}
@@ -700,11 +700,12 @@ const Course = () => {
                   overflow={"hidden"}
                 >
                   <Image
+                    transform={"scale(1.5)"}
                     src={"http://localhost:5000/" + course.ownerImage}
                     bgColor={"var(--secondary-color)"}
                     name={course.ownerName}
                   />
-                </Box>
+                </Center>
               ) : (
                 <Avatar
                   border={"2px dashed var(--secondary-color)"}
@@ -715,7 +716,7 @@ const Course = () => {
               )}
             </Flex>
 
-            <Text fontSize={responsive("", "xs", "sm")}>
+            <Text fontSize={responsive("", "sm", "md")}>
               {course.ownerIntroduce}
             </Text>
           </GridItem>
@@ -802,7 +803,12 @@ const Course = () => {
             >
               {filteredLessonList.length > 0 &&
                 filteredLessonList.map((lesson, index) => (
-                  <Flex key={index} align={"center"} justify={"space-between"}>
+                  <Flex
+                    key={index}
+                    align={"center"}
+                    justify={"space-between"}
+                    w={"100%"}
+                  >
                     <Flex
                       gap={".5em"}
                       align={"center"}
@@ -814,53 +820,76 @@ const Course = () => {
                         borderRadius={"full"}
                         bgColor={"var(--accent-color)"}
                       ></Box>
-                      <Text fontWeight={500} opacity={0.9}>
-                        {lesson.title}
-                      </Text>
+                      <Tooltip label={lesson.title} aria-label="A tooltip">
+                        <Text
+                          textOverflow={"ellipsis"}
+                          whiteSpace={"nowrap"}
+                          overflow={"hidden"}
+                          fontWeight={500}
+                          maxW={responsive("", "10em", "12em")}
+                          fontSize={responsive("", "sm", "md")}
+                          opacity={0.9}
+                        >
+                          {lesson.title}
+                        </Text>
+                      </Tooltip>
                     </Flex>
-                    <Text
-                      maxW={"20%"}
-                      textOverflow={"ellipsis"}
-                      whiteSpace={"nowrap"}
-                    >
-                      {lesson.description}
-                    </Text>
-                    <Text
-                      opacity={0.9}
-                      fontWeight={500}
-                      fontSize={responsive("", "sm", "md")}
-                    >
-                      {lesson.duration
-                        ? lesson.duration < 60
-                          ? lesson.duration + " sec"
-                          : Math.round(lesson.duration / 60) + " min"
-                        : "0 min"}
-                    </Text>
-                    <Flex align={"center"} gap={"1em"}>
-                      <Button
-                        border={"1px solid transparent"}
-                        bgColor={"var(--accent-color)"}
+                    <Tooltip label={lesson.description} aria-label="A tooltip">
+                      <Text
+                        textOverflow={"ellipsis"}
+                        whiteSpace={"nowrap"}
+                        overflow={"hidden"}
+                        fontWeight={500}
+                        maxW={responsive("", "10em", "12em")}
                         fontSize={responsive("", "sm", "md")}
-                        color={"white"}
-                        _hover={{
-                          bgColor: "var(--bg-color)",
-                          color: "orange",
-                          border: "1px solid var(--accent-color)",
-                        }}
+                        opacity={0.9}
                       >
-                        <ChakraLink
-                          as={Link}
-                          onClick={() => handleLessonClick()}
-                          to={
-                            enroll ||
-                            (account && account.username === course.ownerName)
-                              ? `/${page}/course/${slug}/lessons/${lesson.slug}`
-                              : ""
-                          }
+                        {lesson.description}
+                      </Text>
+                    </Tooltip>
+
+                    <Flex align={"center"} gap={"1em"}>
+                      <Text
+                        opacity={0.9}
+                        fontWeight={500}
+                        fontSize={responsive("", "sm", "md")}
+                        w={"max-content"}
+                      >
+                        {lesson.duration
+                          ? lesson.duration < 60
+                            ? lesson.duration + " sec"
+                            : Math.floor(lesson.duration / 60) +
+                              " min " +
+                              (lesson.duration % 60) +
+                              " sec"
+                          : "0 min"}
+                      </Text>
+                      <ChakraLink
+                        as={Link}
+                        onClick={() => handleLessonClick()}
+                        _hover={{ textDecor: "none" }}
+                        to={
+                          enroll ||
+                          (account && account.username === course.ownerName)
+                            ? `/${page}/course/${slug}/lessons/${lesson.slug}`
+                            : ""
+                        }
+                      >
+                        <Button
+                          border={"1px solid transparent"}
+                          bgColor={"var(--accent-color)"}
+                          fontSize={responsive("", "sm", "md")}
+                          color={"white"}
+                          _hover={{
+                            bgColor: "var(--bg-color)",
+                            color: "orange",
+                            border: "1px solid var(--accent-color)",
+                          }}
                         >
                           View
-                        </ChakraLink>
-                      </Button>
+                        </Button>
+                      </ChakraLink>
+
                       {isLessonsEditing && (
                         <Button
                           variant="outline"
@@ -959,8 +988,8 @@ const Course = () => {
                     }}
                   ></i>
                   <Text fontSize={responsive("", "sm", "md")}>
-                    {course.enrollments && course.enrollments.length}{" "}
-                    Enrollments
+                    {course.enrollments && course.enrollments.length}
+                    &nbsp;Enrollments
                   </Text>
                 </Flex>
                 /
@@ -977,7 +1006,16 @@ const Course = () => {
                       top: "2px",
                     }}
                   ></i>
-                  <Text fontSize={responsive("", "sm", "md")}>45 Hours</Text>
+                  <Text fontSize={responsive("", "sm", "md")}>
+                    {course.duration
+                      ? course.duration < 60
+                        ? course.duration + " sec"
+                        : Math.floor(course.duration / 60) +
+                          " min " +
+                          (course.duration % 60) +
+                          " sec"
+                      : "0 min"}
+                  </Text>
                 </Flex>
                 /
                 <Flex

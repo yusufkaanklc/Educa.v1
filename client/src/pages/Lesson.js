@@ -234,13 +234,19 @@ const Lesson = () => {
               fontSize={responsive("", "sm", "md")}
             >
               <Box color={"var(--accent-color)"}>
-                {starList.length > 0 &&
+                {starList.length > 0 ? (
                   starList.map((star) => (
                     <StarIcon
                       key={star}
                       style={{ position: "relative", bottom: "3px" }}
                     ></StarIcon>
-                  ))}
+                  ))
+                ) : (
+                  <i
+                    class="fi fi-rr-star"
+                    style={{ position: "relative", top: "2px" }}
+                  ></i>
+                )}
               </Box>
               <Text>({lesson?.comments && lesson.comments.length})</Text>
             </Flex>

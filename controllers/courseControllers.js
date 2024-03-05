@@ -31,7 +31,6 @@ const createCourse = async (req, res) => {
     // Başarılı yanıtı döndürün
     res.status(201).json(newCourse);
   } catch (error) {
-    console.log(error);
     // Hata durumunda uygun bir hata yanıtı döndürün
     errorHandling(error, req, res);
   }
@@ -168,6 +167,7 @@ const getAllCourses = async (req, res) => {
               $cond: [{ $ifNull: ["$commentDetails", false] }, 1, 0],
             },
           },
+          duration: { $sum: "$lessonDetails.duration" },
           categoryTitle: { $first: "$categoryDetails.title" },
           categorySlug: { $first: "$categoryDetails.slug" },
           imageUrl: { $first: "$imageUrl" },
@@ -253,11 +253,13 @@ const getCourse = async (req, res) => {
           ownerImage: { $first: "$ownershipDetails.image" },
           enrollments: { $addToSet: "$enrollmentsDetails" },
           comments: { $first: "$comments" },
+          duration: { $sum: "$lessonDetails.duration" },
           price: { $first: "$price" },
           lessons: { $addToSet: "$lessonDetails" },
           category: { $first: "$category" },
           imageUrl: { $first: "$imageUrl" },
           point: { $first: "$point" },
+          duration: { $sum: "$lessonDetails.duration" },
           slug: { $first: "$slug" },
           totalFinishedLessons: {
             $sum: {
@@ -272,6 +274,7 @@ const getCourse = async (req, res) => {
           title: 1,
           description: 1,
           ownerName: 1,
+          duration: 1,
           enrollments: 1,
           ownerIntroduce: 1,
           ownerImage: 1,
@@ -324,6 +327,7 @@ const updateCourse = async (req, res) => {
       updateData.slug = newSlug;
     }
     if (description !== "" && description) updateData.description = description;
+    if (price !== "" && price) updateData.price = price;
     if (req.uploadedImageUrl) updateData.imageUrl = req.uploadedImageUrl;
 
     const beforeCourse = await Course.findOne({ slug: courseSlug });
