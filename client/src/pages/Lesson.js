@@ -39,6 +39,7 @@ const Lesson = () => {
   const [starList, setStarList] = useState([]);
   const [currentVideoTime, setCurrentVideoTime] = useState(null);
   const [isLessonFinished, setIsLessonFinished] = useState(false);
+  const [isFinishButtonClicked, setIsFinishButtonClicked] = useState(false);
 
   const { page, courseSlug, lessonSlug } = useParams();
   const responsive = (mobile, laptop, desktop) => {
@@ -64,7 +65,8 @@ const Lesson = () => {
   const toast = useToast();
 
   const updateLessonStateFunc = (lessonSlug) => {
-    if (isLessonFinished) {
+    if (isLessonFinished && course.ownerName !== account.username) {
+      setIsFinishButtonClicked(true);
       updateLessonState(courseSlug, lessonSlug, "lesson")
         .then(() => {
           toast({
@@ -91,12 +93,14 @@ const Lesson = () => {
   };
 
   useEffect(() => {
-    getCourse(courseSlug)
-      .then((data) => setCourse(data))
-      .catch((error) => setErrors([...errors, error]));
-    getLessons(courseSlug)
-      .then((data) => setLessons(data))
-      .catch((error) => setErrors([...errors, error]));
+    if (courseSlug) {
+      getCourse(courseSlug)
+        .then((data) => setCourse(data))
+        .catch((error) => setErrors([...errors, error]));
+      getLessons(courseSlug)
+        .then((data) => setLessons(data))
+        .catch((error) => setErrors([...errors, error]));
+    }
   }, [courseSlug]);
 
   useEffect(() => {
@@ -115,13 +119,21 @@ const Lesson = () => {
 
   useEffect(() => {
     if ((currentVideoTime / lesson?.duration) * 100 >= 80) {
+      console.log(currentVideoTime);
       setIsLessonFinished(true);
     }
   }, [currentVideoTime]);
 
   useEffect(() => {
-    getCourseState(courseSlug).then((data) => setCourseStates(data));
-  }, [courseSlug, isLessonFinished]);
+    if (
+      course.slug &&
+      account &&
+      account.username !== course.ownerName &&
+      !isLessonFinished
+    ) {
+      getCourseState(course.slug).then((data) => setCourseStates(data));
+    }
+  }, [account, course, isLessonFinished]);
 
   useEffect(() => {
     if (courseStates) {
@@ -129,6 +141,7 @@ const Lesson = () => {
         (el) => el.lesson === lesson?._id
       );
       setIsLessonFinished(lessonState?.state);
+      setIsFinishButtonClicked(lessonState?.state);
     }
   }, [courseStates, lesson]);
 
@@ -379,7 +392,7 @@ const Lesson = () => {
                   variant={"outline"}
                   bgColor={"var(--accent-color)"}
                   color={"white"}
-                  isDisabled={isLessonFinished}
+                  isDisabled={isFinishButtonClicked}
                   onClick={() => updateLessonStateFunc(lesson.slug)}
                   fontSize={responsive("", "sm", "md")}
                   border={"1px solid var(--accent-color)"}

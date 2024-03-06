@@ -239,6 +239,31 @@ const Course = () => {
     }
   };
 
+  const navigateToLastLesson = () => {
+    const lessonStates = courseStates.lessonsStates.map((el, index) => ({
+      elState: el.state,
+      elIndex: index,
+      elLesson: el.lesson,
+    }));
+    console.log("lessonStates:", lessonStates);
+
+    const findIndex = lessonStates.map((state) => {
+      if (state) {
+        return state.elIndex;
+      }
+    });
+    console.log("findIndex:", findIndex);
+    const targetLessonIndex = lessonStates[findIndex.length - 1].elIndex;
+    console.log("targetLessonIndex:", targetLessonIndex);
+    const targetLessonId = lessonStates[targetLessonIndex].elLesson;
+    const targetLesson = lessons.find((lesson) => {
+      if (lesson._id === targetLessonId) {
+        return lesson;
+      }
+    });
+    navigate(`/${page}/course/${slug}/lessons/${targetLesson.slug}`);
+  };
+
   useEffect(() => {
     setIsLoading(true);
     getCourse(slug)
@@ -275,25 +300,36 @@ const Course = () => {
     if (course) {
       setIsLoading(false);
     }
-    if (course.slug) {
+    if (course.slug && enroll) {
       getCourseState(course.slug).then((data) => setCourseStates(data));
     }
-  }, [course]);
+  }, [course, enroll]);
 
   useEffect(() => {
-    const lessonStatesList =
-      courseStates?.lessonsStates.map((lesson) => lesson.state) ?? [];
+    if (courseStates) {
+      const lessonStatesList =
+        courseStates?.lessonsStates.map((lesson) => lesson.state) ?? [];
 
-    const completedLessonCount = lessonStatesList.filter(
-      (state) => state
-    ).length;
-    const totalLessonCount = lessonStatesList.length;
+      const completedLessonCount = lessonStatesList.filter(
+        (state) => state
+      ).length;
+      const totalLessonCount = lessonStatesList.length;
 
-    const progress =
-      totalLessonCount > 0
-        ? (completedLessonCount / totalLessonCount) * 100
-        : 0;
-    setProgressValue(progress);
+      const progress =
+        totalLessonCount > 0
+          ? (completedLessonCount / totalLessonCount) * 100
+          : 0;
+      setProgressValue(progress);
+
+      if (
+        !courseStates.lessonsStates.filter((state) => !state) &&
+        !isCourseFinished
+      ) {
+        updateCourseState(slug).then(() => {
+          setIsCourseFinished(true);
+        });
+      }
+    }
   }, [courseStates]);
 
   useEffect(() => {
@@ -309,17 +345,6 @@ const Course = () => {
       });
     }
   }, [account, course]);
-
-  useEffect(() => {
-    if (
-      !courseStates?.lessonsStates.filter((state) => state === false) &&
-      !isCourseFinished
-    ) {
-      updateCourseState(slug).then(() => {
-        setIsCourseFinished(true);
-      });
-    }
-  }, [courseStates]);
 
   return (
     <Box
@@ -694,6 +719,8 @@ const Course = () => {
                       !enroll
                     ) {
                       handleEnrollCourse();
+                    } else if (enroll) {
+                      navigateToLastLesson();
                     } else if (!account) {
                       navigate("/login");
                     }
