@@ -14,6 +14,7 @@ import {
   BreadcrumbLink,
   Textarea,
   useToast,
+  ButtonGroup,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import ReactPlayer from "react-player";
@@ -23,6 +24,7 @@ import dataContext from "../utils/contextApi";
 import { getLessons, updateLessonState } from "../utils/data/LessonsData";
 import { getCourse, getCourseState } from "../utils/data/CoursesData";
 import { getUsers } from "../utils/data/UsersData";
+import { deleteComment, updateComment } from "../utils/data/CommentData";
 const Lesson = () => {
   const {
     apiUrl,
@@ -45,6 +47,10 @@ const Lesson = () => {
   const [currentVideoTime, setCurrentVideoTime] = useState(null);
   const [isLessonFinished, setIsLessonFinished] = useState(false);
   const [isFinishButtonClicked, setIsFinishButtonClicked] = useState(false);
+  const [updatedCommentList, setUpdatedCommentList] = useState([]);
+  const [filteredCommentList, setFilteredCommentList] = useState([]);
+  const [isCommentEditing, setIsCommentEditing] = useState(false);
+  const [deletionCommentList, setDeletionCommentList] = useState([]);
 
   const { page, courseSlug, lessonSlug } = useParams();
   const responsive = (mobile, laptop, desktop) => {
@@ -107,6 +113,91 @@ const Lesson = () => {
     }
   };
 
+  const handleCommentChange = (e, commentId) => {
+    const updatedList = updatedCommentList.map((comment) => {
+      if (comment._id === commentId) {
+        return { ...comment, text: e.target.value };
+      }
+      return comment;
+    });
+    setUpdatedCommentList(updatedList);
+  };
+
+  const handleUpdateCommentSubmit = async (e) => {
+    e.preventDefault();
+    let isUpdatedOrDeleted = false;
+    try {
+      await Promise.all(
+        updatedCommentList.map(async (updatedComment) => {
+          const originalComment = comments.find(
+            (comment) => comment._id === updatedComment._id
+          );
+          if (originalComment && originalComment.text !== updatedComment.text) {
+            const formData = new FormData();
+            formData.append("text", updatedComment.text);
+            await updateSingleComment(
+              courseSlug,
+              lessonSlug,
+              updatedComment._id,
+              formData
+            );
+            isUpdatedOrDeleted = true;
+          }
+        })
+      );
+
+      if (deletionCommentList.length > 0) {
+        await Promise.all(
+          deletionCommentList.map(async (comment) => {
+            await deleteSingleComment(courseSlug, lessonSlug, comment._id);
+            isUpdatedOrDeleted = true;
+          })
+        );
+      }
+
+      if (isUpdatedOrDeleted) {
+        toast({
+          title: "Success",
+          description: "Comments updated or deleted successfully",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        setComments(updatedCommentList);
+      }
+      setIsCommentEditing(false);
+    } catch (error) {
+      setErrors([...errors, error]);
+    }
+  };
+
+  const updateSingleComment = async (
+    courseSlug,
+    lessonSlug,
+    commentId,
+    formData
+  ) => {
+    await updateComment(courseSlug, lessonSlug, commentId, formData);
+  };
+
+  const deleteSingleComment = async (courseSlug, lessonSlug, commentId) => {
+    await deleteComment(courseSlug, lessonSlug, commentId);
+  };
+
+  const handleDeleteComment = (commentId) => {
+    // Silinecek yorumu filteredCommentList'ten filtreleyerek çıkarın
+    const filteredComments = filteredCommentList.filter(
+      (c) => c._id !== commentId
+    );
+    // Silinecek yorumu deletionCommentList'e ekleyin
+    setDeletionCommentList((prevList) => [
+      ...prevList,
+      filteredCommentList.find((c) => c._id === commentId),
+    ]);
+    // Filtrelenmiş yorumları güncelleyin
+    setFilteredCommentList(filteredComments);
+  };
+
   useEffect(() => {
     if (courseSlug) {
       getCourse(courseSlug)
@@ -117,10 +208,6 @@ const Lesson = () => {
         .catch((error) => setErrors([...errors, error]));
     }
   }, [courseSlug]);
-
-  useEffect(() => {
-    console.log(course);
-  }, [course]);
 
   useEffect(() => {
     const currentLesson = lessons.filter((el) => el.slug === lessonSlug)[0];
@@ -139,9 +226,10 @@ const Lesson = () => {
     const fetchData = async () => {
       try {
         const userList = await getUsers(); // Kullanıcı listesini al
-        const owners = comments.map((comment) => {
+        const uniqueUserIds = [...new Set(comments.map((c) => c.user))];
+        const owners = uniqueUserIds.map((userId) => {
           // Her yorum için ilgili kullanıcıyı bul
-          return userList.find((user) => user._id === comment.user);
+          return userList.find((user) => user._id === userId);
         });
         setCommentOwnerList(owners);
       } catch (error) {
@@ -150,6 +238,9 @@ const Lesson = () => {
     };
 
     fetchData(); // fetchData fonksiyonunu çağır
+
+    setUpdatedCommentList(comments);
+    setFilteredCommentList(comments);
   }, [comments]);
 
   useEffect(() => {
@@ -478,21 +569,47 @@ const Lesson = () => {
             <Heading fontSize={responsive("", "md", "lg")} fontWeight={"600"}>
               Lesson Comments
             </Heading>
-            {account && course && account._id === course.ownerId && (
-              <Button
-                variant={"outline"}
-                bgColor={"var(--accent-color)"}
-                color={"white"}
-                fontSize={responsive("", "sm", "md")}
-                border={"1px solid var(--accent-color)"}
-                _hover={{
-                  bgColor: "white",
-                  color: "var(--accent-color)",
-                }}
-              >
-                Edit
-              </Button>
-            )}
+            <ButtonGroup>
+              {isCommentEditing && (
+                <Button
+                  variant={"outline"}
+                  onClick={(e) => handleUpdateCommentSubmit(e)}
+                  bgColor={"var(--secondary-color)"}
+                  color={"white"}
+                  fontSize={responsive("", "sm", "md")}
+                  border={"1px solid var(--secondary-color)"}
+                  _hover={{
+                    bgColor: "var(--bg-color)",
+                    color: "var(--secondary-color)",
+                  }}
+                >
+                  Save
+                </Button>
+              )}
+              {account && course && account._id === course.ownerId && (
+                <Button
+                  variant={"outline"}
+                  onClick={() => {
+                    setIsCommentEditing(!isCommentEditing);
+                    if (isCommentEditing) {
+                      setUpdatedCommentList(comments);
+                      setDeletionCommentList([]);
+                      setFilteredCommentList(comments);
+                    }
+                  }}
+                  bgColor={"var(--accent-color)"}
+                  color={"white"}
+                  fontSize={responsive("", "sm", "md")}
+                  border={"1px solid var(--accent-color)"}
+                  _hover={{
+                    bgColor: "var(--bg-color)",
+                    color: "var(--accent-color)",
+                  }}
+                >
+                  {isCommentEditing ? "Reset" : "Edit"}
+                </Button>
+              )}
+            </ButtonGroup>
           </Flex>
           <Flex
             flexDir={"column"}
@@ -500,8 +617,8 @@ const Lesson = () => {
             maxH={responsive("", "35em", "37em")}
             overflow={"auto"}
           >
-            {comments.length > 0 && commentOwnerList.length > 0
-              ? comments.map((comment, index) => (
+            {filteredCommentList.length > 0 && commentOwnerList.length > 0
+              ? filteredCommentList.map((comment, index) => (
                   <Flex
                     key={index}
                     bgColor="white"
@@ -548,6 +665,33 @@ const Lesson = () => {
                                 Edit
                               </Button>
                             )}
+                            {account &&
+                              course &&
+                              account._id === course.ownerId &&
+                              isCommentEditing && (
+                                <Button
+                                  variant="outline"
+                                  p=".5em"
+                                  minH="max-content"
+                                  minW="max-content"
+                                  border={"1px solid var(--accent-color)"}
+                                  fontSize={responsive("", "sm", "md")}
+                                  onClick={() =>
+                                    handleDeleteComment(comment._id)
+                                  }
+                                  color={"white"}
+                                  _hover={{
+                                    color: "var(--accent-color)",
+                                    bgColor: "white",
+                                  }}
+                                  bgColor={"var(--accent-color)"}
+                                >
+                                  <i
+                                    className="fi fi-rr-trash"
+                                    style={{ position: "relative", top: "2px" }}
+                                  />
+                                </Button>
+                              )}
                           </Flex>
                         );
                       }
@@ -555,12 +699,16 @@ const Lesson = () => {
                     })}
                     <Textarea
                       border={"2px dashed #cfcfcf"}
-                      readOnly={true}
+                      value={
+                        updatedCommentList.find((c) => c._id === comment._id)
+                          ?.text || ""
+                      }
+                      onChange={(e) => handleCommentChange(e, comment._id)}
+                      readOnly={!isCommentEditing}
                       _focus={{
                         border: "2px dashed #cfcfcf",
                         boxShadow: "none",
                       }}
-                      value={comment.text}
                       fontSize={responsive("", "sm", "md")}
                       fontWeight={500}
                       opacity={0.9}
