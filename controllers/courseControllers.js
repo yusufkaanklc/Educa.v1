@@ -395,9 +395,6 @@ const updateCourseOrLessonState = async (req, res) => {
     const { courseSlug, lessonSlug } = req.params;
     const { stateType } = req.query;
 
-    if (!courseSlug || !lessonSlug)
-      throw { code: 1, message: "Course or Lesson slug is missing" };
-
     if (stateType === "course") {
       const course = await Course.findOne({ slug: courseSlug });
       if (!course) throw { code: 2, message: "Course not found" };

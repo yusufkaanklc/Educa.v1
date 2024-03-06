@@ -14,8 +14,10 @@ export const DataProvider = ({ children }) => {
     Cookies.get("isLoggedIn") ? true : false
   );
   const [errors, setErrors] = useState([]);
+  const [courseStates, setCourseStates] = useState(null);
   const [categories, setCategories] = useState([]);
   const [userPoint, setUserPoint] = useState("");
+  const [isCourseFinished, setIsCourseFinished] = useState(false);
   const [courseCreateData, setCourseCreateData] = useState({
     title: "",
     description: "",
@@ -51,6 +53,8 @@ export const DataProvider = ({ children }) => {
         teachers,
         searchQuery,
         setSearchQuery,
+        courseStates,
+        setCourseStates,
         setTeachers,
         lessonCreateData,
         setLessonCreateData,
@@ -74,6 +78,8 @@ export const DataProvider = ({ children }) => {
         setCourseUpdateData,
         errors,
         setErrors,
+        isCourseFinished,
+        setIsCourseFinished,
         isMobile,
         isLaptop,
         isDesktop,

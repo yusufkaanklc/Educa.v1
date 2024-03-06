@@ -92,4 +92,26 @@ const getCourseState = async (courseSlug) => {
   }
 };
 
-export { getCourses, getCourse, createCourse, updateCourse, getCourseState };
+const updateCourseState = async (courseSlug) => {
+  try {
+    const { data } = await axios.put(
+      `/courses/${courseSlug}/lessons/lessonSlug/update-state?stateType=course`
+    );
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
+
+export {
+  getCourses,
+  getCourse,
+  createCourse,
+  updateCourse,
+  getCourseState,
+  updateCourseState,
+};

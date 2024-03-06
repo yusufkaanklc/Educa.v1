@@ -30,6 +30,7 @@ import {
   getCourse,
   getCourseState,
   updateCourse,
+  updateCourseState,
 } from "../utils/data/CoursesData";
 import { enrollCourse } from "../utils/data/UsersData";
 import { deleteLesson, getLessons } from "../utils/data/LessonsData";
@@ -47,6 +48,10 @@ const Course = () => {
     setCourseUpdateData,
     errors,
     setErrors,
+    courseStates,
+    setCourseStates,
+    isCourseFinished,
+    setIsCourseFinished,
   } = useContext(dataContext);
   const [isLoading, setIsLoading] = useState(false);
   const [starList, setStarList] = useState([]);
@@ -56,9 +61,7 @@ const Course = () => {
   const [deletedLessonList, setDeletedLessonList] = useState([]);
   const [isCourseEditing, setIsCourseEditing] = useState(false);
   const [isLessonsEditing, setIsLessonsEditing] = useState(false);
-  const [courseStates, setCourseStates] = useState(null);
   const [progressValue, setProgressValue] = useState(null);
-
   const { slug, page } = useParams();
   const toast = useToast();
 
@@ -306,6 +309,17 @@ const Course = () => {
       });
     }
   }, [account, course]);
+
+  useEffect(() => {
+    if (
+      !courseStates?.lessonsStates.filter((state) => state === false) &&
+      !isCourseFinished
+    ) {
+      updateCourseState(slug).then(() => {
+        setIsCourseFinished(true);
+      });
+    }
+  }, [courseStates]);
 
   return (
     <Box
@@ -685,6 +699,7 @@ const Course = () => {
                     }
                   }}
                   color={"white"}
+                  isDisabled={isCourseFinished}
                   _hover={{
                     bgColor: "var(--bg-color)",
                     color: "var(--accent-color)",

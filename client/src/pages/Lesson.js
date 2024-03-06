@@ -19,7 +19,7 @@ import { useContext, useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import dataContext from "../utils/contextApi";
 import { getLessons, updateLessonState } from "../utils/data/LessonsData";
-import { getCourse } from "../utils/data/CoursesData";
+import { getCourse, getCourseState } from "../utils/data/CoursesData";
 const Lesson = () => {
   const {
     isMobile,
@@ -30,6 +30,8 @@ const Lesson = () => {
     course,
     account,
     setCourse,
+    courseStates,
+    setCourseStates,
   } = useContext(dataContext);
   const [lessons, setLessons] = useState([]);
   const [lesson, setLesson] = useState({});
@@ -116,6 +118,19 @@ const Lesson = () => {
       setIsLessonFinished(true);
     }
   }, [currentVideoTime]);
+
+  useEffect(() => {
+    getCourseState(courseSlug).then((data) => setCourseStates(data));
+  }, [courseSlug, isLessonFinished]);
+
+  useEffect(() => {
+    if (courseStates) {
+      const lessonState = courseStates.lessonsStates.find(
+        (el) => el.lesson === lesson?._id
+      );
+      setIsLessonFinished(lessonState?.state);
+    }
+  }, [courseStates, lesson]);
 
   return (
     <Box
@@ -206,7 +221,7 @@ const Lesson = () => {
           rowSpan={17}
           display={"flex"}
           flexDir={"column"}
-          gap={"1em"}
+          gap={"1.5em"}
           maxW={"22em"}
           p={"1em"}
           borderRadius={"10px"}
@@ -252,6 +267,20 @@ const Lesson = () => {
                     {lesson.title}
                   </Text>
                 </Flex>
+                <Text
+                  fontWeight={500}
+                  opacity={0.9}
+                  fontSize={responsive("", "sm", "md")}
+                >
+                  {lesson.duration
+                    ? lesson.duration < 60
+                      ? lesson.duration + " sec"
+                      : Math.floor(lesson.duration / 60) +
+                        " min " +
+                        (lesson.duration % 60) +
+                        " sec"
+                    : "0 min"}
+                </Text>
               </Flex>
             ))}
         </GridItem>
@@ -329,6 +358,7 @@ const Lesson = () => {
         <GridItem
           colSpan={3}
           rowSpan={7}
+          maxH={responsive("", "60em", "62em")}
           p={"1em"}
           borderRadius={"10px"}
           bgColor={"var(--bg-color)"}
@@ -340,7 +370,7 @@ const Lesson = () => {
                 Course Note
               </Heading>
               <Text fontWeight={500} fontSize={responsive("", "sm", "md")}>
-                {lesson?.title}
+                {lesson?.notes}
               </Text>
             </Stack>
             <Flex justify={"flex-end"}>
@@ -349,6 +379,7 @@ const Lesson = () => {
                   variant={"outline"}
                   bgColor={"var(--accent-color)"}
                   color={"white"}
+                  isDisabled={isLessonFinished}
                   onClick={() => updateLessonStateFunc(lesson.slug)}
                   fontSize={responsive("", "sm", "md")}
                   border={"1px solid var(--accent-color)"}
@@ -363,6 +394,15 @@ const Lesson = () => {
             </Flex>
           </Flex>
         </GridItem>
+        <GridItem colSpan={1} rowSpan={17}></GridItem>
+        <GridItem
+          colSpan={3}
+          rowSpan={17}
+          p={"1em"}
+          borderRadius={"10px"}
+          bgColor={"var(--bg-color)"}
+          border={"2px dashed var(--secondary-color)"}
+        ></GridItem>
       </Grid>
     </Box>
   );
