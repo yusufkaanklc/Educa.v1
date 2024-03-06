@@ -18,7 +18,7 @@ import { Link } from "react-router-dom";
 import dataContext from "../../utils/contextApi";
 
 const Courses = () => {
-  const { courses, isMobile, isLaptop } = useContext(dataContext);
+  const { courses, isMobile, isLaptop, apiUrl } = useContext(dataContext);
   const [popularCourses, setPopularCourses] = useState([]);
 
   const responsive = (mobile, laptop, desktop) => {
@@ -97,9 +97,7 @@ const Courses = () => {
                           overflow={"hidden"}
                           borderRadius="lg"
                         >
-                          <Image
-                            src={"http://localhost:5000/" + course.imageUrl}
-                          />
+                          <Image src={apiUrl + course.imageUrl} />
                         </Center>
                       ) : (
                         <Skeleton
@@ -180,14 +178,14 @@ const Courses = () => {
                         <Flex align={"center"} gap={"0.5em"}>
                           <Avatar
                             size={responsive("", "xs", "sm")}
-                            src={"http://localhost:5000/" + course.ownerImage}
+                            src={apiUrl + course.ownerImage}
                           ></Avatar>
                           <Text
                             fontWeight={"600"}
                             w={"max-content"}
                             fontSize={responsive("", "sm", "md")}
                           >
-                            {course.ownership}
+                            {course.ownerName}
                           </Text>
                         </Flex>
                         <Text

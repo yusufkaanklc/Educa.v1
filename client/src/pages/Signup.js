@@ -74,7 +74,6 @@ const Signup = () => {
         navigate("/login");
       })
       .catch((error) => {
-        console.log(error);
         if (Array.isArray(error.message)) {
           const errorMessage = error.message.map((error) => error).join(", ");
           toast({

@@ -1,7 +1,6 @@
 import {
   Grid,
   GridItem,
-  Link as ChakraLink,
   Box,
   Flex,
   Breadcrumb,
@@ -45,6 +44,7 @@ const Dashboard = () => {
     LineElement
   );
   const {
+    apiUrl,
     isMobile,
     isLaptop,
     setTargetScroll,
@@ -212,7 +212,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     setOwnedCourses(
-      courses.filter((course) => course?.ownership === account?.username)
+      courses.filter((course) => course?.ownerName === account?.username)
     );
   }, [courses]);
 
@@ -717,14 +717,13 @@ const Dashboard = () => {
                         p={responsive("", ".5em", "1em")}
                         borderRadius="10px"
                         justify="space-between"
-                        transition="all .3s ease"
                         flexDir="column"
                         gap="1em"
                       >
                         <Flex align="center" justify="space-between">
                           <Flex gap=".5em" align="center">
                             <Avatar
-                              src={`http://localhost:5000/${comment?.user.image}`}
+                              src={apiUrl + comment?.user.image}
                               bgColor="var(--secondary-color)"
                               name={comment?.user.username}
                               size={responsive("", "sm", "sm")}

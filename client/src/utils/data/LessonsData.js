@@ -56,7 +56,6 @@ const updateLessonState = async (courseSlug, lessonSlug, stateType) => {
     );
     return data;
   } catch (error) {
-    console.log("sdfsd", error);
     // eslint-disable-next-line no-throw-literal
     throw {
       message: error.response.data,

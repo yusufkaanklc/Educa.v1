@@ -5,6 +5,7 @@ import Comment from "../models/Comment.js";
 import errorHandling from "../middlewares/errorHandling.js";
 import { unlink } from "fs/promises";
 import fs from "fs";
+import CourseStates from "../models/CourseStates.js";
 const createLesson = async (req, res) => {
   try {
     const { title, description, notes, duration } = req.body;
@@ -36,6 +37,20 @@ const createLesson = async (req, res) => {
     );
 
     if (!course) throw { code: 3, message: "Lesson could not add" };
+
+    const addCourseState = await CourseStates.updateMany(
+      { course: course._id },
+      {
+        $push: {
+          lessonsStates: {
+            lesson: newLessonCreate._id,
+            state: false,
+          },
+        },
+      }
+    );
+    if (!addCourseState)
+      throw { code: 3, message: "Lesson state relation could not add" };
 
     res.status(200).json(newLessonCreate);
   } catch (error) {
@@ -232,6 +247,15 @@ const deleteLesson = async (req, res) => {
 
     // Silinen dersi kontrol et
     if (!deletedLesson) throw { code: 2, message: "Lesson could not deleted" };
+
+    const deleteLessonsState = await CourseStates.updateMany(
+      { lessonsStates: { $elemMatch: { lesson: deletedLesson._id } } },
+      { $pull: { lessonsStates: { lesson: deletedLesson._id } } }
+    );
+
+    if (!deleteLessonsState) {
+      throw { code: 2, message: "Lesson state relations could not deleted" };
+    }
 
     // Başarılı yanıtı döndür
     res.status(200).json({ deletedLesson });

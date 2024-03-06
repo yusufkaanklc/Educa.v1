@@ -7,10 +7,12 @@ import {
   BreadcrumbItem,
   Text,
   Heading,
+  Avatar,
   Center,
   Button,
   Stack,
   BreadcrumbLink,
+  Textarea,
   useToast,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
@@ -20,22 +22,25 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import dataContext from "../utils/contextApi";
 import { getLessons, updateLessonState } from "../utils/data/LessonsData";
 import { getCourse, getCourseState } from "../utils/data/CoursesData";
+import { getUsers } from "../utils/data/UsersData";
 const Lesson = () => {
   const {
+    apiUrl,
     isMobile,
     isLaptop,
     setTargetScroll,
     setErrors,
     errors,
-    course,
     account,
-    setCourse,
     courseStates,
     setCourseStates,
   } = useContext(dataContext);
   const [lessons, setLessons] = useState([]);
-  const [lesson, setLesson] = useState({});
+  const [lesson, setLesson] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [course, setCourse] = useState(null);
   const [lessonPoint, setLessonPoint] = useState(null);
+  const [commentOwnerList, setCommentOwnerList] = useState([]);
   const [starList, setStarList] = useState([]);
   const [currentVideoTime, setCurrentVideoTime] = useState(null);
   const [isLessonFinished, setIsLessonFinished] = useState(false);
@@ -58,6 +63,16 @@ const Lesson = () => {
     navigate("/");
   };
 
+  const getDate = (createdAt) => {
+    if (createdAt) {
+      const date = new Date(createdAt);
+      return `${date.getDate()} / ${
+        date.getMonth() + 1
+      } / ${date.getFullYear()}`;
+    }
+    return ""; // Eğer createdAt değeri yoksa boş string döndür
+  };
+
   const navigateLesson = (lessonSlug) => {
     navigate(`/${page}/course/${courseSlug}/lessons/${lessonSlug}`);
   };
@@ -65,13 +80,13 @@ const Lesson = () => {
   const toast = useToast();
 
   const updateLessonStateFunc = (lessonSlug) => {
-    if (isLessonFinished && course.ownerName !== account.username) {
+    if (isLessonFinished && course.ownerId !== account._id) {
       setIsFinishButtonClicked(true);
       updateLessonState(courseSlug, lessonSlug, "lesson")
         .then(() => {
           toast({
             title: "Success",
-            description: "The course was completed successfully",
+            description: "The lesson was completed successfully",
             status: "success",
             duration: 5000,
             isClosable: true,
@@ -84,7 +99,7 @@ const Lesson = () => {
     } else {
       toast({
         title: "Warning",
-        description: "Please complete the course",
+        description: "Please complete the lesson",
         status: "warning",
         duration: 5000,
         isClosable: true,
@@ -104,10 +119,38 @@ const Lesson = () => {
   }, [courseSlug]);
 
   useEffect(() => {
+    console.log(course);
+  }, [course]);
+
+  useEffect(() => {
     const currentLesson = lessons.filter((el) => el.slug === lessonSlug)[0];
     setLesson(currentLesson);
     setLessonPoint(currentLesson && currentLesson.point);
   }, [lessons, lessonSlug]);
+
+  useEffect(() => {
+    if (lesson) {
+      const commentList = lesson.comments.map((comment) => comment);
+      setComments(commentList);
+    }
+  }, [lesson]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userList = await getUsers(); // Kullanıcı listesini al
+        const owners = comments.map((comment) => {
+          // Her yorum için ilgili kullanıcıyı bul
+          return userList.find((user) => user._id === comment.user);
+        });
+        setCommentOwnerList(owners);
+      } catch (error) {
+        setErrors([...errors, error]);
+      }
+    };
+
+    fetchData(); // fetchData fonksiyonunu çağır
+  }, [comments]);
 
   useEffect(() => {
     let starLisst = [];
@@ -119,16 +162,15 @@ const Lesson = () => {
 
   useEffect(() => {
     if ((currentVideoTime / lesson?.duration) * 100 >= 80) {
-      console.log(currentVideoTime);
       setIsLessonFinished(true);
     }
   }, [currentVideoTime]);
 
   useEffect(() => {
     if (
-      course.slug &&
+      course &&
       account &&
-      account.username !== course.ownerName &&
+      account._id !== course.ownerId &&
       !isLessonFinished
     ) {
       getCourseState(course.slug).then((data) => setCourseStates(data));
@@ -209,7 +251,7 @@ const Lesson = () => {
             as={Link}
             to={`/${page}/course/${courseSlug}`}
           >
-            {course.title}
+            {course && course.title}
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbItem>
@@ -219,7 +261,7 @@ const Lesson = () => {
             as={Link}
             to={`/${page}/course/${courseSlug}/lessons/${lessonSlug}`}
           >
-            {lesson && lesson.title}
+            {course && lesson && lesson.title}
           </BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
@@ -314,7 +356,13 @@ const Lesson = () => {
               >
                 {lesson?.title}
               </Heading>
-              <Text>{lesson?.description}</Text>
+              <Text
+                fontWeight={500}
+                opacity={0.9}
+                fontSize={responsive("", "sm", "md")}
+              >
+                {lesson?.description}
+              </Text>
             </Flex>
             <Flex
               align={"center"}
@@ -336,7 +384,13 @@ const Lesson = () => {
                   ></i>
                 )}
               </Box>
-              <Text>({lesson?.comments && lesson.comments.length})</Text>
+              <Text
+                fontWeight={500}
+                opacity={0.9}
+                fontSize={responsive("", "sm", "md")}
+              >
+                ({lesson?.comments && lesson.comments.length})
+              </Text>
             </Flex>
           </Flex>
         </GridItem>
@@ -357,7 +411,7 @@ const Lesson = () => {
                 controls
                 width={"100%"}
                 height={"100%"}
-                url={"http://localhost:5000/" + lesson.videoUrl}
+                url={apiUrl + lesson.videoUrl}
               ></ReactPlayer>
             )}
           </Center>
@@ -380,14 +434,18 @@ const Lesson = () => {
           <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
             <Stack>
               <Heading fontSize={responsive("", "md", "lg")} fontWeight={"600"}>
-                Course Note
+                Lesson Note
               </Heading>
-              <Text fontWeight={500} fontSize={responsive("", "sm", "md")}>
+              <Text
+                fontWeight={500}
+                opacity={0.9}
+                fontSize={responsive("", "sm", "md")}
+              >
                 {lesson?.notes}
               </Text>
             </Stack>
             <Flex justify={"flex-end"}>
-              {account?.username !== course?.ownerName && (
+              {account && course && account._id !== course.ownerId && (
                 <Button
                   variant={"outline"}
                   bgColor={"var(--accent-color)"}
@@ -415,7 +473,123 @@ const Lesson = () => {
           borderRadius={"10px"}
           bgColor={"var(--bg-color)"}
           border={"2px dashed var(--secondary-color)"}
-        ></GridItem>
+        >
+          <Flex align={"center"} justify={"space-between"} mb={"1em"}>
+            <Heading fontSize={responsive("", "md", "lg")} fontWeight={"600"}>
+              Lesson Comments
+            </Heading>
+            {account && course && account._id === course.ownerId && (
+              <Button
+                variant={"outline"}
+                bgColor={"var(--accent-color)"}
+                color={"white"}
+                fontSize={responsive("", "sm", "md")}
+                border={"1px solid var(--accent-color)"}
+                _hover={{
+                  bgColor: "white",
+                  color: "var(--accent-color)",
+                }}
+              >
+                Edit
+              </Button>
+            )}
+          </Flex>
+          <Flex
+            flexDir={"column"}
+            gap={responsive("", "1em", "1.5em")}
+            maxH={responsive("", "35em", "37em")}
+            overflow={"auto"}
+          >
+            {comments.length > 0 && commentOwnerList.length > 0
+              ? comments.map((comment, index) => (
+                  <Flex
+                    key={index}
+                    bgColor="white"
+                    p={responsive("", ".5em", "1em")}
+                    borderRadius="10px"
+                    justify="space-between"
+                    flexDir="column"
+                    gap="1em"
+                  >
+                    {commentOwnerList.map((owner) => {
+                      // Yorumun sahibini bul
+                      if (owner._id === comment.user) {
+                        return (
+                          <Flex align="center" justify={"space-between"}>
+                            <Flex align={"center"} gap={"1em"}>
+                              <Avatar
+                                key={owner._id}
+                                src={owner.image}
+                                bgColor={"var(--secondary-color)"}
+                                name={owner.username}
+                                size={responsive("", "sm", "sm")}
+                              />
+                              <Text
+                                fontWeight={500}
+                                fontSize={responsive("", "sm", "md")}
+                                opacity={0.9}
+                              >
+                                {owner.username}
+                              </Text>
+                            </Flex>
+                            {account && account._id === comment.user && (
+                              <Button
+                                variant={"outline"}
+                                size={responsive("", "xs", "sm")}
+                                bgColor={"var(--accent-color)"}
+                                color={"white"}
+                                fontSize={responsive("", "sm", "md")}
+                                border={"1px solid var(--accent-color)"}
+                                _hover={{
+                                  bgColor: "white",
+                                  color: "var(--accent-color)",
+                                }}
+                              >
+                                Edit
+                              </Button>
+                            )}
+                          </Flex>
+                        );
+                      }
+                      return null;
+                    })}
+                    <Textarea
+                      border={"2px dashed #cfcfcf"}
+                      readOnly={true}
+                      _focus={{
+                        border: "2px dashed #cfcfcf",
+                        boxShadow: "none",
+                      }}
+                      value={comment.text}
+                      fontSize={responsive("", "sm", "md")}
+                      fontWeight={500}
+                      opacity={0.9}
+                    ></Textarea>
+                    <Flex align={"center"} justify={"space-between"}>
+                      <Flex
+                        fontSize={responsive("", "sm", "md")}
+                        fontWeight={500}
+                        opacity={0.9}
+                        color={"var(--accent-color)"}
+                        gap={".3em"}
+                        align={"center"}
+                      >
+                        <Text>{comment.point}</Text>
+                        <StarIcon pos={"relative"} bottom={"2px"}></StarIcon>
+                      </Flex>
+                      <Text
+                        fontSize={responsive("", "sm", "md")}
+                        fontWeight={500}
+                        opacity={0.9}
+                      >
+                        {getDate(comment.createdAt)}
+                      </Text>
+                    </Flex>
+                  </Flex>
+                ))
+              : ""}
+          </Flex>
+        </GridItem>
       </Grid>
     </Box>
   );

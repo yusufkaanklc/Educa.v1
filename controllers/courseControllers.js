@@ -120,7 +120,8 @@ const getAllCourses = async (req, res) => {
           _id: "$_id",
           title: { $first: "$title" },
           description: { $first: "$description" },
-          ownership: { $first: "$ownershipDetails.username" },
+          ownerName: { $first: "$ownershipDetails.username" },
+          ownerId: { $first: "$ownershipDetails._id" },
           ownerImage: { $first: "$ownershipDetails.image" },
           enrollments: { $first: "$enrollments" },
           createdAt: { $first: "$createdAt" },
@@ -250,10 +251,10 @@ const getCourse = async (req, res) => {
           title: { $first: "$title" },
           description: { $first: "$description" },
           ownerName: { $first: "$ownershipDetails.username" },
+          ownerId: { $first: "$ownershipDetails._id" },
           ownerIntroduce: { $first: "$ownershipDetails.introduce" },
           ownerImage: { $first: "$ownershipDetails.image" },
           enrollments: { $addToSet: "$enrollmentsDetails" },
-          comments: { $first: "$comments" },
           duration: { $sum: "$lessonDetails.duration" },
           price: { $first: "$price" },
           lessons: { $addToSet: "$lessonDetails" },
@@ -269,12 +270,12 @@ const getCourse = async (req, res) => {
           title: 1,
           description: 1,
           ownerName: 1,
+          ownerId: 1,
           duration: 1,
           enrollments: 1,
           ownerIntroduce: 1,
           ownerImage: 1,
           price: 1,
-          comments: 1,
           lessons: 1,
           category: 1,
           imageUrl: 1,
@@ -436,7 +437,6 @@ const updateCourseOrLessonState = async (req, res) => {
 const getCourseOrLessonState = async (req, res) => {
   try {
     const { courseSlug } = req.params;
-    console.log(courseSlug);
     const course = await Course.findOne({ slug: courseSlug });
     if (!course) throw { code: 2, message: "Course not found" };
     const findState = await CourseStates.findOne({

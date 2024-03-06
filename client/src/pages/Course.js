@@ -38,8 +38,7 @@ import { useToast } from "@chakra-ui/react";
 
 const Course = () => {
   const {
-    course,
-    setCourse,
+    apiUrl,
     isMobile,
     isLaptop,
     setTargetScroll,
@@ -56,6 +55,7 @@ const Course = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [starList, setStarList] = useState([]);
   const [enroll, setEnroll] = useState(null);
+  const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [filteredLessonList, setFilteredLessonList] = useState([]);
   const [deletedLessonList, setDeletedLessonList] = useState([]);
@@ -91,7 +91,7 @@ const Course = () => {
         duration: 5000,
         isClosable: true,
       });
-    } else if (course.ownerName !== account.username && !enroll) {
+    } else if (course.ownerId !== account._id && !enroll) {
       toast({
         title: "Warning",
         description: "Please enroll",
@@ -170,15 +170,15 @@ const Course = () => {
   };
 
   const handleLessonDeleteSubmit = async () => {
-    const loadingToastId = toast({
-      title: "Loading",
-      description: "Updating course...",
-      status: "info",
-      duration: null, // Set duration to null to keep the toast until it's manually closed
-      isClosable: false,
-    });
-    try {
-      if (deletedLessonList.length > 0) {
+    if (deletedLessonList.length > 0) {
+      const loadingToastId = toast({
+        title: "Loading",
+        description: "Updating course...",
+        status: "info",
+        duration: null, // Set duration to null to keep the toast until it's manually closed
+        isClosable: false,
+      });
+      try {
         const deletionPromises = deletedLessonList.map(async (lesson) => {
           await deleteLesson(slug, lesson.slug);
         });
@@ -203,12 +203,12 @@ const Course = () => {
         );
         // deletedLessonList'i boşalt
         setDeletedLessonList([]);
-      } else {
-        setIsLessonsEditing(false);
+      } catch (error) {
+        toast.close(loadingToastId);
+        setErrors([...errors, error]);
       }
-    } catch (error) {
-      toast.close(loadingToastId);
-      setErrors([...errors, error]);
+    } else {
+      setIsLessonsEditing(false);
     }
   };
 
@@ -240,27 +240,41 @@ const Course = () => {
   };
 
   const navigateToLastLesson = () => {
-    const lessonStates = courseStates.lessonsStates.map((el, index) => ({
-      elState: el.state,
-      elIndex: index,
-      elLesson: el.lesson,
-    }));
-    console.log("lessonStates:", lessonStates);
-
-    const findIndex = lessonStates.map((state) => {
-      if (state) {
-        return state.elIndex;
-      }
-    });
-    console.log("findIndex:", findIndex);
-    const targetLessonIndex = lessonStates[findIndex.length - 1].elIndex;
-    console.log("targetLessonIndex:", targetLessonIndex);
-    const targetLessonId = lessonStates[targetLessonIndex].elLesson;
-    const targetLesson = lessons.find((lesson) => {
-      if (lesson._id === targetLessonId) {
-        return lesson;
-      }
-    });
+    if (
+      !courseStates ||
+      !courseStates.lessonsStates ||
+      courseStates.lessonsStates.length === 0
+    ) {
+      // Eğer ders durumu veya ders durumu listesi yoksa veya boşsa, işlem yapma
+      return;
+    }
+    const lessonIndices = courseStates.lessonsStates.reduce(
+      (indices, lesson, index) => {
+        if (lesson.state) {
+          indices.push(index);
+        }
+        return indices;
+      },
+      []
+    );
+    if (lessonIndices.length === 0) {
+      // Hiç tamamlanmış ders yoksa, işlem yapma
+      return;
+    }
+    const targetLessonIndex = lessonIndices[lessonIndices.length - 1] + 1;
+    if (targetLessonIndex >= courseStates.lessonsStates.length) {
+      // Hedef ders indeksi, ders durumu dizisinin dışına çıkarsa, işlem yapma
+      return;
+    }
+    const targetLessonId = courseStates.lessonsStates[targetLessonIndex].lesson;
+    const targetLesson = lessons.find(
+      (lesson) => lesson._id === targetLessonId
+    );
+    if (!targetLesson) {
+      // Hedef ders bulunamazsa, işlem yapma
+      return;
+    }
+    // Hedef dersin URL'sine yönlendirme yapın
     navigate(`/${page}/course/${slug}/lessons/${targetLesson.slug}`);
   };
 
@@ -282,26 +296,29 @@ const Course = () => {
         setErrors([...errors, error]);
       });
 
+    setIsCourseFinished(false);
     window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
-    const newStarList = [];
-    for (let i = 1; i <= course.point; i++) {
-      newStarList.push(i);
-    }
-    setStarList(newStarList);
-    setCourseUpdateData({
-      title: course.title,
-      description: course.description,
-      price: course.price,
-      image: course.imageUrl,
-    });
     if (course) {
       setIsLoading(false);
-    }
-    if (course.slug && enroll) {
-      getCourseState(course.slug).then((data) => setCourseStates(data));
+      const newStarList = [];
+      for (let i = 1; i <= course.point; i++) {
+        newStarList.push(i);
+      }
+      setStarList(newStarList);
+      setCourseUpdateData({
+        title: course.title,
+        description: course.description,
+        price: course.price,
+        image: course.imageUrl,
+      });
+      if (course && enroll) {
+        getCourseState(course?.slug)
+          .then((data) => setCourseStates(data))
+          .catch((error) => setErrors([...errors, error]));
+      }
     }
   }, [course, enroll]);
 
@@ -309,7 +326,6 @@ const Course = () => {
     if (courseStates) {
       const lessonStatesList =
         courseStates?.lessonsStates.map((lesson) => lesson.state) ?? [];
-
       const completedLessonCount = lessonStatesList.filter(
         (state) => state
       ).length;
@@ -317,17 +333,13 @@ const Course = () => {
 
       const progress =
         totalLessonCount > 0
-          ? (completedLessonCount / totalLessonCount) * 100
+          ? Math.round((completedLessonCount / totalLessonCount) * 100)
           : 0;
       setProgressValue(progress);
 
-      if (
-        !courseStates.lessonsStates.filter((state) => !state) &&
-        !isCourseFinished
-      ) {
-        updateCourseState(slug).then(() => {
-          setIsCourseFinished(true);
-        });
+      // Tüm dersler tamamlandıysa ve kurs henüz tamamlanmadıysa, kurs durumunu güncelle
+      if (completedLessonCount === totalLessonCount && !isCourseFinished) {
+        updateCourseState(slug).then(() => setIsCourseFinished(true));
       }
     }
   }, [courseStates]);
@@ -423,7 +435,7 @@ const Course = () => {
                   as={Link}
                   to={`/courses/course/${slug}`}
                 >
-                  {course.title}
+                  {course?.title}
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </Breadcrumb>
@@ -530,14 +542,14 @@ const Course = () => {
           >
             <Stack gap={responsive("", ".75em", "1em")}>
               <FormControl pos={"relative"}>
-                {course.imageUrl !== "" && course.imageUrl ? (
+                {course && course.imageUrl !== "" && course.imageUrl ? (
                   <Center
                     borderRadius={"10px"}
                     maxH={responsive("", "16em", "20em")}
                     overflow={"hidden"}
                   >
                     <Image
-                      src={"http://localhost:5000/" + course.imageUrl}
+                      src={apiUrl + course.imageUrl}
                       borderRadius={"10px"}
                       pos={"relative"}
                       top={0}
@@ -608,7 +620,7 @@ const Course = () => {
                   fontSize={responsive("", "xl", "2xl")}
                   fontWeight={"600"}
                 >
-                  {course.title}
+                  {course && course.title}
                 </Heading>
               )}
 
@@ -629,12 +641,22 @@ const Course = () => {
                   />
                 </FormControl>
               ) : (
-                <Text fontSize={responsive("", "sm", "md")}>
-                  {course.description}
+                <Text
+                  fontSize={responsive("", "sm", "md")}
+                  fontWeight={500}
+                  opacity={0.9}
+                >
+                  {course && course.description}
                 </Text>
               )}
               <Flex gap={".5em"}>
-                <Text opacity={0.9}>{course.point ? course.point : 0}</Text>
+                <Text
+                  fontSize={responsive("", "sm", "md")}
+                  fontWeight={500}
+                  opacity={0.9}
+                >
+                  {course && course.point ? course.point : 0}
+                </Text>
                 {starList.length > 0 ? (
                   starList.map((star) => (
                     <StarIcon
@@ -678,7 +700,7 @@ const Course = () => {
                   fontWeight={"500"}
                   opacity={"0.9"}
                 >
-                  {course.price}$
+                  {course && course.price}$
                 </Text>
               )}
               <ButtonGroup>
@@ -703,7 +725,7 @@ const Course = () => {
                   bgColor={"var(--accent-color)"}
                   fontSize={responsive("", "sm", "md")}
                   onClick={() => {
-                    if (account && course.ownerName === account.username) {
+                    if (account && course.ownerId === account._id) {
                       setIsCourseEditing(!isCourseEditing);
                       if (isCourseEditing) {
                         setCourseUpdateData({
@@ -711,18 +733,26 @@ const Course = () => {
                           description: course.description,
                           price: course.price,
                         });
-                        setLessons([]);
                       }
                     } else if (
                       account &&
-                      course.ownerName !== account.username &&
+                      course &&
+                      course.ownerId !== account._id &&
                       !enroll
                     ) {
                       handleEnrollCourse();
-                    } else if (enroll) {
+                    } else if (enroll && !isCourseFinished) {
                       navigateToLastLesson();
                     } else if (!account) {
                       navigate("/login");
+                    } else if (enroll && isCourseFinished) {
+                      toast({
+                        title: "Success",
+                        description: "Course finished successfully",
+                        status: "success",
+                        duration: 5000,
+                        isClosable: true,
+                      });
                     }
                   }}
                   color={"white"}
@@ -734,12 +764,14 @@ const Course = () => {
                   }}
                 >
                   {account
-                    ? course.ownerName === account.username
+                    ? course && course.ownerId === account._id
                       ? isCourseEditing
                         ? "Reset"
                         : "Edit"
                       : enroll
-                      ? "Continue"
+                      ? isCourseFinished
+                        ? "Finished"
+                        : "Continue"
                       : "Enroll now"
                     : "Login to enroll"}
                 </Button>
@@ -778,10 +810,10 @@ const Course = () => {
                   color={"var(--secondary-color)"}
                   w={"max-content"}
                 >
-                  {course.ownerName}
+                  {course && course.ownerName}
                 </Center>
               </Box>
-              {course.ownerImage ? (
+              {course && course.ownerImage ? (
                 <Center
                   border={"2px solid var(--secondary-color)"}
                   w={responsive("", "5.5em", "6.5em")}
@@ -791,7 +823,7 @@ const Course = () => {
                 >
                   <Image
                     transform={"scale(1.5)"}
-                    src={"http://localhost:5000/" + course.ownerImage}
+                    src={apiUrl + course.ownerImage}
                     bgColor={"var(--secondary-color)"}
                     name={course.ownerName}
                   />
@@ -800,14 +832,18 @@ const Course = () => {
                 <Avatar
                   border={"2px dashed var(--secondary-color)"}
                   bgColor={"var(--secondary-color)"}
-                  name={course.ownerName}
+                  name={course && course.ownerName}
                   size={responsive("", "xl", "xl")}
                 ></Avatar>
               )}
             </Flex>
 
-            <Text fontSize={responsive("", "sm", "md")}>
-              {course.ownerIntroduce}
+            <Text
+              fontSize={responsive("", "sm", "md")}
+              fontWeight={500}
+              opacity={0.9}
+            >
+              {course && course.ownerIntroduce}
             </Text>
           </GridItem>
 
@@ -854,14 +890,14 @@ const Course = () => {
                   </Button>
                 )}
 
-                {account?.username === course?.ownerName && (
+                {account && course && account._id === course.ownerId && (
                   <Button
                     border={"1px solid transparent"}
                     bgColor={"var(--accent-color)"}
                     fontSize={responsive("", "sm", "md")}
                     onClick={() => {
                       account &&
-                        course.ownerName === account.username &&
+                        course.ownerId === account._id &&
                         setIsLessonsEditing(!isLessonsEditing);
                       if (isLessonsEditing) {
                         setCourseUpdateData({
@@ -960,7 +996,7 @@ const Course = () => {
                         _hover={{ textDecor: "none" }}
                         to={
                           enroll ||
-                          (account && account.username === course.ownerName)
+                          (account && course && account._id === course.ownerId)
                             ? `/${page}/course/${slug}/lessons/${lesson.slug}`
                             : ""
                         }
@@ -1078,7 +1114,7 @@ const Course = () => {
                     }}
                   ></i>
                   <Text fontSize={responsive("", "sm", "md")}>
-                    {course.enrollments && course.enrollments.length}
+                    {course && course.enrollments && course.enrollments.length}
                     &nbsp;Enrollments
                   </Text>
                 </Flex>
@@ -1097,7 +1133,7 @@ const Course = () => {
                     }}
                   ></i>
                   <Text fontSize={responsive("", "sm", "md")}>
-                    {course.duration
+                    {course && course.duration
                       ? course.duration < 60
                         ? course.duration + " sec"
                         : Math.floor(course.duration / 60) +
@@ -1122,7 +1158,7 @@ const Course = () => {
                     }}
                   ></i>
                   <Text fontSize={responsive("", "sm", "md")}>
-                    {course.lessons && course.lessons.length} Lessons
+                    {course && course.lessons && course.lessons.length} Lessons
                   </Text>
                 </Flex>
               </Flex>

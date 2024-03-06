@@ -5,11 +5,11 @@ import Cookies from "js-cookie";
 const dataContext = createContext();
 
 export const DataProvider = ({ children }) => {
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [courses, setCourses] = useState([]);
   const [users, setUsers] = useState([]);
   const [account, setAccount] = useState(null);
   const [teachers, setTeachers] = useState([]);
-  const [course, setCourse] = useState({});
   const [isLogin, setIsLogin] = useState(
     Cookies.get("isLoggedIn") ? true : false
   );
@@ -46,6 +46,7 @@ export const DataProvider = ({ children }) => {
   return (
     <dataContext.Provider
       value={{
+        apiUrl,
         courses,
         setCourses,
         users,
@@ -60,8 +61,6 @@ export const DataProvider = ({ children }) => {
         setLessonCreateData,
         account,
         setAccount,
-        course,
-        setCourse,
         categories,
         setCategories,
         targetScroll,

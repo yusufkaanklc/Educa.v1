@@ -26,6 +26,7 @@ import { getCourses } from "../utils/data/CoursesData";
 
 const AllCourses = () => {
   const {
+    apiUrl,
     isLaptop,
     isMobile,
     setTargetScroll,
@@ -170,7 +171,7 @@ const AllCourses = () => {
                           borderRadius="lg"
                         >
                           <Image
-                            src={"http://localhost:5000/" + course.imageUrl}
+                            src={apiUrl + course.imageUrl}
                             borderRadius="lg"
                           />
                         </Center>
@@ -252,14 +253,14 @@ const AllCourses = () => {
                         <Flex align={"center"} gap={"0.5em"}>
                           <Avatar
                             size={responsive("", "xs", "sm")}
-                            src={"http://localhost:5000/" + course.ownerImage}
+                            src={apiUrl + course.ownerImage}
                           ></Avatar>
                           <Text
                             fontWeight={"600"}
                             w={"max-content"}
                             fontSize={responsive("", "sm", "md")}
                           >
-                            {course.ownership}
+                            {course.ownerName}
                           </Text>
                         </Flex>
                         <Text

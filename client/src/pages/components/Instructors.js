@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import dataContext from "../../utils/contextApi";
 const Instructors = () => {
-  const { isMobile, isLaptop, teachers } = useContext(dataContext);
+  const { isMobile, isLaptop, teachers, apiUrl } = useContext(dataContext);
   const [instructors, setInstructors] = useState([]);
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
@@ -75,7 +75,7 @@ const Instructors = () => {
                           src={
                             instructor.image
                               ? instructor.image
-                              : "http://localhost:5000/" + instructor.image
+                              : apiUrl + instructor.image
                           }
                           w={responsive("", "18em", "22em")}
                           h={responsive("", "10.3em", "14em")}
