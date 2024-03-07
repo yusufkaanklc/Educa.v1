@@ -34,12 +34,11 @@ const Lesson = () => {
     setErrors,
     errors,
     account,
-    courseStates,
-    setCourseStates,
   } = useContext(dataContext);
   const [lessons, setLessons] = useState([]);
   const [lesson, setLesson] = useState(null);
   const [comments, setComments] = useState([]);
+  const [courseStates, setCourseStates] = useState(null);
   const [course, setCourse] = useState(null);
   const [lessonPoint, setLessonPoint] = useState(null);
   const [commentOwnerList, setCommentOwnerList] = useState([]);
@@ -51,6 +50,7 @@ const Lesson = () => {
   const [filteredCommentList, setFilteredCommentList] = useState([]);
   const [isCommentEditing, setIsCommentEditing] = useState(false);
   const [deletionCommentList, setDeletionCommentList] = useState([]);
+  const [prevLessonState, setPrevLessonState] = useState(false);
 
   const { page, courseSlug, lessonSlug } = useParams();
   const responsive = (mobile, laptop, desktop) => {
@@ -85,33 +85,80 @@ const Lesson = () => {
 
   const toast = useToast();
 
-  const updateLessonStateFunc = (lessonSlug) => {
-    if (isLessonFinished && course.ownerId !== account._id) {
-      setIsFinishButtonClicked(true);
-      updateLessonState(courseSlug, lessonSlug, "lesson")
-        .then(() => {
+  const updateLessonStateFunc = () => {
+    let lessonStateList = [];
+    let currentLessonStateIndex;
+
+    getCourseState(courseSlug)
+      .then((data) => {
+        const courseState = data;
+        lessonStateList = courseState.lessonsStates;
+
+        // Hedef dersin endeksini bul
+        lessonStateList.forEach((l, index) => {
+          if (l.lesson === lesson._id) {
+            currentLessonStateIndex = index;
+          }
+        });
+
+        console.log(currentLessonStateIndex);
+
+        // İlk dersi bitirmeye çalışıyorsa, bir önceki ders yoktur
+        if (currentLessonStateIndex === 0) {
+          setPrevLessonState(true);
+        } else {
+          // Hedef dersin önceki durumunu al
+          setPrevLessonState(
+            lessonStateList[currentLessonStateIndex - 1].state
+          );
+        }
+      })
+      .catch((error) => {
+        // Hata işleme
+        console.error("Veri alınırken hata oluştu:", error);
+      });
+  };
+
+  useEffect(() => {
+    if (isLessonFinished) {
+      if (course.ownerId !== account._id) {
+        console.log(prevLessonState);
+        if (prevLessonState) {
+          setIsFinishButtonClicked(true);
+          updateLessonState(courseSlug, lessonSlug, "lesson")
+            .then(() => {
+              toast({
+                title: "Success",
+                description: "The lesson was completed successfully",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+              });
+              navigate(`/${page}/course/${courseSlug}`);
+            })
+            .catch((error) => {
+              setErrors([...errors, error]);
+            });
+        } else {
           toast({
-            title: "Success",
-            description: "The lesson was completed successfully",
-            status: "success",
+            title: "Warning",
+            description: "please finish the previous lesson",
+            status: "warning",
             duration: 5000,
             isClosable: true,
           });
-          navigate(`/${page}/course/${courseSlug}`);
-        })
-        .catch((error) => {
-          setErrors([...errors, error]);
+        }
+      } else {
+        toast({
+          title: "Warning",
+          description: "Please complete the lesson",
+          status: "warning",
+          duration: 5000,
+          isClosable: true,
         });
-    } else {
-      toast({
-        title: "Warning",
-        description: "Please complete the lesson",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-      });
+      }
     }
-  };
+  }, [prevLessonState]);
 
   const handleCommentChange = (e, commentId) => {
     const updatedList = updatedCommentList.map((comment) => {
@@ -586,7 +633,9 @@ const Lesson = () => {
                   Save
                 </Button>
               )}
-              {account && course && account._id === course.ownerId && (
+              {((account && course && account._id === course.ownerId) ||
+                (commentOwnerList.some((c) => c._id === account._id) &&
+                  updatedCommentList.length > 0)) && (
                 <Button
                   variant={"outline"}
                   onClick={() => {
@@ -649,49 +698,37 @@ const Lesson = () => {
                                 {owner.username}
                               </Text>
                             </Flex>
-                            {account && account._id === comment.user && (
-                              <Button
-                                variant={"outline"}
-                                size={responsive("", "xs", "sm")}
-                                bgColor={"var(--accent-color)"}
-                                color={"white"}
-                                fontSize={responsive("", "sm", "md")}
-                                border={"1px solid var(--accent-color)"}
-                                _hover={{
-                                  bgColor: "white",
-                                  color: "var(--accent-color)",
-                                }}
-                              >
-                                Edit
-                              </Button>
-                            )}
-                            {account &&
+
+                            {(account &&
                               course &&
                               account._id === course.ownerId &&
-                              isCommentEditing && (
-                                <Button
-                                  variant="outline"
-                                  p=".5em"
-                                  minH="max-content"
-                                  minW="max-content"
-                                  border={"1px solid var(--accent-color)"}
-                                  fontSize={responsive("", "sm", "md")}
-                                  onClick={() =>
-                                    handleDeleteComment(comment._id)
-                                  }
-                                  color={"white"}
-                                  _hover={{
-                                    color: "var(--accent-color)",
-                                    bgColor: "white",
+                              isCommentEditing) ||
+                            (account._id === comment.user &&
+                              isCommentEditing) ? (
+                              <Button
+                                variant="outline"
+                                p=".5em"
+                                minH="max-content"
+                                minW="max-content"
+                                border={"1px solid var(--accent-color)"}
+                                fontSize={responsive("", "sm", "md")}
+                                onClick={() => handleDeleteComment(comment._id)}
+                                color={"white"}
+                                _hover={{
+                                  color: "var(--accent-color)",
+                                  bgColor: "white",
+                                }}
+                                bgColor={"var(--accent-color)"}
+                              >
+                                <i
+                                  className="fi fi-rr-trash"
+                                  style={{
+                                    position: "relative",
+                                    top: "2px",
                                   }}
-                                  bgColor={"var(--accent-color)"}
-                                >
-                                  <i
-                                    className="fi fi-rr-trash"
-                                    style={{ position: "relative", top: "2px" }}
-                                  />
-                                </Button>
-                              )}
+                                />
+                              </Button>
+                            ) : null}
                           </Flex>
                         );
                       }

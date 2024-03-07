@@ -47,12 +47,10 @@ const Course = () => {
     setCourseUpdateData,
     errors,
     setErrors,
-    courseStates,
-    setCourseStates,
-    isCourseFinished,
-    setIsCourseFinished,
   } = useContext(dataContext);
+  const [courseStates, setCourseStates] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCourseFinished, setIsCourseFinished] = useState(false);
   const [starList, setStarList] = useState([]);
   const [enroll, setEnroll] = useState(null);
   const [course, setCourse] = useState(null);
@@ -257,11 +255,13 @@ const Course = () => {
       },
       []
     );
-    if (lessonIndices.length === 0) {
-      // Hiç tamamlanmış ders yoksa, işlem yapma
-      return;
-    }
-    const targetLessonIndex = lessonIndices[lessonIndices.length - 1] + 1;
+
+    console.log(lessonIndices);
+
+    const targetLessonIndex =
+      lessonIndices.length > 0
+        ? lessonIndices[lessonIndices.length - 1] + 1
+        : 0;
     if (targetLessonIndex >= courseStates.lessonsStates.length) {
       // Hedef ders indeksi, ders durumu dizisinin dışına çıkarsa, işlem yapma
       return;
@@ -296,7 +296,6 @@ const Course = () => {
         setErrors([...errors, error]);
       });
 
-    setIsCourseFinished(false);
     window.scrollTo(0, 0);
   }, []);
 
@@ -337,11 +336,17 @@ const Course = () => {
           : 0;
       setProgressValue(progress);
 
-      // Tüm dersler tamamlandıysa ve kurs henüz tamamlanmadıysa, kurs durumunu güncelle
-      if (completedLessonCount === totalLessonCount && !isCourseFinished) {
+      // Tüm dersler tamamlanmışsa ve kurs henüz tamamlanmadıysa, kurs durumunu güncelle
+      if (
+        completedLessonCount === totalLessonCount &&
+        !isCourseFinished &&
+        totalLessonCount > 0
+      ) {
         updateCourseState(slug).then(() => setIsCourseFinished(true));
       }
     }
+
+    console.log(courseStates);
   }, [courseStates]);
 
   useEffect(() => {

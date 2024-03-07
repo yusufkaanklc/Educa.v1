@@ -35,8 +35,6 @@ const CourseCreate = () => {
     setCourseCreateData,
     courseCreateData,
     setErrors,
-    course,
-    setCourse,
     setSearchQuery,
     searchQuery,
     errors,
@@ -48,7 +46,7 @@ const CourseCreate = () => {
 
   const [categories, setCategories] = useState([]);
   const [showOptions, setShowOptions] = useState(false);
-
+  const [course, setCourse] = useState(null);
   const [searchParams] = useSearchParams();
   const courseSlug = searchParams.get("course");
 
