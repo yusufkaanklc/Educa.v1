@@ -86,6 +86,7 @@ router
   .put(
     authMiddlewares.isLoggedIn,
     courseMiddlewares.ownershipControl,
+    fileUploadMiddlewares(),
     lessonControllers.updateLesson
   );
 

@@ -166,33 +166,32 @@ const updateLesson = async (req, res) => {
       Course.findOne({ slug: courseSlug }),
       Lesson.findOne({ slug: lessonSlug }),
     ]);
-
-    if (!title && !description && !notes)
+    if (!title && !description && !notes && !req.uploadedVideoUrl)
       throw { code: 1, message: "All fields required" };
 
     if (!course || !lesson || !course.lessons.includes(lesson?._id))
       throw { code: 2, message: "Invalid course or lesson" };
 
-    let newSlug;
-    let newVideoUrl = lesson.videoUrl;
+    let newFile = {};
 
-    if (req.uploadedVideoUrl) newVideoUrl = req.uploadedVideoUrl;
-
-    if (title !== undefined) {
-      newSlug = slugify(title, { lower: true, strict: true });
+    if (title) {
+      newFile.slug = slugify(title, { lower: true, strict: true });
+      newFile.title = title;
+    }
+    if (description) {
+      newFile.description = description;
+    }
+    if (notes) {
+      newFile.notes = notes;
+    }
+    if (req.uploadedVideoUrl && req.uploadedVideoUrl !== lesson.videoUrl) {
+      newFile.videoUrl = req.uploadedVideoUrl;
+      await unlink(lesson.videoUrl);
     }
 
-    const updatedLesson = await Lesson.findByIdAndUpdate(
-      lesson?._id,
-      {
-        title,
-        description,
-        notes: notes ? notes : "",
-        newVideoUrl,
-        slug: title !== "" ? newSlug : lessonSlug,
-      },
-      { new: true }
-    );
+    const updatedLesson = await Lesson.findByIdAndUpdate(lesson?._id, newFile, {
+      new: true,
+    });
     if (!updatedLesson) throw { code: 2, message: "Lesson could not updated" };
     res.status(200).json({ "updated lesson": updatedLesson });
   } catch (error) {

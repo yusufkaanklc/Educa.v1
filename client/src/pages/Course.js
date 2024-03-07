@@ -178,7 +178,11 @@ const Course = () => {
       });
       try {
         const deletionPromises = deletedLessonList.map(async (lesson) => {
-          await deleteLesson(slug, lesson.slug);
+          try {
+            await deleteLesson(slug, lesson.slug);
+          } catch (error) {
+            setErrors([...errors, error]);
+          }
         });
         await Promise.all(deletionPromises);
         toast.close(loadingToastId);
@@ -255,8 +259,6 @@ const Course = () => {
       },
       []
     );
-
-    console.log(lessonIndices);
 
     const targetLessonIndex =
       lessonIndices.length > 0
@@ -345,8 +347,6 @@ const Course = () => {
         updateCourseState(slug).then(() => setIsCourseFinished(true));
       }
     }
-
-    console.log(courseStates);
   }, [courseStates]);
 
   useEffect(() => {

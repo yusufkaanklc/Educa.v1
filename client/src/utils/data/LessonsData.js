@@ -49,6 +49,27 @@ const deleteLesson = async (courseSlug, lessonSlug) => {
   }
 };
 
+const updateLesson = async (courseSlug, lessonSlug, lessonData) => {
+  try {
+    const { data } = await axios.put(
+      `/courses/${courseSlug}/lessons/${lessonSlug}`,
+      lessonData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
+
 const updateLessonState = async (courseSlug, lessonSlug, stateType) => {
   try {
     const { data } = await axios.put(
@@ -64,4 +85,10 @@ const updateLessonState = async (courseSlug, lessonSlug, stateType) => {
   }
 };
 
-export { getLessons, createLesson, deleteLesson, updateLessonState };
+export {
+  getLessons,
+  createLesson,
+  deleteLesson,
+  updateLessonState,
+  updateLesson,
+};

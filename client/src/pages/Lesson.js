@@ -5,6 +5,8 @@ import {
   Breadcrumb,
   Flex,
   BreadcrumbItem,
+  FormControl,
+  Input,
   Text,
   Heading,
   Avatar,
@@ -15,13 +17,19 @@ import {
   Textarea,
   useToast,
   ButtonGroup,
+  FormLabel,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import ReactPlayer from "react-player";
 import { useContext, useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import dataContext from "../utils/contextApi";
-import { getLessons, updateLessonState } from "../utils/data/LessonsData";
+import {
+  deleteLesson,
+  getLessons,
+  updateLesson,
+  updateLessonState,
+} from "../utils/data/LessonsData";
 import { getCourse, getCourseState } from "../utils/data/CoursesData";
 import { getUsers } from "../utils/data/UsersData";
 import { deleteComment, updateComment } from "../utils/data/CommentData";
@@ -44,13 +52,18 @@ const Lesson = () => {
   const [commentOwnerList, setCommentOwnerList] = useState([]);
   const [starList, setStarList] = useState([]);
   const [currentVideoTime, setCurrentVideoTime] = useState(null);
-  const [isLessonFinished, setIsLessonFinished] = useState(false);
+  const [isLessonFinished, setIsLessonFinished] = useState(null);
   const [isFinishButtonClicked, setIsFinishButtonClicked] = useState(false);
+  const [isCommentEditing, setIsCommentEditing] = useState(false);
+  const [isLessonEditing, setIsLessonEditing] = useState(false);
+  const [prevLessonState, setPrevLessonState] = useState(null);
+
   const [updatedCommentList, setUpdatedCommentList] = useState([]);
   const [filteredCommentList, setFilteredCommentList] = useState([]);
-  const [isCommentEditing, setIsCommentEditing] = useState(false);
   const [deletionCommentList, setDeletionCommentList] = useState([]);
-  const [prevLessonState, setPrevLessonState] = useState(false);
+  const [filteredLessonList, setFilteredLessonList] = useState([]);
+  const [deletionLessonList, setDeletionLessonList] = useState([]);
+  const [lessonUpdateData, setLessonUpdateData] = useState(null);
 
   const { page, courseSlug, lessonSlug } = useParams();
   const responsive = (mobile, laptop, desktop) => {
@@ -80,85 +93,157 @@ const Lesson = () => {
   };
 
   const navigateLesson = (lessonSlug) => {
-    navigate(`/${page}/course/${courseSlug}/lessons/${lessonSlug}`);
+    if (!isLessonEditing) {
+      navigate(`/${page}/course/${courseSlug}/lessons/${lessonSlug}`);
+    }
   };
 
   const toast = useToast();
 
-  const updateLessonStateFunc = () => {
-    let lessonStateList = [];
-    let currentLessonStateIndex;
+  const updateLessonStateFunc = async () => {
+    try {
+      const data = await getCourseState(courseSlug);
+      const courseState = data;
+      let lessonStateList = courseState.lessonsStates;
+      let currentLessonStateIndex;
 
-    getCourseState(courseSlug)
-      .then((data) => {
-        const courseState = data;
-        lessonStateList = courseState.lessonsStates;
-
-        // Hedef dersin endeksini bul
-        lessonStateList.forEach((l, index) => {
-          if (l.lesson === lesson._id) {
-            currentLessonStateIndex = index;
-          }
-        });
-
-        console.log(currentLessonStateIndex);
-
-        // İlk dersi bitirmeye çalışıyorsa, bir önceki ders yoktur
-        if (currentLessonStateIndex === 0) {
-          setPrevLessonState(true);
-        } else {
-          // Hedef dersin önceki durumunu al
-          setPrevLessonState(
-            lessonStateList[currentLessonStateIndex - 1].state
-          );
+      lessonStateList.forEach((l, index) => {
+        if (l.lesson === lesson._id) {
+          currentLessonStateIndex = index;
         }
-      })
-      .catch((error) => {
-        // Hata işleme
-        console.error("Veri alınırken hata oluştu:", error);
       });
+
+      if (currentLessonStateIndex === 0) {
+        setPrevLessonState(true);
+      } else {
+        setPrevLessonState(lessonStateList[currentLessonStateIndex - 1].state);
+      }
+    } catch (error) {
+      console.error("Veri alınırken hata oluştu:", error);
+      setErrors([...errors, error]);
+    }
   };
 
+  // useEffect(() => {
+  //   if (
+  //     isLessonFinished &&
+  //     course &&
+  //     account &&
+  //     course.ownerId !== account._id &&
+  //     prevLessonState
+  //   ) {
+  //     setIsFinishButtonClicked(true);
+  //     updateLessonState(courseSlug, lessonSlug, "lesson").then(() => {
+  //       const findCurrentIndex = lessons.findIndex(
+  //         (l) => l.slug === lessonSlug
+  //       );
+  //       console.log(findCurrentIndex);
+  //       console.log("last lesson", lessons.length - 1);
+  //       if (findCurrentIndex !== -1 && findCurrentIndex < lessons.length - 1) {
+  //         const findLastLessonSlug = lessons[findCurrentIndex + 1].slug;
+  //         showSuccessToastAndNavigate(findLastLessonSlug);
+  //       } else {
+  //         console.error(
+  //           "Current lesson index not found or next lesson not available."
+  //         );
+  //       }
+  //     });
+  //   } else {
+  //     if (!isLessonFinished) {
+  //       toast({
+  //         title: "Warning",
+  //         description: "Please complete the lesson",
+  //         status: "warning",
+  //         duration: 5000,
+  //         isClosable: true,
+  //       });
+  //     }
+  //     if (course && account && course.ownerId === account._id) {
+  //       // Eğer kurs sahibiyseniz, bildirim göstermek gerekli değilse burada başka bir işlem yapılabilir.
+  //     }
+  //     if (!prevLessonState) {
+  //       toast({
+  //         title: "Warning",
+  //         description: "Please finish the previous lesson",
+  //         status: "warning",
+  //         duration: 5000,
+  //         isClosable: true,
+  //       });
+  //     }
+  //   }
+  // }, [prevLessonState]);
   useEffect(() => {
-    if (isLessonFinished) {
-      if (course.ownerId !== account._id) {
-        console.log(prevLessonState);
-        if (prevLessonState) {
-          setIsFinishButtonClicked(true);
-          updateLessonState(courseSlug, lessonSlug, "lesson")
-            .then(() => {
-              toast({
-                title: "Success",
-                description: "The lesson was completed successfully",
-                status: "success",
-                duration: 5000,
-                isClosable: true,
-              });
-              navigate(`/${page}/course/${courseSlug}`);
-            })
-            .catch((error) => {
-              setErrors([...errors, error]);
+    // Sadece prevLessonState değiştiğinde bu blok çalışacak
+    if (prevLessonState !== null) {
+      if (
+        isLessonFinished &&
+        course.ownerId !== account._id &&
+        prevLessonState
+      ) {
+        setIsFinishButtonClicked(true);
+        updateLessonState(courseSlug, lessonSlug, "lesson").then(() => {
+          const findCurrentIndex = lessons.findIndex(
+            (l) => l.slug === lessonSlug
+          );
+          console.log(findCurrentIndex);
+          console.log("last lesson", lessons.length - 1);
+          if (
+            findCurrentIndex !== -1 &&
+            findCurrentIndex < lessons.length - 1
+          ) {
+            const findLastLessonSlug = lessons[findCurrentIndex + 1].slug;
+            showSuccessToastAndNavigate(findLastLessonSlug);
+          } else if (findCurrentIndex === lessons.length - 1) {
+            toast({
+              title: "Success",
+              description: "The course was completed successfully",
+              status: "success",
+              duration: 5000,
+              isClosable: true,
             });
-        } else {
+            navigate(`/${page}/course/${courseSlug}`);
+          } else {
+            console.error(
+              "Current lesson index not found or next lesson not available."
+            );
+          }
+        });
+      } else {
+        if (!isLessonFinished && prevLessonState) {
           toast({
             title: "Warning",
-            description: "please finish the previous lesson",
+            description: "Please complete the lesson",
             status: "warning",
             duration: 5000,
             isClosable: true,
           });
         }
-      } else {
-        toast({
-          title: "Warning",
-          description: "Please complete the lesson",
-          status: "warning",
-          duration: 5000,
-          isClosable: true,
-        });
+        if (course.ownerId === account._id && prevLessonState) {
+          // Eğer kurs sahibiyseniz, bildirim göstermek gerekli değilse burada başka bir işlem yapılabilir.
+        }
+        if (!prevLessonState && isLessonFinished) {
+          toast({
+            title: "Warning",
+            description: "Please finish the previous lesson",
+            status: "warning",
+            duration: 5000,
+            isClosable: true,
+          });
+        }
       }
     }
-  }, [prevLessonState]);
+  }, [prevLessonState]); // Sadece prevLessonState değiştiğinde bu useEffect çalışacak
+
+  const showSuccessToastAndNavigate = (nextLessonSlug) => {
+    toast({
+      title: "Success",
+      description: "The lesson was completed successfully",
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
+    navigate(`/${page}/course/${courseSlug}/lessons/${nextLessonSlug}`);
+  };
 
   const handleCommentChange = (e, commentId) => {
     const updatedList = updatedCommentList.map((comment) => {
@@ -188,18 +273,26 @@ const Lesson = () => {
               updatedComment._id,
               formData
             );
-            isUpdatedOrDeleted = true;
+            if (!isLessonEditing) {
+              isUpdatedOrDeleted = true;
+            }
           }
         })
       );
 
       if (deletionCommentList.length > 0) {
-        await Promise.all(
-          deletionCommentList.map(async (comment) => {
+        for (const comment of deletionCommentList) {
+          try {
             await deleteSingleComment(courseSlug, lessonSlug, comment._id);
-            isUpdatedOrDeleted = true;
-          })
-        );
+            if (!isLessonEditing) {
+              isUpdatedOrDeleted = true;
+            }
+          } catch (error) {
+            // Hata olursa burada yakalanacak ve işlenecek
+            console.error("Error deleting comment:", error);
+            throw error; // Hatanın yukarı doğru iletilmesi
+          }
+        }
       }
 
       if (isUpdatedOrDeleted) {
@@ -214,7 +307,8 @@ const Lesson = () => {
       }
       setIsCommentEditing(false);
     } catch (error) {
-      setErrors([...errors, error]);
+      setIsCommentEditing(true);
+      setErrors([...errors, error]); // Hata yakalanıp işleniyor
     }
   };
 
@@ -224,11 +318,21 @@ const Lesson = () => {
     commentId,
     formData
   ) => {
-    await updateComment(courseSlug, lessonSlug, commentId, formData);
+    try {
+      await updateComment(courseSlug, lessonSlug, commentId, formData);
+    } catch (error) {
+      console.error("Error updating comment:", error);
+      throw error; // Hatanın yukarı doğru iletilmesi
+    }
   };
 
   const deleteSingleComment = async (courseSlug, lessonSlug, commentId) => {
-    await deleteComment(courseSlug, lessonSlug, commentId);
+    try {
+      await deleteComment(courseSlug, lessonSlug, commentId);
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      throw error; // Hatanın yukarı doğru iletilmesi
+    }
   };
 
   const handleDeleteComment = (commentId) => {
@@ -245,6 +349,144 @@ const Lesson = () => {
     setFilteredCommentList(filteredComments);
   };
 
+  const handleDeleteLesson = (lessonSlug) => {
+    const filteredLessons = filteredLessonList.filter(
+      (l) => l.slug !== lessonSlug
+    );
+    setDeletionLessonList((prevList) => [
+      ...prevList,
+      filteredLessonList.find((l) => l.slug === lessonSlug),
+    ]);
+
+    setFilteredLessonList(filteredLessons);
+  };
+
+  const handleLessonChange = (e) => {
+    const { name, value } = e.target;
+    setLessonUpdateData({ ...lessonUpdateData, [name]: value });
+  };
+
+  const handleLessonChangeForVideo = async (e) => {
+    const { name, files } = e.target;
+    setLessonUpdateData({ ...lessonUpdateData, [name]: files[0] });
+    if (e.target.files.length > 0) {
+      toast({
+        title: "Success",
+        description: "Video uploaded successfully",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleUpdateLessonSubmit = async (e) => {
+    const loadingToastId = toast({
+      title: "Loading",
+      description: "Updating lesson...",
+      status: "info",
+      duration: null,
+      isClosable: false,
+    });
+
+    try {
+      let isUpdatedOrDeleted = false;
+      if (lessonNeedsUpdate()) {
+        const lessonUpdateFormData = new FormData();
+        if (lesson.title !== lessonUpdateData.title) {
+          lessonUpdateFormData.append("title", lessonUpdateData.title);
+        }
+        if (lesson.description !== lessonUpdateData.description) {
+          lessonUpdateFormData.append(
+            "description",
+            lessonUpdateData.description
+          );
+        }
+        if (lesson.notes !== lessonUpdateData.notes) {
+          lessonUpdateFormData.append("notes", lessonUpdateData.notes);
+        }
+        if (
+          lessonUpdateData.video &&
+          lesson.videoUrl !== lessonUpdateData.video
+        ) {
+          const duration = await getVideoDuration(lessonUpdateData.video);
+          lessonUpdateFormData.append("video", lessonUpdateData.video);
+          lessonUpdateFormData.append("duration", duration);
+        }
+
+        try {
+          await updateLesson(courseSlug, lessonSlug, lessonUpdateFormData);
+        } catch (error) {
+          throw error;
+        }
+      }
+
+      if (deletionLessonList.length > 0) {
+        await Promise.all(
+          deletionLessonList.map(async (lesson) => {
+            try {
+              await deleteLesson(courseSlug, lesson.slug);
+            } catch (error) {
+              throw error;
+            }
+          })
+        );
+      }
+
+      try {
+        await handleUpdateCommentSubmit(e);
+      } catch (error) {
+        throw error;
+      }
+
+      isUpdatedOrDeleted = true;
+
+      toast.close(loadingToastId);
+      if (isUpdatedOrDeleted) {
+        toast({
+          title: "Success",
+          description: "Lessons updated successfully",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+      setIsLessonEditing(false);
+
+      if (lessonNeedsUpdate() || deletionLessonList.length > 0) {
+        navigate(`/${page}/course/${courseSlug}`);
+      }
+    } catch (error) {
+      toast.close(loadingToastId);
+      setErrors([...errors, error]);
+    }
+  };
+
+  const lessonNeedsUpdate = () => {
+    return (
+      !deletionLessonList.includes(lesson) &&
+      (lesson.title !== lessonUpdateData.title ||
+        lesson.description !== lessonUpdateData.description ||
+        lesson.notes !== lessonUpdateData.notes ||
+        (lessonUpdateData.video && lesson.videoUrl !== lessonUpdateData.video))
+    );
+  };
+
+  const getVideoDuration = async (videoFile) => {
+    const url = URL.createObjectURL(videoFile);
+    return new Promise((resolve) => {
+      const video = document.createElement("video");
+      video.muted = true;
+      const videoSource = document.createElement("source");
+      videoSource.src = url;
+      video.preload = "metadata";
+      video.appendChild(videoSource);
+      video.onloadedmetadata = () => {
+        resolve(Math.round(video.duration));
+      };
+    });
+  };
+
   useEffect(() => {
     if (courseSlug) {
       getCourse(courseSlug)
@@ -257,15 +499,27 @@ const Lesson = () => {
   }, [courseSlug]);
 
   useEffect(() => {
-    const currentLesson = lessons.filter((el) => el.slug === lessonSlug)[0];
+    setFilteredLessonList(lessons);
+  }, [lessons]);
+
+  useEffect(() => {
+    const currentLesson = filteredLessonList.filter(
+      (el) => el.slug === lessonSlug
+    )[0];
+    setPrevLessonState(null);
     setLesson(currentLesson);
-    setLessonPoint(currentLesson && currentLesson.point);
   }, [lessons, lessonSlug]);
 
   useEffect(() => {
     if (lesson) {
+      setLessonPoint(lesson.point);
       const commentList = lesson.comments.map((comment) => comment);
       setComments(commentList);
+      setLessonUpdateData({
+        title: lesson.title,
+        description: lesson.description,
+        notes: lesson.notes,
+      });
     }
   }, [lesson]);
 
@@ -399,7 +653,7 @@ const Lesson = () => {
             as={Link}
             to={`/${page}/course/${courseSlug}/lessons/${lessonSlug}`}
           >
-            {course && lesson && lesson.title}
+            {lessonUpdateData?.title}
           </BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
@@ -424,8 +678,8 @@ const Lesson = () => {
           <Heading fontSize={responsive("", "md", "lg")} fontWeight={"600"}>
             Lessons
           </Heading>
-          {lessons &&
-            lessons.map((lesson, index) => (
+          {filteredLessonList &&
+            filteredLessonList.map((lesson, index) => (
               <Flex
                 onClick={() => navigateLesson(lesson.slug)}
                 cursor={"pointer"}
@@ -460,23 +714,51 @@ const Lesson = () => {
                     {lesson.title}
                   </Text>
                 </Flex>
-                <Text
-                  fontWeight={500}
-                  opacity={0.9}
-                  fontSize={responsive("", "sm", "md")}
-                >
-                  {lesson.duration
-                    ? lesson.duration < 60
-                      ? lesson.duration + " sec"
-                      : Math.floor(lesson.duration / 60) +
-                        " min " +
-                        (lesson.duration % 60) +
-                        " sec"
-                    : "0 min"}
-                </Text>
+                <Flex align={"center"} gap={"1em"}>
+                  <Text
+                    fontWeight={500}
+                    opacity={0.9}
+                    fontSize={responsive("", "sm", "md")}
+                  >
+                    {lesson.duration
+                      ? lesson.duration < 60
+                        ? lesson.duration + " sec"
+                        : Math.floor(lesson.duration / 60) +
+                          " min " +
+                          (lesson.duration % 60) +
+                          " sec"
+                      : "0 min"}
+                  </Text>
+                  {isLessonEditing && (
+                    <Button
+                      variant="outline"
+                      p=".5em"
+                      minH="max-content"
+                      minW="max-content"
+                      onClick={() => handleDeleteLesson(lesson.slug)}
+                      border={"1px solid var(--accent-color)"}
+                      fontSize={responsive("", "sm", "md")}
+                      color={"white"}
+                      _hover={{
+                        color: "var(--accent-color)",
+                        bgColor: "white",
+                      }}
+                      bgColor={"var(--accent-color)"}
+                    >
+                      <i
+                        className="fi fi-rr-trash"
+                        style={{
+                          position: "relative",
+                          top: "2px",
+                        }}
+                      />
+                    </Button>
+                  )}
+                </Flex>
               </Flex>
             ))}
         </GridItem>
+
         <GridItem
           colSpan={3}
           rowSpan={7}
@@ -487,48 +769,144 @@ const Lesson = () => {
         >
           <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
             <Flex flexDir={"column"} gap={"1em"}>
-              <Heading
-                fontSize={responsive("", "2xl", "3xl")}
-                fontWeight={600}
-                color={"var(--secondary-color)"}
-              >
-                {lesson?.title}
-              </Heading>
-              <Text
-                fontWeight={500}
-                opacity={0.9}
-                fontSize={responsive("", "sm", "md")}
-              >
-                {lesson?.description}
-              </Text>
+              {isLessonEditing ? (
+                <>
+                  <FormControl>
+                    <Input
+                      autoFocus
+                      type={"text"}
+                      name="title"
+                      color={"var(--secondary-color)"}
+                      variant={"flushed"}
+                      fontWeight={"600"}
+                      value={lessonUpdateData.title}
+                      fontFamily={"Montserrat, sans-serif;"}
+                      fontSize={responsive("", "2xl", "3xl")}
+                      onChange={(e) => handleLessonChange(e)}
+                      _focus={{
+                        borderColor: "#cdcdcd",
+                        outline: 0,
+                        boxShadow: "none",
+                      }}
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <Input
+                      type={"text"}
+                      name="description"
+                      variant={"flushed"}
+                      value={lessonUpdateData.description}
+                      fontFamily={"Montserrat, sans-serif;"}
+                      fontWeight={500}
+                      opacity={0.9}
+                      fontSize={responsive("", "sm", "md")}
+                      onChange={(e) => handleLessonChange(e)}
+                      _focus={{
+                        borderColor: "#cdcdcd",
+                        outline: 0,
+                        boxShadow: "none",
+                      }}
+                    />
+                  </FormControl>
+                </>
+              ) : (
+                <>
+                  <Heading
+                    fontSize={responsive("", "2xl", "3xl")}
+                    fontWeight={600}
+                    color={"var(--secondary-color)"}
+                  >
+                    {lessonUpdateData?.title}
+                  </Heading>
+
+                  <Text
+                    fontWeight={500}
+                    opacity={0.9}
+                    fontSize={responsive("", "sm", "md")}
+                  >
+                    {lessonUpdateData?.description}
+                  </Text>
+                </>
+              )}
             </Flex>
-            <Flex
-              align={"center"}
-              gap={".5em"}
-              fontSize={responsive("", "sm", "md")}
-            >
-              <Box color={"var(--accent-color)"}>
-                {starList.length > 0 ? (
-                  starList.map((star) => (
-                    <StarIcon
-                      key={star}
-                      style={{ position: "relative", bottom: "3px" }}
-                    ></StarIcon>
-                  ))
-                ) : (
-                  <i
-                    class="fi fi-rr-star"
-                    style={{ position: "relative", top: "2px" }}
-                  ></i>
-                )}
-              </Box>
-              <Text
-                fontWeight={500}
-                opacity={0.9}
+            <Flex align={"center"} justify={"space-between"}>
+              <Flex
+                align={"center"}
+                gap={".5em"}
                 fontSize={responsive("", "sm", "md")}
               >
-                ({lesson?.comments && lesson.comments.length})
-              </Text>
+                <Box color={"var(--accent-color)"}>
+                  {starList.length > 0 ? (
+                    starList.map((star) => (
+                      <StarIcon
+                        key={star}
+                        style={{ position: "relative", bottom: "3px" }}
+                      ></StarIcon>
+                    ))
+                  ) : (
+                    <i
+                      class="fi fi-rr-star"
+                      style={{ position: "relative", top: "2px" }}
+                    ></i>
+                  )}
+                </Box>
+                <Text
+                  fontWeight={500}
+                  opacity={0.9}
+                  fontSize={responsive("", "sm", "md")}
+                >
+                  ({lesson?.comments && lesson.comments.length})
+                </Text>
+              </Flex>
+              {account && course && account._id === course.ownerId && (
+                <ButtonGroup>
+                  {isLessonEditing && (
+                    <Button
+                      variant={"outline"}
+                      bgColor={"var(--secondary-color)"}
+                      color={"white"}
+                      onClick={(e) => handleUpdateLessonSubmit(e)}
+                      fontSize={responsive("", "sm", "md")}
+                      border={"1px solid var(--secondary-color)"}
+                      _hover={{
+                        bgColor: "var(--bg-color)",
+                        color: "var(--secondary-color)",
+                      }}
+                    >
+                      Save
+                    </Button>
+                  )}
+                  <Button
+                    variant={"outline"}
+                    bgColor={"var(--accent-color)"}
+                    color={"white"}
+                    onClick={() => {
+                      setIsLessonEditing(!isLessonEditing);
+                      setIsCommentEditing(!isCommentEditing);
+                      if (isCommentEditing && isLessonEditing) {
+                        setUpdatedCommentList(comments);
+                        setDeletionCommentList([]);
+                        setFilteredCommentList(comments);
+                        setDeletionLessonList([]);
+                        setLessonUpdateData({
+                          title: lesson.title,
+                          description: lesson.description,
+                          notes: lesson.notes,
+                        });
+                        setFilteredLessonList(lessons);
+                      }
+                    }}
+                    fontSize={responsive("", "sm", "md")}
+                    border={"1px solid var(--accent-color)"}
+                    _hover={{
+                      bgColor: "var(--bg-color)",
+                      color: "var(--accent-color)",
+                    }}
+                  >
+                    {isLessonEditing ? "Reset changes" : "Edit Lesson"}
+                  </Button>
+                </ButtonGroup>
+              )}
             </Flex>
           </Flex>
         </GridItem>
@@ -542,15 +920,52 @@ const Lesson = () => {
         >
           <Center h={"100%"} borderRadius={"10px"} overflow={"hidden"}>
             {lesson && lesson.videoUrl && (
-              <ReactPlayer
-                onProgress={(state) =>
-                  setCurrentVideoTime(state.playedSeconds.toFixed(0))
-                }
-                controls
-                width={"100%"}
-                height={"100%"}
-                url={apiUrl + lesson.videoUrl}
-              ></ReactPlayer>
+              <FormControl position={"relative"}>
+                <ReactPlayer
+                  style={{ position: "relative", top: "0", left: "0" }}
+                  onProgress={(state) =>
+                    setCurrentVideoTime(state.playedSeconds.toFixed(0))
+                  }
+                  controls
+                  width={"100%"}
+                  height={"100%"}
+                  url={apiUrl + lesson.videoUrl}
+                ></ReactPlayer>
+                <Input
+                  type="file"
+                  onChange={(e) => handleLessonChangeForVideo(e)}
+                  accept="video/*"
+                  name="video"
+                  display={"none"}
+                  id="video"
+                ></Input>
+                {isLessonEditing && (
+                  <FormLabel
+                    htmlFor="video"
+                    pos={"absolute"}
+                    top={0}
+                    left={0}
+                    w={"100%"}
+                    h={"100%"}
+                    opacity={0.5}
+                    display={"flex"}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    cursor={"pointer"}
+                  >
+                    {isLessonEditing && (
+                      <i
+                        class="fi fi-rr-camera"
+                        style={{
+                          position: "relative",
+                          top: "2px",
+                          fontSize: responsive("", "5em", "7em"),
+                        }}
+                      ></i>
+                    )}
+                  </FormLabel>
+                )}
+              </FormControl>
             )}
           </Center>
         </GridItem>
@@ -570,21 +985,30 @@ const Lesson = () => {
           border={"2px dashed var(--secondary-color)"}
         >
           <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
-            <Stack>
+            <Stack gap={"1em"}>
               <Heading fontSize={responsive("", "md", "lg")} fontWeight={"600"}>
                 Lesson Note
               </Heading>
-              <Text
+              <Textarea
+                minH={"10em"}
+                border={"2px dashed #cfcfcf"}
+                onChange={(e) => handleLessonChange(e)}
+                readOnly={!isLessonEditing}
+                name="notes"
+                _focus={{
+                  border: "2px dashed #cfcfcf",
+                  boxShadow: "none",
+                }}
+                fontSize={responsive("", "sm", "md")}
                 fontWeight={500}
                 opacity={0.9}
-                fontSize={responsive("", "sm", "md")}
-              >
-                {lesson?.notes}
-              </Text>
+                value={lessonUpdateData?.notes}
+              ></Textarea>
             </Stack>
             <Flex justify={"flex-end"}>
               {account && course && account._id !== course.ownerId && (
                 <Button
+                  mt={"1em"}
                   variant={"outline"}
                   bgColor={"var(--accent-color)"}
                   color={"white"}
@@ -617,7 +1041,7 @@ const Lesson = () => {
               Lesson Comments
             </Heading>
             <ButtonGroup>
-              {isCommentEditing && (
+              {isCommentEditing && course.ownerId !== account._id && (
                 <Button
                   variant={"outline"}
                   onClick={(e) => handleUpdateCommentSubmit(e)}
@@ -633,31 +1057,33 @@ const Lesson = () => {
                   Save
                 </Button>
               )}
-              {((account && course && account._id === course.ownerId) ||
-                (commentOwnerList.some((c) => c._id === account._id) &&
-                  updatedCommentList.length > 0)) && (
-                <Button
-                  variant={"outline"}
-                  onClick={() => {
-                    setIsCommentEditing(!isCommentEditing);
-                    if (isCommentEditing) {
-                      setUpdatedCommentList(comments);
-                      setDeletionCommentList([]);
-                      setFilteredCommentList(comments);
-                    }
-                  }}
-                  bgColor={"var(--accent-color)"}
-                  color={"white"}
-                  fontSize={responsive("", "sm", "md")}
-                  border={"1px solid var(--accent-color)"}
-                  _hover={{
-                    bgColor: "var(--bg-color)",
-                    color: "var(--accent-color)",
-                  }}
-                >
-                  {isCommentEditing ? "Reset" : "Edit"}
-                </Button>
-              )}
+              {account &&
+                course &&
+                commentOwnerList.some((c) => c._id === account._id) &&
+                course.ownerId !== account._id &&
+                updatedCommentList.length > 0 && (
+                  <Button
+                    variant={"outline"}
+                    onClick={() => {
+                      setIsCommentEditing(!isCommentEditing);
+                      if (isCommentEditing) {
+                        setUpdatedCommentList(comments);
+                        setDeletionCommentList([]);
+                        setFilteredCommentList(comments);
+                      }
+                    }}
+                    bgColor={"var(--accent-color)"}
+                    color={"white"}
+                    fontSize={responsive("", "sm", "md")}
+                    border={"1px solid var(--accent-color)"}
+                    _hover={{
+                      bgColor: "var(--bg-color)",
+                      color: "var(--accent-color)",
+                    }}
+                  >
+                    {isCommentEditing ? "Reset" : "Edit"}
+                  </Button>
+                )}
             </ButtonGroup>
           </Flex>
           <Flex
