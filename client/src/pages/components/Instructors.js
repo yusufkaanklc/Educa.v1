@@ -172,31 +172,6 @@ const Instructors = () => {
           </>
         )}
       </Flex>
-
-      <Center pt={"3em"}>
-        <ChakraLink
-          as={Link}
-          to="/insturctors"
-          fontSize={"md"}
-          color={"white"}
-          padding={".8em 1.5em"}
-          bgColor={"#FFD05A"}
-          border={"1px solid transparent"}
-          borderRadius={"30px"}
-          fontWeight={"500"}
-          transition={"all 0.5s ease"}
-          _hover={{
-            textDecoration: "none",
-            opacity: 1,
-            color: "black",
-            bgColor: "transparent",
-            border: "1px solid #FFD05A",
-            transition: "all 0.5s ease",
-          }}
-        >
-          Become Instructors
-        </ChakraLink>
-      </Center>
     </Box>
   );
 };

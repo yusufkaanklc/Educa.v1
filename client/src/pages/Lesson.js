@@ -54,6 +54,7 @@ const Lesson = () => {
   const [currentVideoTime, setCurrentVideoTime] = useState(null);
   const [isLessonFinished, setIsLessonFinished] = useState(null);
   const [isFinishButtonClicked, setIsFinishButtonClicked] = useState(false);
+  const [finishButtonFlag, setFinishButtonFlag] = useState(false);
   const [isCommentEditing, setIsCommentEditing] = useState(false);
   const [isLessonEditing, setIsLessonEditing] = useState(false);
   const [prevLessonState, setPrevLessonState] = useState(null);
@@ -101,6 +102,7 @@ const Lesson = () => {
   const toast = useToast();
 
   const updateLessonStateFunc = async () => {
+    setFinishButtonFlag(!finishButtonFlag);
     try {
       const data = await getCourseState(courseSlug);
       const courseState = data;
@@ -124,56 +126,7 @@ const Lesson = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (
-  //     isLessonFinished &&
-  //     course &&
-  //     account &&
-  //     course.ownerId !== account._id &&
-  //     prevLessonState
-  //   ) {
-  //     setIsFinishButtonClicked(true);
-  //     updateLessonState(courseSlug, lessonSlug, "lesson").then(() => {
-  //       const findCurrentIndex = lessons.findIndex(
-  //         (l) => l.slug === lessonSlug
-  //       );
-  //       console.log(findCurrentIndex);
-  //       console.log("last lesson", lessons.length - 1);
-  //       if (findCurrentIndex !== -1 && findCurrentIndex < lessons.length - 1) {
-  //         const findLastLessonSlug = lessons[findCurrentIndex + 1].slug;
-  //         showSuccessToastAndNavigate(findLastLessonSlug);
-  //       } else {
-  //         console.error(
-  //           "Current lesson index not found or next lesson not available."
-  //         );
-  //       }
-  //     });
-  //   } else {
-  //     if (!isLessonFinished) {
-  //       toast({
-  //         title: "Warning",
-  //         description: "Please complete the lesson",
-  //         status: "warning",
-  //         duration: 5000,
-  //         isClosable: true,
-  //       });
-  //     }
-  //     if (course && account && course.ownerId === account._id) {
-  //       // Eğer kurs sahibiyseniz, bildirim göstermek gerekli değilse burada başka bir işlem yapılabilir.
-  //     }
-  //     if (!prevLessonState) {
-  //       toast({
-  //         title: "Warning",
-  //         description: "Please finish the previous lesson",
-  //         status: "warning",
-  //         duration: 5000,
-  //         isClosable: true,
-  //       });
-  //     }
-  //   }
-  // }, [prevLessonState]);
   useEffect(() => {
-    // Sadece prevLessonState değiştiğinde bu blok çalışacak
     if (prevLessonState !== null) {
       if (
         isLessonFinished &&
@@ -185,8 +138,6 @@ const Lesson = () => {
           const findCurrentIndex = lessons.findIndex(
             (l) => l.slug === lessonSlug
           );
-          console.log(findCurrentIndex);
-          console.log("last lesson", lessons.length - 1);
           if (
             findCurrentIndex !== -1 &&
             findCurrentIndex < lessons.length - 1
@@ -209,7 +160,7 @@ const Lesson = () => {
           }
         });
       } else {
-        if (!isLessonFinished && prevLessonState) {
+        if (!isLessonFinished) {
           toast({
             title: "Warning",
             description: "Please complete the lesson",
@@ -221,7 +172,7 @@ const Lesson = () => {
         if (course.ownerId === account._id && prevLessonState) {
           // Eğer kurs sahibiyseniz, bildirim göstermek gerekli değilse burada başka bir işlem yapılabilir.
         }
-        if (!prevLessonState && isLessonFinished) {
+        if (!prevLessonState) {
           toast({
             title: "Warning",
             description: "Please finish the previous lesson",
@@ -232,7 +183,7 @@ const Lesson = () => {
         }
       }
     }
-  }, [prevLessonState]); // Sadece prevLessonState değiştiğinde bu useEffect çalışacak
+  }, [prevLessonState, finishButtonFlag]); // Sadece prevLessonState değiştiğinde bu useEffect çalışacak
 
   const showSuccessToastAndNavigate = (nextLessonSlug) => {
     toast({
