@@ -27,9 +27,6 @@ router
   .route("/enrolled-courses")
   .get(authMiddlewares.isLoggedIn, userControllers.getEnrollments);
 
-// Kategorileri getir
-router.route("/categories").get(courseControllers.getAllCategories);
-
 // Bir kursu getirmek için GET isteği
 router.route("/:courseSlug").get(courseControllers.getCourse);
 

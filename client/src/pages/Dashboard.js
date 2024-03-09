@@ -12,9 +12,19 @@ import {
   Button,
   Avatar,
   useToast,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalCloseButton,
+  ModalHeader,
+  ModalOverlay,
+  ModalContent,
   Image,
+  Input,
   Center,
   Textarea,
+  useDisclosure,
+  FormControl,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import { useContext, useEffect, useState } from "react";
@@ -32,8 +42,10 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { deleteComment, updateComment } from "../utils/data/CommentData";
+import { createCategories } from "../utils/data/CategoryData";
 
 const Dashboard = () => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   ChartJS.register(
     ArcElement,
     Tooltip,
@@ -61,6 +73,10 @@ const Dashboard = () => {
   const [commentDeleteList, setCommentDeleteList] = useState([]);
   const [activeButtonIndices, setActiveButtonIndices] = useState([]);
   const [commentTextList, setCommentTextList] = useState([]);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [categoryData, setCategoryData] = useState({
+    title: "",
+  });
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
       return mobile;
@@ -207,6 +223,28 @@ const Dashboard = () => {
     }
   };
 
+  const handleChangeCategory = (e) => {
+    setCategoryData({ title: e.target.value });
+  };
+
+  const handleCreateCategorySubmit = (e) => {
+    e.preventDefault();
+    const categoryForm = new FormData();
+    categoryForm.append("title", categoryData.title);
+    createCategories(categoryForm)
+      .then(() => {
+        toast({
+          title: "Success",
+          description: `Comments Deleted Successfully`,
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        onClose();
+      })
+      .catch((error) => setErrors([...errors, error]));
+  };
+
   useEffect(() => {
     setOwnedCourses(
       courses.filter((course) => course?.ownerName === account?.username)
@@ -246,6 +284,57 @@ const Dashboard = () => {
 
   return (
     <>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader mb={"1em"}>
+            <Flex align={"center"} w={"100%"} justify={"space-between"}>
+              <Heading fontSize={responsive("", "lg", "xl")} fontWeight={600}>
+                Create Category
+              </Heading>
+              <ModalCloseButton
+                _focus={{ boxShadow: "none" }}
+                border={"1px solid var(--accent-color)"}
+                bgColor={"var(--accent-color)"}
+                color={"white"}
+                _hover={{
+                  bgColor: "white",
+                  color: "var(--accent-color)",
+                }}
+              />
+            </Flex>
+          </ModalHeader>
+          <ModalBody>
+            <FormControl>
+              <Input
+                type="text"
+                placeholder="Category name"
+                onChange={(e) => handleChangeCategory(e)}
+                required
+                _focus={{
+                  boxShadow: "none",
+                  border: "2px solid var(--secondary-color)",
+                }}
+              />
+            </FormControl>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              bgColor={"var(--secondary-color)"}
+              color={"white"}
+              onClick={(e) => handleCreateCategorySubmit(e)}
+              fontSize={responsive("", "sm", "md")}
+              border={"1px solid var(--secondary-color)"}
+              _hover={{
+                bgColor: "white",
+                color: "var(--secondary-color)",
+              }}
+            >
+              Save
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       <Box
         bgColor={"white"}
         border={"2px dashed #cfcfcf"}
@@ -455,6 +544,7 @@ const Dashboard = () => {
               fontSize={responsive("", "md", "lg")}
               fontWeight={"500"}
               borderRadius={"10px"}
+              onClick={() => onOpen()}
               transition={"all .3s ease"}
               _hover={{
                 bgColor: "white",

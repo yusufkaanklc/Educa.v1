@@ -1,4 +1,5 @@
 import Category from "../models/Category.js";
+import errorHandling from "../middlewares/errorHandling.js";
 
 const getAllCategories = async (req, res) => {
   try {
@@ -14,13 +15,12 @@ const getAllCategories = async (req, res) => {
 
 const createCategory = async (req, res) => {
   try {
-    const { title, description } = req.body;
-    if (!title || !description) {
+    const { title } = req.body;
+    if (!title) {
       throw { code: 1, message: "Fields cannot be empty" };
     }
     const newCategory = new Category({
       title,
-      description,
     });
     if (!newCategory) {
       throw { code: 2, message: "Category not created" };
