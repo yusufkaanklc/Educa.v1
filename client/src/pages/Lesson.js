@@ -568,6 +568,10 @@ const Lesson = () => {
     }
   }, [courseStates, lesson]);
 
+  useEffect(() => {
+    console.log(commentData);
+  }, [commentData]);
+
   return (
     <Box
       bgColor={"white"}

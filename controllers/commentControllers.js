@@ -17,11 +17,17 @@ const addComment = async (req, res) => {
       throw { code: 2, message: "Lesson not found" };
     }
 
-    const newComment = new Comment({
+    const newCommentData = {
       text,
       user: req.session.userID,
-      point: point ? point : 1,
-    });
+    };
+
+    if (point) {
+      newCommentData.point = point;
+    } else {
+      newCommentData.point = 1;
+    }
+    const newComment = new Comment(newCommentData);
     await newComment.save();
 
     await Lesson.findOneAndUpdate(
