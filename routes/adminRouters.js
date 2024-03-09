@@ -98,20 +98,4 @@ router
   .route("/courses/:courseSlug/lessons/:lessonSlug")
   .delete(lessonControllers.deleteLesson);
 
-// Bütün kategorileri getiren GET isteği
-router.route("/categories").get(adminControllers.getAllCategories);
-
-// Yeni bir kategori oluşturmak için POST isteği
-router.route("/add-category").post(adminControllers.createCategory);
-
-// Bir kategoriyi getiren GET isteği
-router.route("/categories/:categorySlug").get(adminControllers.getCategory);
-
-// Bir kategoriyi güncellemek için PUT isteği
-router.route("/categories/:categorySlug").put(adminControllers.updateCategory);
-// Bir kategoriyi silmek için DELETE isteği
-router
-  .route("/categories/:categorySlug")
-  .delete(adminControllers.deleteCategory);
-
 export default router;

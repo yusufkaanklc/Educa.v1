@@ -20,7 +20,7 @@ const addComment = async (req, res) => {
     const newComment = new Comment({
       text,
       user: req.session.userID,
-      point,
+      point: point ? point : 1,
     });
     await newComment.save();
 

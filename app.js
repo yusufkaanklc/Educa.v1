@@ -33,7 +33,7 @@ app.use(fileUpload());
 // Session middleware
 const store = new MongoDBStore(
   {
-    uri: "mongodb://127.0.0.1:27017/education-app-db",
+    uri: "mongodb://admin:jFzgz50Hl0@45.136.6.18:27017/education-app-db",
     collection: "sessions",
   },
   (error) => {

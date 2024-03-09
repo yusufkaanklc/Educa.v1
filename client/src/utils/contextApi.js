@@ -15,7 +15,6 @@ export const DataProvider = ({ children }) => {
   );
   const [errors, setErrors] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [userPoint, setUserPoint] = useState("");
   const [courseCreateData, setCourseCreateData] = useState({
     title: "",
     description: "",
@@ -60,12 +59,10 @@ export const DataProvider = ({ children }) => {
         categories,
         setCategories,
         targetScroll,
-        userPoint,
         courseCreateData,
         setCourseCreateData,
         setCreatedLessonsList,
         createdLessonsList,
-        setUserPoint,
         setTargetScroll,
         isLogin,
         setIsLogin,

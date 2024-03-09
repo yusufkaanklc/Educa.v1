@@ -52,6 +52,15 @@ const createLesson = async (req, res) => {
     if (!addCourseState)
       throw { code: 3, message: "Lesson state relation could not add" };
 
+    const deleteLessonsState = await CourseStates.updateMany(
+      { lessonsStates: { $elemMatch: { lesson: newLessonCreate._id } } },
+      { courseState: true }
+    );
+
+    if (!deleteLessonsState) {
+      throw { code: 3, message: "Course state could not updated" };
+    }
+
     res.status(200).json(newLessonCreate);
   } catch (error) {
     errorHandling(error, req, res);

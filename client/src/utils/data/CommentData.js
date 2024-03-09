@@ -49,5 +49,25 @@ const updateComment = async (
     };
   }
 };
+const addComment = async (courseSlug, lessonSlug, commentData) => {
+  try {
+    const { data } = await axios.post(
+      `/courses/${courseSlug}/lessons/${lessonSlug}/add-comment`,
+      commentData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
 
-export { getComments, deleteComment, updateComment };
+export { getComments, deleteComment, updateComment, addComment };

@@ -32,7 +32,11 @@ import {
 } from "../utils/data/LessonsData";
 import { getCourse, getCourseState } from "../utils/data/CoursesData";
 import { getUsers } from "../utils/data/UsersData";
-import { deleteComment, updateComment } from "../utils/data/CommentData";
+import {
+  addComment,
+  deleteComment,
+  updateComment,
+} from "../utils/data/CommentData";
 const Lesson = () => {
   const {
     apiUrl,
@@ -54,7 +58,6 @@ const Lesson = () => {
   const [currentVideoTime, setCurrentVideoTime] = useState(null);
   const [isLessonFinished, setIsLessonFinished] = useState(null);
   const [isFinishButtonClicked, setIsFinishButtonClicked] = useState(false);
-  const [finishButtonFlag, setFinishButtonFlag] = useState(false);
   const [isCommentEditing, setIsCommentEditing] = useState(false);
   const [isLessonEditing, setIsLessonEditing] = useState(false);
   const [prevLessonState, setPrevLessonState] = useState(null);
@@ -65,7 +68,12 @@ const Lesson = () => {
   const [filteredLessonList, setFilteredLessonList] = useState([]);
   const [deletionLessonList, setDeletionLessonList] = useState([]);
   const [lessonUpdateData, setLessonUpdateData] = useState(null);
-
+  const [finishButtonFlag, setFinishButtonFlag] = useState(false);
+  const [commentAddState, setCommentAddState] = useState(false);
+  const [commentData, setCommentData] = useState({
+    text: "",
+    point: "",
+  });
   const { page, courseSlug, lessonSlug } = useParams();
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
@@ -125,8 +133,8 @@ const Lesson = () => {
       setErrors([...errors, error]);
     }
   };
-
   useEffect(() => {
+    // Sadece prevLessonState değiştiğinde bu blok çalışacak
     if (prevLessonState !== null) {
       if (
         isLessonFinished &&
@@ -160,7 +168,7 @@ const Lesson = () => {
           }
         });
       } else {
-        if (!isLessonFinished) {
+        if (!isLessonFinished && prevLessonState) {
           toast({
             title: "Warning",
             description: "Please complete the lesson",
@@ -172,7 +180,7 @@ const Lesson = () => {
         if (course.ownerId === account._id && prevLessonState) {
           // Eğer kurs sahibiyseniz, bildirim göstermek gerekli değilse burada başka bir işlem yapılabilir.
         }
-        if (!prevLessonState) {
+        if (!prevLessonState && isLessonFinished) {
           toast({
             title: "Warning",
             description: "Please finish the previous lesson",
@@ -438,20 +446,49 @@ const Lesson = () => {
     });
   };
 
+  const handleChangeCreateComment = (e) => {
+    const { name, value } = e.target;
+    if (name === "point" && value.length <= 1 && /^\d*$/.test(value)) {
+      // Sadece 1 karakter ve sayı kabul edilir
+      setCommentData({ ...commentData, [name]: value });
+    }
+    if (name === "text") {
+      setCommentData({ ...commentData, [name]: value });
+    }
+  };
+
+  const handleSubmitCreateComment = async (e) => {
+    e.preventDefault();
+    const commentFormData = new FormData();
+    commentFormData.append("text", commentData.text);
+    commentFormData.append("point", commentData.point);
+    await addComment(courseSlug, lesson.slug, commentFormData)
+      .then(async () => {
+        toast({
+          title: "Success",
+          description: "Comment created successfully",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        setCommentAddState(false);
+      })
+      .catch((error) => setErrors([...errors, error]));
+  };
+
   useEffect(() => {
     if (courseSlug) {
       getCourse(courseSlug)
         .then((data) => setCourse(data))
         .catch((error) => setErrors([...errors, error]));
-      getLessons(courseSlug)
-        .then((data) => setLessons(data))
-        .catch((error) => setErrors([...errors, error]));
     }
   }, [courseSlug]);
 
   useEffect(() => {
-    setFilteredLessonList(lessons);
-  }, [lessons]);
+    getLessons(courseSlug)
+      .then((data) => setLessons(data))
+      .catch((error) => setErrors([...errors, error]));
+  }, [course]);
 
   useEffect(() => {
     const currentLesson = filteredLessonList.filter(
@@ -472,7 +509,8 @@ const Lesson = () => {
         notes: lesson.notes,
       });
     }
-  }, [lesson]);
+    setFilteredLessonList(lessons);
+  }, [lessons]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -992,6 +1030,22 @@ const Lesson = () => {
               Lesson Comments
             </Heading>
             <ButtonGroup>
+              {!isCommentEditing && (
+                <Button
+                  variant={"outline"}
+                  onClick={() => setCommentAddState(!commentAddState)}
+                  bgColor={"var(--secondary-color)"}
+                  color={"white"}
+                  fontSize={responsive("", "sm", "md")}
+                  border={"1px solid var(--secondary-color)"}
+                  _hover={{
+                    bgColor: "var(--bg-color)",
+                    color: "var(--secondary-color)",
+                  }}
+                >
+                  {commentAddState ? "Reset comment" : "Add Comment"}
+                </Button>
+              )}
               {isCommentEditing && course.ownerId !== account._id && (
                 <Button
                   variant={"outline"}
@@ -1008,6 +1062,7 @@ const Lesson = () => {
                   Save
                 </Button>
               )}
+
               {account &&
                 course &&
                 commentOwnerList.some((c) => c._id === account._id) &&
@@ -1016,6 +1071,7 @@ const Lesson = () => {
                   <Button
                     variant={"outline"}
                     onClick={() => {
+                      setCommentAddState(false);
                       setIsCommentEditing(!isCommentEditing);
                       if (isCommentEditing) {
                         setUpdatedCommentList(comments);
@@ -1043,6 +1099,99 @@ const Lesson = () => {
             maxH={responsive("", "35em", "37em")}
             overflow={"auto"}
           >
+            {commentAddState && (
+              <Flex
+                bgColor="white"
+                p={responsive("", ".5em", "1em")}
+                borderRadius="10px"
+                justify="space-between"
+                flexDir="column"
+                gap="1em"
+              >
+                <Flex
+                  align={"center"}
+                  gap={"1em"}
+                  w={"100%"}
+                  justify={"space-between"}
+                >
+                  <Flex align={"center"} gap={"1em"}>
+                    <Avatar
+                      src={account.image}
+                      bgColor={"var(--secondary-color)"}
+                      name={account.username}
+                      size={responsive("", "sm", "sm")}
+                    />
+                    <Text
+                      fontWeight={500}
+                      fontSize={responsive("", "sm", "md")}
+                      opacity={0.9}
+                    >
+                      {account.username}
+                    </Text>
+                  </Flex>
+                  <Button
+                    variant={"outline"}
+                    onClick={(e) => handleSubmitCreateComment(e)}
+                    bgColor={"var(--secondary-color)"}
+                    color={"white"}
+                    fontSize={responsive("", "sm", "md")}
+                    border={"1px solid var(--secondary-color)"}
+                    _hover={{
+                      bgColor: "var(--bg-color)",
+                      color: "var(--secondary-color)",
+                    }}
+                  >
+                    Save
+                  </Button>
+                </Flex>
+                <Textarea
+                  border={"2px dashed #cfcfcf"}
+                  name="text"
+                  onChange={(e) => handleChangeCreateComment(e)}
+                  value={commentData.text}
+                  _focus={{
+                    border: "2px dashed #cfcfcf",
+                    boxShadow: "none",
+                  }}
+                  fontSize={responsive("", "sm", "md")}
+                  fontWeight={500}
+                  opacity={0.9}
+                ></Textarea>
+                <Flex align={"center"} justify={"space-between"}>
+                  <Flex
+                    fontSize={responsive("", "sm", "md")}
+                    fontWeight={500}
+                    opacity={0.9}
+                    gap={".3em"}
+                    align={"center"}
+                  >
+                    <Text>Point: </Text>
+                    &nbsp;
+                    <Input
+                      type={"number"}
+                      name="point"
+                      variant={"flushed"}
+                      onChange={(e) => handleChangeCreateComment(e)}
+                      value={commentData.point}
+                      w={"2em"}
+                      fontWeight={"600"}
+                      _focus={{
+                        borderColor: "#cdcdcd",
+                        outline: 0,
+                        boxShadow: "none",
+                      }}
+                    />
+                  </Flex>
+                  <Text
+                    fontSize={responsive("", "sm", "md")}
+                    fontWeight={500}
+                    opacity={0.9}
+                  >
+                    {getDate(new Date().toLocaleDateString())}
+                  </Text>
+                </Flex>
+              </Flex>
+            )}
             {filteredCommentList.length > 0 && commentOwnerList.length > 0
               ? filteredCommentList.map((comment, index) => (
                   <Flex

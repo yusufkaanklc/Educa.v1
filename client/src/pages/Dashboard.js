@@ -50,8 +50,6 @@ const Dashboard = () => {
     setTargetScroll,
     courses,
     account,
-    userPoint,
-    setUserPoint,
     setErrors,
     errors,
   } = useContext(dataContext);
@@ -59,7 +57,6 @@ const Dashboard = () => {
   const [enrollments, setEnrollments] = useState([]);
   const [comments, setComments] = useState([]);
   const [lessons, setLessons] = useState([]);
-  const [starList, setStarList] = useState([]);
   const [commentsEdit, setCommentsEdit] = useState(false);
   const [commentDeleteList, setCommentDeleteList] = useState([]);
   const [activeButtonIndices, setActiveButtonIndices] = useState([]);
@@ -220,22 +217,6 @@ const Dashboard = () => {
     setLessons(ownedCourses.flatMap((course) => course.lessons));
     setEnrollments(ownedCourses.flatMap((course) => course.enrollments));
 
-    const pointList = ownedCourses
-      .map((course) => course.point)
-      .filter((point) => point !== null);
-
-    if (pointList.length > 0) {
-      if (pointList.length > 1) {
-        setUserPoint(
-          Math.round(
-            pointList.reduce((acc, curr) => acc + curr, 0) / pointList.length
-          )
-        );
-      } else {
-        setUserPoint(Math.round(pointList[0]));
-      }
-    }
-
     setComments(
       ownedCourses
         .flatMap((course) => course.comments)
@@ -258,14 +239,6 @@ const Dashboard = () => {
     setActiveButtonIndices(Array(comments.length).fill(false));
     updatedCommentTextListFunc();
   }, [comments]);
-
-  useEffect(() => {
-    const starLisst = [];
-    for (let i = 0; i < userPoint; i++) {
-      starLisst.push(i);
-    }
-    setStarList(starLisst);
-  }, [userPoint]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -478,25 +451,21 @@ const Dashboard = () => {
           <GridItem colSpan={1} rowSpan={2}>
             <Center
               bgColor={"var(--accent-color)"}
+              border={"2px dashed var(--accent-color)"}
               fontSize={responsive("", "md", "lg")}
               fontWeight={"500"}
               borderRadius={"10px"}
+              transition={"all .3s ease"}
+              _hover={{
+                bgColor: "white",
+                color: "var(--accent-color)",
+                cursor: "pointer",
+              }}
               p={responsive("", "1em", "1em")}
               color={"white"}
-              transition={"all .3s ease"}
               style={{ fontSize: responsive("", "sm", "md") }}
             >
-              Your Point &nbsp;
-              {starList.length > 0 ? (
-                starList.map((star) => (
-                  <StarIcon pos={"relative"} bottom={"2px"} key={star} />
-                ))
-              ) : (
-                <i
-                  class="fi fi-rr-star"
-                  style={{ position: "relative", top: "2px" }}
-                ></i>
-              )}
+              Create category
             </Center>
           </GridItem>
           <GridItem
