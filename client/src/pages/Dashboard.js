@@ -60,6 +60,7 @@ const Dashboard = () => {
   const [commentDeleteList, setCommentDeleteList] = useState([]);
   const [activeButtonIndices, setActiveButtonIndices] = useState([]);
   const [commentTextList, setCommentTextList] = useState([]);
+  const [isCoursesEditing, setIsCoursesEditing] = useState(false);
   const responsive = (mobile, laptop, desktop) => {
     if (isMobile) {
       return mobile;
@@ -312,13 +313,51 @@ const Dashboard = () => {
             bgColor={"var(--bg-color)"}
             border={"2px dashed var(--secondary-color)"}
           >
-            <Text
-              fontWeight={"500"}
-              fontSize={responsive("", "md", "lg")}
-              w={"max-content"}
-            >
-              Your Courses
-            </Text>
+            <Flex align={"center"} justify={"space-between"} mr={"1em"}>
+              <Text
+                fontWeight={"500"}
+                fontSize={responsive("", "md", "lg")}
+                w={"max-content"}
+              >
+                Your Courses
+              </Text>
+              <ButtonGroup>
+                {isCoursesEditing && (
+                  <Button
+                    variant={"outline"}
+                    onClick={() => {
+                      setIsCoursesEditing(!isCoursesEditing);
+                    }}
+                    bgColor={"var(--secondary-color)"}
+                    color={"white"}
+                    fontSize={responsive("", "sm", "md")}
+                    border={"1px solid var(--secondary-color)"}
+                    _hover={{
+                      bgColor: "white",
+                      color: "var(--secondary-color)",
+                    }}
+                  >
+                    Save
+                  </Button>
+                )}
+                <Button
+                  variant={"outline"}
+                  onClick={() => {
+                    setIsCoursesEditing(!isCoursesEditing);
+                  }}
+                  bgColor={"var(--accent-color)"}
+                  color={"white"}
+                  fontSize={responsive("", "sm", "md")}
+                  border={"1px solid var(--accent-color)"}
+                  _hover={{
+                    bgColor: "white",
+                    color: "var(--accent-color)",
+                  }}
+                >
+                  {isCoursesEditing ? "Reset" : "Edit"}
+                </Button>
+              </ButtonGroup>
+            </Flex>
             <Flex
               pr={"1em"}
               overflow={"auto"}
@@ -512,11 +551,17 @@ const Dashboard = () => {
                     justify={"space-between"}
                     transition={"all .3s ease"}
                   >
-                    <Text fontWeight={"500"}>{lesson.title}</Text>
+                    <Text
+                      fontWeight={"500"}
+                      fontSize={responsive("", "sm", "md")}
+                    >
+                      {lesson.title}
+                    </Text>
                     <Text
                       fontWeight={"500"}
                       textOverflow={"ellipsis"}
                       overflow={"hidden"}
+                      fontSize={responsive("", "sm", "md")}
                       maxW={"30%"}
                       whiteSpace={"nowrap"}
                     >
