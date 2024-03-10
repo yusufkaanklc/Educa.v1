@@ -149,7 +149,7 @@ dist
 
 node_modules
 
-public/uploads
+
 
 *.sublime*
 
