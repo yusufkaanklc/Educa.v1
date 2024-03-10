@@ -16,6 +16,7 @@ import {
   Link as ChakraLink,
   ButtonGroup,
   Image,
+  Textarea,
   GridItem,
   Progress,
   FormLabel,
@@ -629,31 +630,23 @@ const Course = () => {
                 </Heading>
               )}
 
-              {isCourseEditing ? (
-                <FormControl>
-                  <Input
-                    type={"text"}
-                    name="description"
-                    value={courseUpdateData.description}
-                    variant={"flushed"}
-                    fontSize={responsive("", "sm", "md")}
-                    onChange={(e) => handleCourseChange(e)}
-                    _focus={{
-                      borderColor: "#cdcdcd",
-                      outline: 0,
-                      boxShadow: "none",
-                    }}
-                  />
-                </FormControl>
-              ) : (
-                <Text
-                  fontSize={responsive("", "sm", "md")}
-                  fontWeight={500}
-                  opacity={0.9}
-                >
-                  {course && course.description}
-                </Text>
-              )}
+              <Textarea
+                fontSize={responsive("", "sm", "md")}
+                readOnly={!isCourseEditing}
+                fontWeight={500}
+                opacity={0.9}
+                type={"text"}
+                name="description"
+                value={courseUpdateData.description}
+                border={"2px dashed var(--secondary-color)"}
+                _focus={{
+                  boxShadow: "none",
+                  border: "2px dashed var(--secondary-color)",
+                }}
+                _hover={{ border: "2px dashed var(--secondary-color)" }}
+              >
+                {course && course.description}
+              </Textarea>
               <Flex gap={".5em"}>
                 <Text
                   fontSize={responsive("", "sm", "md")}

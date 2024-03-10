@@ -22,7 +22,7 @@ const addComment = async (req, res) => {
       user: req.session.userID,
     };
 
-    if (point) {
+    if (point !== NaN) {
       newCommentData.point = point;
     } else {
       newCommentData.point = 1;

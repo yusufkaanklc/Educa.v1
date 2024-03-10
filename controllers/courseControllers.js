@@ -341,6 +341,14 @@ const updateCourse = async (req, res) => {
 const deleteCourse = async (req, res) => {
   try {
     const courseSlug = req.params.courseSlug;
+    const findCourse = await Course.findOne({ slug: courseSlug });
+    if (findCourse.enrollments.length > 0) {
+      throw { code: 2, message: "Course has enrollment" };
+    }
+
+    await CourseStates.findOneAndDelete({
+      course: findCourse._id,
+    });
 
     const course = await Course.findOneAndDelete({ slug: courseSlug });
     if (!course) throw { code: 2, message: "Course couldnt be deleted" };

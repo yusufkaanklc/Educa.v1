@@ -218,23 +218,27 @@ const Dashboard = () => {
   };
 
   const handleDeleteCourseSubmit = async () => {
-    try {
-      for (const courseSlug of courseDeleteList) {
-        await deleteCourse(courseSlug).catch((error) => {
-          throw error;
+    if (courseDeleteList.length > 0) {
+      try {
+        for (const courseSlug of courseDeleteList) {
+          await deleteCourse(courseSlug).catch((error) => {
+            throw error;
+          });
+        }
+        toast({
+          title: "Success",
+          description: `Courses Deleted Successfully`,
+          status: "success",
+          duration: 5000,
+          isClosable: true,
         });
+        setIsCoursesEditing(!isCoursesEditing);
+        setCourseDeleteList([]);
+      } catch (error) {
+        setErrors([...errors, error]);
       }
-      toast({
-        title: "Success",
-        description: `Courses Deleted Successfully`,
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
+    } else {
       setIsCoursesEditing(!isCoursesEditing);
-      setCourseDeleteList([]);
-    } catch (error) {
-      setErrors([...errors, error]);
     }
   };
 
