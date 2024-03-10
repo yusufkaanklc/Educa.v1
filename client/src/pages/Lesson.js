@@ -707,47 +707,32 @@ const Lesson = () => {
                     {lesson.title}
                   </Text>
                 </Flex>
-                <Flex align={"center"} gap={"1em"}>
-                  <Text
-                    fontWeight={500}
-                    opacity={0.9}
+
+                {isLessonEditing && (
+                  <Button
+                    variant="outline"
+                    p=".5em"
+                    minH="max-content"
+                    minW="max-content"
+                    onClick={() => handleDeleteLesson(lesson.slug)}
+                    border={"1px solid var(--accent-color)"}
                     fontSize={responsive("", "sm", "md")}
+                    color={"white"}
+                    _hover={{
+                      color: "var(--accent-color)",
+                      bgColor: "white",
+                    }}
+                    bgColor={"var(--accent-color)"}
                   >
-                    {lesson.duration
-                      ? lesson.duration < 60
-                        ? lesson.duration + " sec"
-                        : Math.floor(lesson.duration / 60) +
-                          " min " +
-                          (lesson.duration % 60) +
-                          " sec"
-                      : "0 min"}
-                  </Text>
-                  {isLessonEditing && (
-                    <Button
-                      variant="outline"
-                      p=".5em"
-                      minH="max-content"
-                      minW="max-content"
-                      onClick={() => handleDeleteLesson(lesson.slug)}
-                      border={"1px solid var(--accent-color)"}
-                      fontSize={responsive("", "sm", "md")}
-                      color={"white"}
-                      _hover={{
-                        color: "var(--accent-color)",
-                        bgColor: "white",
+                    <i
+                      className="fi fi-rr-trash"
+                      style={{
+                        position: "relative",
+                        top: "2px",
                       }}
-                      bgColor={"var(--accent-color)"}
-                    >
-                      <i
-                        className="fi fi-rr-trash"
-                        style={{
-                          position: "relative",
-                          top: "2px",
-                        }}
-                      />
-                    </Button>
-                  )}
-                </Flex>
+                    />
+                  </Button>
+                )}
               </Flex>
             ))}
         </GridItem>

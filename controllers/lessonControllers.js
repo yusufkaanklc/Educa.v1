@@ -193,9 +193,15 @@ const updateLesson = async (req, res) => {
     if (notes) {
       newFile.notes = notes;
     }
-    if (req.uploadedVideoUrl && req.uploadedVideoUrl !== lesson.videoUrl) {
+    if (
+      lesson.videoUrl &&
+      req.uploadedVideoUrl &&
+      req.uploadedVideoUrl !== lesson.videoUrl
+    ) {
       newFile.videoUrl = req.uploadedVideoUrl;
-      await unlink(lesson.videoUrl);
+      if (fs.existsSync(lesson.videoUrl)) {
+        await unlink(lesson.videoUrl);
+      }
     }
 
     const updatedLesson = await Lesson.findByIdAndUpdate(lesson?._id, newFile, {

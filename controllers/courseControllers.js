@@ -328,7 +328,9 @@ const updateCourse = async (req, res) => {
     }
 
     if (course.imageUrl && course.imageUrl !== beforeCourse.imageUrl) {
-      await unlink(beforeCourse.imageUrl);
+      if (fs.existsSync(beforeCourse.imageUrl)) {
+        await unlink(beforeCourse.imageUrl);
+      }
     }
     res.status(200).json({ message: "Course updated" });
   } catch (error) {
@@ -355,10 +357,12 @@ const deleteCourse = async (req, res) => {
 
     for (const lesson of course.lessons) {
       if (lesson.videoUrl && lesson.videoUrl !== "") {
-        fs.unlink(lesson.videoUrl, (err) => {
-          if (err)
-            throw { code: 2, message: "Course video couldnt be deleted" };
-        });
+        if (fs.existsSync(lesson.videoUrl)) {
+          fs.unlink(lesson.videoUrl, (err) => {
+            if (err)
+              throw { code: 2, message: "Course video couldnt be deleted" };
+          });
+        }
       }
     }
 

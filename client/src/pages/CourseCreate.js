@@ -172,14 +172,14 @@ const CourseCreate = () => {
   };
 
   const handleLessonCreateSubmit = async (courseSlug) => {
+    const loadingToastId = toast({
+      title: "Loading",
+      description: "Creating lessons...",
+      status: "info",
+      duration: null, // Set duration to null to keep the toast until it's manually closed
+      isClosable: false,
+    });
     try {
-      const loadingToastId = toast({
-        title: "Loading",
-        description: "Creating lessons...",
-        status: "info",
-        duration: null, // Set duration to null to keep the toast until it's manually closed
-        isClosable: false,
-      });
       if (createdLessonsList.length > 0) {
         for (const lesson of createdLessonsList) {
           const lessonFormData = new FormData();
@@ -229,6 +229,7 @@ const CourseCreate = () => {
         });
       }
     } catch (error) {
+      toast.close(loadingToastId);
       setErrors([...errors, error]);
       toast({
         title: "Error",

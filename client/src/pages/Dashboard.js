@@ -352,50 +352,48 @@ const Dashboard = () => {
               >
                 Your Courses
               </Text>
-              {ownedCourses.length > 0 && (
-                <ButtonGroup>
-                  {isCoursesEditing && (
-                    <Button
-                      variant={"outline"}
-                      onClick={() => handleDeleteCourseSubmit()}
-                      bgColor={"var(--secondary-color)"}
-                      color={"white"}
-                      fontSize={responsive("", "sm", "md")}
-                      border={"1px solid var(--secondary-color)"}
-                      _hover={{
-                        bgColor: "white",
-                        color: "var(--secondary-color)",
-                      }}
-                    >
-                      Save
-                    </Button>
-                  )}
+              <ButtonGroup>
+                {isCoursesEditing && (
                   <Button
                     variant={"outline"}
-                    onClick={() => {
-                      setIsCoursesEditing(!isCoursesEditing);
-                      if (isCoursesEditing) {
-                        setOwnedCourses(
-                          courses.filter(
-                            (course) => course?.ownerName === account?.username
-                          )
-                        );
-                        setCourseDeleteList([]);
-                      }
-                    }}
-                    bgColor={"var(--accent-color)"}
+                    onClick={() => handleDeleteCourseSubmit()}
+                    bgColor={"var(--secondary-color)"}
                     color={"white"}
                     fontSize={responsive("", "sm", "md")}
-                    border={"1px solid var(--accent-color)"}
+                    border={"1px solid var(--secondary-color)"}
                     _hover={{
                       bgColor: "white",
-                      color: "var(--accent-color)",
+                      color: "var(--secondary-color)",
                     }}
                   >
-                    {isCoursesEditing ? "Reset" : "Edit"}
+                    Save
                   </Button>
-                </ButtonGroup>
-              )}
+                )}
+                <Button
+                  variant={"outline"}
+                  onClick={() => {
+                    setIsCoursesEditing(!isCoursesEditing);
+                    if (isCoursesEditing) {
+                      setOwnedCourses(
+                        courses.filter(
+                          (course) => course?.ownerName === account?.username
+                        )
+                      );
+                      setCourseDeleteList([]);
+                    }
+                  }}
+                  bgColor={"var(--accent-color)"}
+                  color={"white"}
+                  fontSize={responsive("", "sm", "md")}
+                  border={"1px solid var(--accent-color)"}
+                  _hover={{
+                    bgColor: "white",
+                    color: "var(--accent-color)",
+                  }}
+                >
+                  {isCoursesEditing ? "Reset" : "Edit"}
+                </Button>
+              </ButtonGroup>
             </Flex>
             <Flex
               pr={"1em"}
@@ -703,52 +701,48 @@ const Dashboard = () => {
               <Text fontWeight={"500"} fontSize={responsive("", "md", "lg")}>
                 Your Comments
               </Text>
-              {comments.length > 0 && (
-                <ButtonGroup>
-                  {commentsEdit && (
-                    <Button
-                      variant={"outline"}
-                      onClick={() => {
-                        setCommentsEdit(!commentsEdit);
-                        commentsDeleteFunc();
-                        handleCommentsSubmit();
-                      }}
-                      bgColor={"var(--secondary-color)"}
-                      type={"submit"}
-                      color={"white"}
-                      fontSize={responsive("", "sm", "md")}
-                      border={"1px solid var(--secondary-color)"}
-                      _hover={{
-                        bgColor: "white",
-                        color: "var(--secondary-color)",
-                      }}
-                    >
-                      Save
-                    </Button>
-                  )}
+              <ButtonGroup>
+                {commentsEdit && (
                   <Button
                     variant={"outline"}
                     onClick={() => {
                       setCommentsEdit(!commentsEdit);
-                      setActiveButtonIndices(
-                        Array(comments.length).fill(false)
-                      );
-                      setCommentDeleteList([]);
-                      updatedCommentTextListFunc();
+                      commentsDeleteFunc();
+                      handleCommentsSubmit();
                     }}
-                    bgColor={"var(--accent-color)"}
+                    bgColor={"var(--secondary-color)"}
+                    type={"submit"}
                     color={"white"}
                     fontSize={responsive("", "sm", "md")}
-                    border={"1px solid var(--accent-color)"}
+                    border={"1px solid var(--secondary-color)"}
                     _hover={{
-                      bgColor: "var(--bg-color)",
-                      color: "var(--accent-color)",
+                      bgColor: "white",
+                      color: "var(--secondary-color)",
                     }}
                   >
-                    {commentsEdit ? "Reset" : "Edit"}
+                    Save
                   </Button>
-                </ButtonGroup>
-              )}
+                )}
+                <Button
+                  variant={"outline"}
+                  onClick={() => {
+                    setCommentsEdit(!commentsEdit);
+                    setActiveButtonIndices(Array(comments.length).fill(false));
+                    setCommentDeleteList([]);
+                    updatedCommentTextListFunc();
+                  }}
+                  bgColor={"var(--accent-color)"}
+                  color={"white"}
+                  fontSize={responsive("", "sm", "md")}
+                  border={"1px solid var(--accent-color)"}
+                  _hover={{
+                    bgColor: "var(--bg-color)",
+                    color: "var(--accent-color)",
+                  }}
+                >
+                  {commentsEdit ? "Reset" : "Edit"}
+                </Button>
+              </ButtonGroup>
             </Flex>
             <Flex
               maxH={"100%"}
