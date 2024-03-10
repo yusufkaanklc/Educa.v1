@@ -495,6 +495,7 @@ const Lesson = () => {
       (el) => el.slug === lessonSlug
     )[0];
     setPrevLessonState(null);
+    setFilteredLessonList(lessons);
     setLesson(currentLesson);
   }, [lessons, lessonSlug]);
 
@@ -509,8 +510,7 @@ const Lesson = () => {
         notes: lesson.notes,
       });
     }
-    setFilteredLessonList(lessons);
-  }, [lessons]);
+  }, [lesson, lessonSlug]);
 
   useEffect(() => {
     const fetchData = async () => {

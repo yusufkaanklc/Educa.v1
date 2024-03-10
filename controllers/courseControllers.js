@@ -3,7 +3,7 @@ import Course from "../models/Course.js";
 import Lesson from "../models/Lesson.js";
 import slugify from "slugify";
 import { unlink } from "fs/promises";
-
+import fs from "fs";
 import errorHandling from "../middlewares/errorHandling.js";
 import CourseStates from "../models/CourseStates.js";
 

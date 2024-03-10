@@ -660,7 +660,7 @@ const Course = () => {
                   fontWeight={500}
                   opacity={0.9}
                 >
-                  {course && course.point ? course.point : 0}
+                  {course && course.point ? Math.round(course.point) : 0}
                 </Text>
                 {starList.length > 0 ? (
                   starList.map((star) => (

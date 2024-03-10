@@ -24,14 +24,14 @@ const authControl = async (req, res, next) => {
   try {
     const user = await User.findById(req.session.userID);
     if (!user) {
-      throw new Error("User not found");
+      throw { code: 2, message: "User not found" };
     }
     if (user.role !== "teacher") {
-      throw new Error("Unauthorized");
+      throw { code: 4, message: "Unauthorized" };
     }
     next();
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
@@ -39,11 +39,11 @@ const isAdmin = async (req, res, next) => {
   try {
     const user = await User.findById(req.session.userID);
     if (user.role !== "superadmin") {
-      return res.status(403).send("you are not an admin");
+      throw { code: 4, message: "You are not an admin" };
     }
     next();
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 

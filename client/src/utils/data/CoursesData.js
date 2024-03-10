@@ -106,12 +106,25 @@ const updateCourseState = async (courseSlug) => {
     };
   }
 };
+const deleteCourse = async (courseSlug) => {
+  try {
+    const { data } = await axios.delete(`/courses/${courseSlug}`);
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
 
 export {
   getCourses,
   getCourse,
   createCourse,
   updateCourse,
+  deleteCourse,
   getCourseState,
   updateCourseState,
 };

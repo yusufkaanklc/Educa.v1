@@ -1,6 +1,7 @@
 import { access, constants, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import sharp from "sharp";
+import errorHandling from "./errorHandling.js";
 
 const uploadFile = async (file, fileType) => {
   const uploadDir = join("public", "uploads");
@@ -25,10 +26,10 @@ const uploadFile = async (file, fileType) => {
       try {
         await mkdir(uploadDir, { recursive: true });
       } catch (err) {
-        throw new Error("Directory could not be created", err);
+        throw { code: 2, message: "Directory could not be created" };
       }
     } else {
-      throw new Error("File already exists or cannot be accessed", err);
+      throw { code: 4, message: "File already exists or cannot be accessed" };
     }
   }
 
@@ -62,7 +63,7 @@ const fileUpload = () => {
 
       next();
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      errorHandling(error, req, res);
     }
   };
 };

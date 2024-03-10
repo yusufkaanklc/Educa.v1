@@ -122,7 +122,7 @@ const Courses = () => {
                         </Center>
                         <Flex align={"center"} gap={"0.5em"}>
                           <Text fontSize={responsive("xxs", "xs", "sm")}>
-                            {course.point ? course.point : 0}
+                            {course.point ? Math.round(course.point) : 0}
                           </Text>
                           <StarIcon
                             color={"var(--accent-color)"}

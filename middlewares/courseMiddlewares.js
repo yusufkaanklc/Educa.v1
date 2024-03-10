@@ -1,12 +1,13 @@
 import Course from "../models/Course.js";
 import Comment from "../models/Comment.js";
+import errorHandling from "./errorHandling.js";
 
 // Ortak hata işleme fonksiyonu
-const handleError = (res, error) => {
-  const errorMessage = error.message || "Internal Server Error";
-  const statusCode = error.statusCode || 500;
-  res.status(statusCode).json({ message: errorMessage });
-};
+// const handleError = (res, error) => {
+//   const errorMessage = error.message || "Internal Server Error";
+//   const statusCode = error.statusCode || 500;
+//   res.status(statusCode).json({ message: errorMessage });
+// };
 
 // Kurs sahipliği kontrolü middleware'i
 const ownershipControl = async (req, res, next) => {
@@ -16,10 +17,12 @@ const ownershipControl = async (req, res, next) => {
       slug: courseSlug,
       ownership: req.session.userID,
     });
-    if (!ownership) throw { message: "Unauthorized", statusCode: 403 };
+    if (!ownership) throw { message: "Unauthorized", code: 4 };
+
     next();
   } catch (error) {
-    handleError(res, error);
+    // handleError(res, error);
+    errorHandling(error, req, res);
   }
 };
 
@@ -31,10 +34,10 @@ const enrollControl = async (req, res, next) => {
       slug: courseSlug,
       enrollments: req.session.userID,
     });
-    if (!enrollment) throw { message: "Unauthorized", statusCode: 403 };
+    if (!enrollment) throw { message: "Unauthorized", code: 4 };
     next();
   } catch (error) {
-    handleError(res, error);
+    errorHandling(error, req, res);
   }
 };
 
@@ -46,11 +49,10 @@ const ownershipAndEnrollControl = async (req, res, next) => {
       Course.findOne({ slug: courseSlug, ownership: req.session.userID }),
       Course.findOne({ slug: courseSlug, enrollments: req.session.userID }),
     ]);
-    if (!ownership && !enrollment)
-      throw { message: "Unauthorized", statusCode: 403 };
+    if (!ownership && !enrollment) throw { message: "Unauthorized", code: 4 };
     next();
   } catch (error) {
-    handleError(res, error);
+    errorHandling(error, req, res);
   }
 };
 
@@ -69,10 +71,10 @@ const ownershipControlForCommentFunc = async (
       comment.user.toString() !== req.session.userID.toString() &&
       course.ownership.toString() !== req.session.userID.toString()
     )
-      throw new Error("Unauthorized");
+      throw { code: 4, message: "Unauthorized" };
     next();
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorHandling(error, req, res);
   }
 };
 
