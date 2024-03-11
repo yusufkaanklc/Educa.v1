@@ -105,6 +105,18 @@ const updateAccount = async (input) => {
   }
 };
 
+const deleteAccount = async () => {
+  try {
+    await axios.delete("users/account");
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
+
 const enrollCourse = async (courseSlug) => {
   try {
     const { data } = await axios.post(`/courses/${courseSlug}/enroll`);
@@ -123,6 +135,7 @@ export {
   registerUser,
   loginUser,
   getAccount,
+  deleteAccount,
   logout,
   updateAccount,
   enrollCourse,

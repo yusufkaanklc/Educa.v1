@@ -267,39 +267,26 @@ const deleteAccount = async (req, res) => {
   try {
     const userComments = await Comment.find({ user: req.session.userID });
 
-    const replyIds = userComments.flatMap((comment) => comment.replies);
-
-    await Comment.deleteMany({ _id: { $in: replyIds } });
-
     // Kullanıcının yaptığı tüm yorumları silme
     await Comment.deleteMany({ user: req.session.userID });
 
     // Kullanıcının yaptığı yorumların ilişkilerini güncelleme
     for (const userComment of userComments) {
-      await Comment.findOneAndUpdate(
-        {
-          replies: userComment._id,
-        },
-        { $pull: { replies: userComment?._id } },
-        { new: true }
-      );
-
-      await Course.findOneAndUpdate(
+      // Kurslardaki yorumun bulunması ve çıkarılması
+      await Course.updateMany(
         { comments: userComment._id },
-        {
-          $pull: { comments: userComment?._id },
-        }
+        { $pull: { comments: userComment._id } }
       );
     }
 
     const ownership = Course.updateMany(
       { ownership: req.session.userID },
-      { $pull: { ownership: null } }
+      { $set: { ownership: null } }
     );
     if (!ownership) throw { code: 2, message: "ownership could not delete" };
 
     const enrollment = Course.updateMany(
-      { enrollments: req.session.userId },
+      { enrollments: req.session.userID },
       {
         $pull: { enrollments: req.session.userID },
       }

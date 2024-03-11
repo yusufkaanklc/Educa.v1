@@ -638,6 +638,7 @@ const Course = () => {
                 type={"text"}
                 name="description"
                 value={courseUpdateData.description}
+                onChange={(e) => handleCourseChange(e)}
                 border={"2px dashed var(--secondary-color)"}
                 _focus={{
                   boxShadow: "none",

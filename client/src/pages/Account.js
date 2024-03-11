@@ -17,15 +17,31 @@ import {
   SkeletonCircle,
   FormControl,
   FormLabel,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  useDisclosure,
+  ButtonGroup,
 } from "@chakra-ui/react";
 import { ChevronRightIcon } from "@chakra-ui/icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import dataContext from "../utils/contextApi";
-import { updateAccount } from "../utils/data/UsersData";
+import { deleteAccount, updateAccount } from "../utils/data/UsersData";
+import Cookies from "js-cookie";
 const Account = () => {
-  const { isMobile, isLaptop, setTargetScroll, account, setAccount } =
-    useContext(dataContext);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isMobile,
+    isLaptop,
+    setTargetScroll,
+    account,
+    setAccount,
+    setErrors,
+    errors,
+  } = useContext(dataContext);
   const [formattedDate, setFormattedDate] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -110,6 +126,25 @@ const Account = () => {
     });
   };
 
+  const navigate = useNavigate();
+  const handleDeleteAccount = () => {
+    try {
+      deleteAccount();
+      navigate("/");
+      Cookies.remove("isLoggedIn");
+      toast({
+        title: "Success",
+        description: "Your account has been deleted",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log(error);
+      setErrors([...errors, error]);
+    }
+  };
+
   useEffect(() => {
     setIsLoading(true);
     if (account) {
@@ -139,301 +174,358 @@ const Account = () => {
   }, [account]);
 
   return (
-    <Box h={"100vh"} pl={"2em"} pt={"2em"}>
-      <Box
-        p={responsive("", "1em", "1em 2em")}
-        bgColor={"var(--secondary-color)"}
-        w={"max-content"}
-      >
-        <Heading
-          color={"white"}
-          fontSize={responsive("", "xl", "2xl")}
-          fontWeight={"600"}
-          mb={"1em"}
-        >
-          Account
-        </Heading>
-        <Breadcrumb
-          color={"white"}
-          spacing="8px"
-          separator={<ChevronRightIcon color="white" />}
-        >
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              as={Link}
-              to="/"
-              onClick={() => setTargetScroll("")}
-              fontWeight={500}
-            >
-              Home
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-
-          <BreadcrumbItem>
-            <BreadcrumbLink fontWeight={500} as={Link} to={"/account"}>
-              Account
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </Breadcrumb>
-      </Box>
-      <Center h={"70%"}>
+    <>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            Are you sure you want to delete the account?
+          </ModalHeader>
+          <ModalBody>
+            <ButtonGroup gap={"1em"}>
+              <Button
+                border={"1px solid transparent"}
+                bgColor={"var(--secondary-color)"}
+                fontSize={responsive("", "sm", "md")}
+                onClick={() => handleDeleteAccount()}
+                color={"white"}
+                _hover={{
+                  bgColor: "var(--bg-color)",
+                  color: "var(--secondary-color)",
+                  border: "1px solid var(--secondary-color)",
+                }}
+              >
+                Yes
+              </Button>
+              <Button
+                border={"1px solid transparent"}
+                bgColor={"var(--accent-color)"}
+                fontSize={responsive("", "sm", "md")}
+                onClick={() => onClose()}
+                color={"white"}
+                _hover={{
+                  bgColor: "var(--bg-color)",
+                  color: "var(--accent-color)",
+                  border: "1px solid var(--accent-color)",
+                }}
+              >
+                No
+              </Button>
+            </ButtonGroup>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+      <Box h={"100vh"} pl={"2em"} pt={"2em"}>
         <Box
-          bgColor={"white"}
-          border={"2px dashed #cfcfcf"}
-          position={"relative"}
-          borderRadius={"10px"}
-          p={responsive("", "1em ", "2em")}
-          w={"30%"}
-          h={"max-content"}
-          boxShadow={"0 0 50px 0 rgba(0,0,0,0.2)"}
+          p={responsive("", "1em", "1em 2em")}
+          bgColor={"var(--secondary-color)"}
+          w={"max-content"}
         >
-          <Box
-            pos={"absolute"}
-            top={responsive("", "-3em", "-4em")}
-            right={responsive("", "-3em", "-4em")}
-            zIndex={-1}
-            w={responsive("", "8em", "10em")}
-            h={responsive("", "8em", "10em")}
-            bgColor={"var(--secondary-color)"}
-          ></Box>
-          <form onSubmit={handleSubmit}>
-            <Flex flexDir={"column"} gap={"2em"}>
-              <Box mt={responsive("", "2em", "3em")}>
-                <Flex align={"center"} gap={responsive("", "1em", "2em")}>
-                  <FormControl position={"relative"} w={"max-content"}>
-                    {isLoading || !account ? (
-                      <SkeletonCircle size={responsive("", "6em", "8em")} />
-                    ) : (
-                      <Avatar
-                        pos={"relative"}
-                        name={account?.username}
-                        src={account?.image}
-                        size={responsive("", "xl", "2xl")}
-                        color={"white"}
-                        bgColor={"var(--accent-color)"}
-                      />
-                    )}
-                    <FormLabel
-                      htmlFor="image"
-                      pos={"absolute"}
-                      bottom={responsive("", "-.3em", "-.5em")}
-                      right={responsive("", "-.3em", "-.5em")}
-                      display={isEditing ? "block" : "none"}
-                    >
-                      <Center
-                        bgColor={"white"}
-                        borderRadius={"full"}
-                        w={responsive("", "1em", "2em")}
-                        h={responsive("", "1em", "2em")}
-                      >
-                        <i
-                          className="fi fi-rr-camera"
-                          style={{
-                            position: "relative",
-                            top: "2px",
-                          }}
-                        ></i>
-                      </Center>
-                    </FormLabel>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      display={"none"}
-                      name={"image"}
-                      id={"image"}
-                      onChange={(e) => handleChangeForImage(e)}
-                    />
-                  </FormControl>
+          <Heading
+            color={"white"}
+            fontSize={responsive("", "xl", "2xl")}
+            fontWeight={"600"}
+            mb={"1em"}
+          >
+            Account
+          </Heading>
+          <Breadcrumb
+            color={"white"}
+            spacing="8px"
+            separator={<ChevronRightIcon color="white" />}
+          >
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                as={Link}
+                to="/"
+                onClick={() => setTargetScroll("")}
+                fontWeight={500}
+              >
+                Home
+              </BreadcrumbLink>
+            </BreadcrumbItem>
 
-                  <Stack gap={isEditing ? "0" : ".5em"}>
-                    {isEditing ? (
-                      <>
-                        <FormControl>
-                          <Input
-                            autoFocus
-                            type={"text"}
-                            value={formData.username}
-                            name="username"
-                            variant={"flushed"}
-                            fontWeight={"600"}
-                            fontFamily={"Montserrat, sans-serif;"}
-                            fontSize={responsive("", "xl", "2xl")}
-                            onChange={(e) => handleChange(e)}
-                            _focus={{
-                              borderColor: "#cdcdcd",
-                              outline: 0,
-                              boxShadow: "none",
+            <BreadcrumbItem>
+              <BreadcrumbLink fontWeight={500} as={Link} to={"/account"}>
+                Account
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </Breadcrumb>
+        </Box>
+        <Center h={"70%"}>
+          <Box
+            bgColor={"white"}
+            border={"2px dashed #cfcfcf"}
+            position={"relative"}
+            borderRadius={"10px"}
+            p={responsive("", "1em ", "2em")}
+            w={"30%"}
+            h={"max-content"}
+            boxShadow={"0 0 50px 0 rgba(0,0,0,0.2)"}
+          >
+            <Box
+              pos={"absolute"}
+              top={responsive("", "-3em", "-4em")}
+              right={responsive("", "-3em", "-4em")}
+              zIndex={-1}
+              w={responsive("", "8em", "10em")}
+              h={responsive("", "8em", "10em")}
+              bgColor={"var(--secondary-color)"}
+            ></Box>
+            <form onSubmit={handleSubmit}>
+              <Flex flexDir={"column"} gap={"2em"}>
+                <Box mt={responsive("", "2em", "3em")}>
+                  <Flex align={"center"} gap={responsive("", "1em", "2em")}>
+                    <FormControl position={"relative"} w={"max-content"}>
+                      {isLoading || !account ? (
+                        <SkeletonCircle size={responsive("", "6em", "8em")} />
+                      ) : (
+                        <Avatar
+                          pos={"relative"}
+                          name={account?.username}
+                          src={account?.image}
+                          size={responsive("", "xl", "2xl")}
+                          color={"white"}
+                          bgColor={"var(--accent-color)"}
+                        />
+                      )}
+                      <FormLabel
+                        htmlFor="image"
+                        pos={"absolute"}
+                        bottom={responsive("", "-.3em", "-.5em")}
+                        right={responsive("", "-.3em", "-.5em")}
+                        display={isEditing ? "block" : "none"}
+                      >
+                        <Center
+                          bgColor={"white"}
+                          borderRadius={"full"}
+                          w={responsive("", "1em", "2em")}
+                          h={responsive("", "1em", "2em")}
+                        >
+                          <i
+                            className="fi fi-rr-camera"
+                            style={{
+                              position: "relative",
+                              top: "2px",
                             }}
-                          />
-                        </FormControl>
-                        <FormControl>
-                          <Input
-                            type={"text"}
-                            value={formData.email}
-                            name={"email"}
-                            variant={"flushed"}
-                            fontWeight={"600"}
-                            fontFamily={"Montserrat, sans-serif;"}
-                            fontSize={responsive("", "sm", "md")}
-                            onChange={(e) => handleChange(e)}
-                            _focus={{
-                              borderColor: "#cdcdcd",
-                              outline: 0,
-                              boxShadow: "none",
-                            }}
-                          />
-                        </FormControl>
-                        {account && account.role === "teacher" && (
+                          ></i>
+                        </Center>
+                      </FormLabel>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        display={"none"}
+                        name={"image"}
+                        id={"image"}
+                        onChange={(e) => handleChangeForImage(e)}
+                      />
+                    </FormControl>
+
+                    <Stack gap={isEditing ? "0" : ".5em"}>
+                      {isEditing ? (
+                        <>
                           <FormControl>
                             <Input
+                              autoFocus
                               type={"text"}
-                              mt={responsive("", ".5em", "1em")}
-                              value={formData.profession}
-                              name={"profession"}
-                              variant={"outline"}
-                              border={"1px solid var(--secondary-color)"}
-                              fontFamily={"Poppins, sans-serif;"}
-                              fontWeight={"300"}
-                              fontSize={responsive("", "sx", "sm")}
-                              color={"var(--secondary-color)"}
-                              p={responsive(
-                                "",
-                                "2px 5px",
-                                "3px 7px",
-                                "5px 10px"
-                              )}
-                              w={"max-content"}
-                              h={"max-content"}
+                              value={formData.username}
+                              name="username"
+                              variant={"flushed"}
+                              fontWeight={"600"}
+                              fontFamily={"Montserrat, sans-serif;"}
+                              fontSize={responsive("", "xl", "2xl")}
                               onChange={(e) => handleChange(e)}
                               _focus={{
-                                borderColor: "var(--secondary-color)",
+                                borderColor: "#cdcdcd",
                                 outline: 0,
                                 boxShadow: "none",
                               }}
-                              _hover={{ borderColor: "var(--secondary-color)" }}
                             />
                           </FormControl>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        {isLoading || !account ? (
-                          <>
-                            <Skeleton
-                              h={responsive("", "1em", "1em")}
-                              w={responsive("", "10em", "15em")}
-                              borderRadius={"10px"}
-                            />
-                            <Skeleton
-                              h={responsive("", "1em", "1em")}
-                              w={responsive("", "10em", "15em")}
-                              borderRadius={"10px"}
-                            />
-                            <Skeleton
-                              h={responsive("", "1em", "1em")}
-                              w={responsive("", "10em", "15em")}
-                              borderRadius={"10px"}
-                            />
-                          </>
-                        ) : (
-                          <>
-                            <Heading
+                          <FormControl>
+                            <Input
+                              type={"text"}
+                              value={formData.email}
+                              name={"email"}
+                              variant={"flushed"}
                               fontWeight={"600"}
-                              fontSize={responsive("", "xl", "2xl")}
-                            >
-                              {account?.username}
-                            </Heading>
-                            <Text
-                              fontWeight={"500"}
+                              fontFamily={"Montserrat, sans-serif;"}
                               fontSize={responsive("", "sm", "md")}
-                            >
-                              {account?.email}
-                            </Text>
-                            {account && account.role === "teacher" && (
-                              <>
-                                <Center
-                                  p={responsive(
-                                    "",
-                                    "2px 5px",
-                                    "3px 7px",
-                                    "5px 10px"
-                                  )}
-                                  border={"1px solid var(--secondary-color)"}
-                                  borderRadius={"5px"}
-                                  w={"max-content"}
-                                  color={"var(--secondary-color)"}
-                                  fontSize={responsive("", "xs", "sm")}
-                                >
-                                  {account?.profession}
-                                </Center>
-                              </>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-                    <Flex
-                      fontWeight={"500"}
-                      fontSize={responsive("", "xs", "sm")}
-                      gap={"1em"}
-                      mt={responsive("", ".5em", "1em")}
-                    >
-                      <Text>Joined on : </Text>
-                      <Text opacity={0.9}>{formattedDate}</Text>
-                    </Flex>
-                  </Stack>
-                </Flex>
-              </Box>
-              <Box>
-                {isEditing && (
-                  <>
-                    <FormControl>
-                      <Input
-                        type={"text"}
-                        placeholder="Enter current password"
-                        name="currentPassword"
-                        variant={"flushed"}
-                        fontWeight={"600"}
-                        fontFamily={"Montserrat, sans-serif;"}
-                        fontSize={responsive("", "sm", "md")}
-                        onChange={(e) => handleChange(e)}
-                        _focus={{
-                          borderColor: "#cdcdcd",
-                          outline: 0,
-                          boxShadow: "none",
-                        }}
-                      />
-                    </FormControl>
-                    <br />
-                    <FormControl>
-                      <Input
-                        type={"text"}
-                        placeholder="Enter new password"
-                        name="password"
-                        variant={"flushed"}
-                        fontWeight={"600"}
-                        fontFamily={"Montserrat, sans-serif;"}
-                        fontSize={responsive("", "sm", "md")}
-                        onChange={(e) => handleChange(e)}
-                        _focus={{
-                          borderColor: "#cdcdcd",
-                          outline: 0,
-                          boxShadow: "none",
-                        }}
-                      />
-                    </FormControl>
-                  </>
-                )}
-              </Box>
-              {account && account.role === "teacher" && (
-                <Box mt={responsive("", "1em", "1em")}>
-                  <Text fontWeight={"600"}>Introduce</Text>
-                  {isEditing ? (
-                    <FormControl>
+                              onChange={(e) => handleChange(e)}
+                              _focus={{
+                                borderColor: "#cdcdcd",
+                                outline: 0,
+                                boxShadow: "none",
+                              }}
+                            />
+                          </FormControl>
+                          {account && account.role === "teacher" && (
+                            <FormControl>
+                              <Input
+                                type={"text"}
+                                mt={responsive("", ".5em", "1em")}
+                                value={formData.profession}
+                                name={"profession"}
+                                variant={"outline"}
+                                border={"1px solid var(--secondary-color)"}
+                                fontFamily={"Poppins, sans-serif;"}
+                                fontWeight={"300"}
+                                fontSize={responsive("", "sx", "sm")}
+                                color={"var(--secondary-color)"}
+                                p={responsive(
+                                  "",
+                                  "2px 5px",
+                                  "3px 7px",
+                                  "5px 10px"
+                                )}
+                                w={"max-content"}
+                                h={"max-content"}
+                                onChange={(e) => handleChange(e)}
+                                _focus={{
+                                  borderColor: "var(--secondary-color)",
+                                  outline: 0,
+                                  boxShadow: "none",
+                                }}
+                                _hover={{
+                                  borderColor: "var(--secondary-color)",
+                                }}
+                              />
+                            </FormControl>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {isLoading || !account ? (
+                            <>
+                              <Skeleton
+                                h={responsive("", "1em", "1em")}
+                                w={responsive("", "10em", "15em")}
+                                borderRadius={"10px"}
+                              />
+                              <Skeleton
+                                h={responsive("", "1em", "1em")}
+                                w={responsive("", "10em", "15em")}
+                                borderRadius={"10px"}
+                              />
+                              <Skeleton
+                                h={responsive("", "1em", "1em")}
+                                w={responsive("", "10em", "15em")}
+                                borderRadius={"10px"}
+                              />
+                            </>
+                          ) : (
+                            <>
+                              <Heading
+                                fontWeight={"600"}
+                                fontSize={responsive("", "xl", "2xl")}
+                              >
+                                {account?.username}
+                              </Heading>
+                              <Text
+                                fontWeight={"500"}
+                                fontSize={responsive("", "sm", "md")}
+                              >
+                                {account?.email}
+                              </Text>
+                              {account && account.role === "teacher" && (
+                                <>
+                                  <Center
+                                    p={responsive(
+                                      "",
+                                      "2px 5px",
+                                      "3px 7px",
+                                      "5px 10px"
+                                    )}
+                                    border={"1px solid var(--secondary-color)"}
+                                    borderRadius={"5px"}
+                                    w={"max-content"}
+                                    color={"var(--secondary-color)"}
+                                    fontSize={responsive("", "xs", "sm")}
+                                  >
+                                    {account?.profession}
+                                  </Center>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </>
+                      )}
+                      <Flex
+                        fontWeight={"500"}
+                        fontSize={responsive("", "xs", "sm")}
+                        gap={"1em"}
+                        mt={responsive("", ".5em", "1em")}
+                      >
+                        <Text>Joined on : </Text>
+                        <Text opacity={0.9}>{formattedDate}</Text>
+                      </Flex>
+                    </Stack>
+                  </Flex>
+                </Box>
+                <Box>
+                  {isEditing && (
+                    <>
+                      <FormControl>
+                        <Input
+                          type={"text"}
+                          placeholder="Enter current password"
+                          name="currentPassword"
+                          variant={"flushed"}
+                          fontWeight={"600"}
+                          fontFamily={"Montserrat, sans-serif;"}
+                          fontSize={responsive("", "sm", "md")}
+                          onChange={(e) => handleChange(e)}
+                          _focus={{
+                            borderColor: "#cdcdcd",
+                            outline: 0,
+                            boxShadow: "none",
+                          }}
+                        />
+                      </FormControl>
+                      <br />
+                      <FormControl>
+                        <Input
+                          type={"text"}
+                          placeholder="Enter new password"
+                          name="password"
+                          variant={"flushed"}
+                          fontWeight={"600"}
+                          fontFamily={"Montserrat, sans-serif;"}
+                          fontSize={responsive("", "sm", "md")}
+                          onChange={(e) => handleChange(e)}
+                          _focus={{
+                            borderColor: "#cdcdcd",
+                            outline: 0,
+                            boxShadow: "none",
+                          }}
+                        />
+                      </FormControl>
+                    </>
+                  )}
+                </Box>
+                {account && account.role === "teacher" && (
+                  <Box mt={responsive("", "1em", "1em")}>
+                    <Text fontWeight={"600"}>Introduce</Text>
+                    {isEditing ? (
+                      <FormControl>
+                        <Textarea
+                          minH={responsive("", "7em", "9em")}
+                          onChange={(e) => handleChange(e)}
+                          value={formData.introduce}
+                          name={"introduce"}
+                          border={"2px dashed var(--secondary-color)"}
+                          _focus={{
+                            borderColor: "var(--secondary-color)",
+                            boxShadow: "none",
+                          }}
+                        />
+                      </FormControl>
+                    ) : (
                       <Textarea
+                        readOnly
+                        _hover={{ borderColor: "var(--secondary-color)" }}
                         minH={responsive("", "7em", "9em")}
-                        onChange={(e) => handleChange(e)}
-                        value={formData.introduce}
+                        value={account?.introduce}
                         name={"introduce"}
                         border={"2px dashed var(--secondary-color)"}
                         _focus={{
@@ -441,87 +533,49 @@ const Account = () => {
                           boxShadow: "none",
                         }}
                       />
-                    </FormControl>
-                  ) : (
-                    <Textarea
-                      readOnly
-                      _hover={{ borderColor: "var(--secondary-color)" }}
-                      minH={responsive("", "7em", "9em")}
-                      value={account?.introduce}
-                      name={"introduce"}
-                      border={"2px dashed var(--secondary-color)"}
-                      _focus={{
-                        borderColor: "var(--secondary-color)",
-                        boxShadow: "none",
-                      }}
-                    />
-                  )}
-                </Box>
-              )}
-
-              <Flex justifyContent={"center"} mt={responsive("", "1em", "2em")}>
-                {isEditing && (
-                  <>
-                    <Flex gap={"1em"}>
-                      <Button
-                        border={"1px solid transparent"}
-                        bgColor={"var(--secondary-color)"}
-                        type="submit"
-                        fontSize={responsive("", "sm", "md")}
-                        color={"white"}
-                        _hover={{
-                          bgColor: "var(--bg-color)",
-                          color: "var(--secondary-color)",
-                          border: "1px solid var(--secondary-color)",
-                        }}
-                      >
-                        Save Changes
-                      </Button>
-                      <Button
-                        type="submit"
-                        border={"1px solid transparent"}
-                        onClick={() => {
-                          setIsEditing(!isEditing);
-                          setIsLoading(false);
-                          setFormData({
-                            username: account.username,
-                            email: account.email,
-                            profession: account.profession,
-                            introduce: account.introduce,
-                            image: account.image,
-                            password: "",
-                            currentPassword: "",
-                          });
-                        }}
-                        bgColor={"var(--accent-color)"}
-                        fontSize={responsive("", "sm", "md")}
-                        color={"white"}
-                        _hover={{
-                          bgColor: "var(--bg-color)",
-                          color: "var(--accent-color)",
-                          border: "1px solid var(--accent-color)",
-                        }}
-                      >
-                        Reset Changes
-                      </Button>
-                    </Flex>
-                  </>
+                    )}
+                  </Box>
                 )}
-                {!isEditing && (
-                  <>
-                    <Box>
-                      {isLoading || !account ? (
-                        <Skeleton
-                          h={responsive("", "1.5em", "2em")}
-                          w={responsive("", "5em", "8em")}
-                          borderRadius={"5px"}
-                        />
-                      ) : (
+
+                <Flex
+                  justifyContent={"center"}
+                  mt={responsive("", "1em", "2em")}
+                >
+                  {isEditing && (
+                    <>
+                      <Flex gap={"1em"}>
                         <Button
                           border={"1px solid transparent"}
+                          bgColor={"var(--secondary-color)"}
+                          type="submit"
+                          fontSize={responsive("", "sm", "md")}
+                          color={"white"}
+                          _hover={{
+                            bgColor: "var(--bg-color)",
+                            color: "var(--secondary-color)",
+                            border: "1px solid var(--secondary-color)",
+                          }}
+                        >
+                          Save Changes
+                        </Button>
+                        <Button
+                          type="submit"
+                          border={"1px solid transparent"}
+                          onClick={() => {
+                            setIsEditing(!isEditing);
+                            setIsLoading(false);
+                            setFormData({
+                              username: account.username,
+                              email: account.email,
+                              profession: account.profession,
+                              introduce: account.introduce,
+                              image: account.image,
+                              password: "",
+                              currentPassword: "",
+                            });
+                          }}
                           bgColor={"var(--accent-color)"}
                           fontSize={responsive("", "sm", "md")}
-                          onClick={() => setIsEditing(!isEditing)}
                           color={"white"}
                           _hover={{
                             bgColor: "var(--bg-color)",
@@ -529,27 +583,73 @@ const Account = () => {
                             border: "1px solid var(--accent-color)",
                           }}
                         >
-                          Edit Account
+                          Reset Changes
                         </Button>
+                      </Flex>
+                    </>
+                  )}
+                  {!isEditing && (
+                    <>
+                      {isLoading || !account ? (
+                        <Skeleton
+                          h={responsive("", "1.5em", "2em")}
+                          w={responsive("", "10em", "16em")}
+                          borderRadius={"5px"}
+                        />
+                      ) : (
+                        <Flex
+                          align={"center"}
+                          justify={"space-between"}
+                          w={"100%"}
+                        >
+                          <Button
+                            border={"1px solid transparent"}
+                            bgColor={"var(--secondary-color)"}
+                            fontSize={responsive("", "sm", "md")}
+                            onClick={() => setIsEditing(!isEditing)}
+                            color={"white"}
+                            _hover={{
+                              bgColor: "var(--bg-color)",
+                              color: "var(--secondary-color)",
+                              border: "1px solid var(--secondary-color)",
+                            }}
+                          >
+                            Edit Account
+                          </Button>
+                          <Button
+                            border={"1px solid transparent"}
+                            bgColor={"var(--accent-color)"}
+                            fontSize={responsive("", "sm", "md")}
+                            onClick={() => onOpen()}
+                            color={"white"}
+                            _hover={{
+                              bgColor: "var(--bg-color)",
+                              color: "var(--accent-color)",
+                              border: "1px solid var(--accent-color)",
+                            }}
+                          >
+                            Delete Account
+                          </Button>
+                        </Flex>
                       )}
-                    </Box>
-                  </>
-                )}
+                    </>
+                  )}
+                </Flex>
               </Flex>
-            </Flex>
-          </form>
-          <Box
-            pos={"absolute"}
-            bottom={responsive("", "-3em", "-4em")}
-            left={responsive("", "-3em", "-4em")}
-            zIndex={-1}
-            w={responsive("", "8em", "10em")}
-            h={responsive("", "8em", "10em")}
-            bgColor={"var(--secondary-color)"}
-          ></Box>
-        </Box>
-      </Center>
-    </Box>
+            </form>
+            <Box
+              pos={"absolute"}
+              bottom={responsive("", "-3em", "-4em")}
+              left={responsive("", "-3em", "-4em")}
+              zIndex={-1}
+              w={responsive("", "8em", "10em")}
+              h={responsive("", "8em", "10em")}
+              bgColor={"var(--secondary-color)"}
+            ></Box>
+          </Box>
+        </Center>
+      </Box>
+    </>
   );
 };
 
