@@ -235,6 +235,7 @@ const Dashboard = () => {
         setIsCoursesEditing(!isCoursesEditing);
         setCourseDeleteList([]);
       } catch (error) {
+        console.log(error);
         setErrors([...errors, error]);
       }
     } else {

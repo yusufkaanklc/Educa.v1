@@ -49,32 +49,6 @@ router
   .route("/courses/:courseSlug/lessons/:lessonSlug/comments/:commentId")
   .delete(commentControllers.deleteComment);
 
-// Bir yorume cevap vermek için POST isteği
-router
-  .route(
-    "//courses/:courseSlug/lessons/:lessonSlug/comments/:commentId/add-reply"
-  )
-  .post(commentControllers.addReply);
-
-// Cevapları getirmek için GET isteği
-router
-  .route("/courses/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies")
-  .get(commentControllers.getReplies);
-
-// Cevabı güncellemek için PUT isteği
-router
-  .route(
-    "/courses/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies/:replyId"
-  )
-  .put(commentControllers.updateReply);
-
-// Bir cevabı silmek için DELETE isteği
-router
-  .route(
-    "/courses/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies/:replyId"
-  )
-  .delete(commentControllers.deleteReply);
-
 // Ders eklemek için POST isteği
 router
   .route("/courses/:courseSlug/add-lesson")

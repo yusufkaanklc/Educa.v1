@@ -345,7 +345,9 @@ const Course = () => {
         !isCourseFinished &&
         totalLessonCount > 0
       ) {
-        updateCourseState(slug).then(() => setIsCourseFinished(true));
+        updateCourseState(slug)
+          .then(() => setIsCourseFinished(true))
+          .catch((error) => setErrors([...errors, error]));
       }
     }
   }, [courseStates]);

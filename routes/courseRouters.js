@@ -130,44 +130,6 @@ router
     commentControllers.deleteComment
   );
 
-//Bir yoruma cevap vermek için POST isteği
-router
-  .route("/:courseSlug/lessons/:lessonSlug/comments/:commentId/add-reply")
-  .post(
-    authMiddlewares.isLoggedIn,
-    courseMiddlewares.ownershipAndEnrollControl,
-    commentControllers.addReply
-  );
-
-// bir yorumun cevaplarını getirmek için GET isteği
-router
-  .route("/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies")
-  .get(commentControllers.getReplies);
-
-// Bir cevabı güncellemek için PUT isteği
-router
-  .route(
-    "/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies/:replyId"
-  )
-  .put(
-    authMiddlewares.isLoggedIn,
-    courseMiddlewares.ownershipAndEnrollControl,
-    courseMiddlewares.ownershipControlForReply,
-    commentControllers.updateReply
-  );
-
-// Bir cevabı silmek için DELETE isteği
-router
-  .route(
-    "/:courseSlug/lessons/:lessonSlug/comments/:commentId/replies/:replyId"
-  )
-  .delete(
-    authMiddlewares.isLoggedIn,
-    courseMiddlewares.ownershipAndEnrollControl,
-    courseMiddlewares.ownershipControlForReply,
-    commentControllers.deleteReply
-  );
-
 router
   .route("/:courseSlug/state")
   .get(courseControllers.getCourseOrLessonState);

@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import Course from "../models/Course.js";
 import errorHandling from "../middlewares/errorHandling.js";
 import CourseStates from "../models/CourseStates.js";
+import Lesson from "../models/Lesson.js";
 
 const register = async (req, res) => {
   try {
@@ -265,38 +266,63 @@ const accountUpdateFunc = async (userId, req, res) => {
 
 const deleteAccount = async (req, res) => {
   try {
-    const userComments = await Comment.find({ user: req.session.userID });
-
     // Kullanıcının yaptığı tüm yorumları silme
     await Comment.deleteMany({ user: req.session.userID });
 
     // Kullanıcının yaptığı yorumların ilişkilerini güncelleme
+    const userComments = await Comment.find({ user: req.session.userID });
     for (const userComment of userComments) {
-      // Kurslardaki yorumun bulunması ve çıkarılması
       await Course.updateMany(
         { comments: userComment._id },
         { $pull: { comments: userComment._id } }
       );
     }
 
-    const ownership = Course.updateMany(
-      { ownership: req.session.userID },
-      { $set: { ownership: null } }
-    );
-    if (!ownership) throw { code: 2, message: "ownership could not delete" };
-
-    const enrollment = Course.updateMany(
-      { enrollments: req.session.userID },
-      {
-        $pull: { enrollments: req.session.userID },
+    // Kullanıcının sahip olduğu kursları kontrol etme ve silme
+    const courses = await Course.find({ ownership: req.session.userID });
+    for (const course of courses) {
+      if (course.enrollments.length > 0) {
+        throw {
+          code: 2,
+          message: `There is a registration for course ${course.title}, it cannot be deleted.`,
+        };
       }
+
+      for (const lesson of course.lessons) {
+        const deleteLesson = await Lesson.findByIdAndDelete(lesson._id);
+        if (!deleteLesson) {
+          throw { code: 2, message: "Lesson could not be deleted" };
+        }
+        if (fs.existsSync(deleteLesson.videoUrl)) {
+          await unlink(deleteLesson.videoUrl);
+        }
+
+        for (const comment of deleteLesson.comments) {
+          await Comment.findByIdAndDelete(comment._id);
+        }
+      }
+
+      await CourseStates.findOneAndDelete({ course: course._id });
+      await Course.findByIdAndDelete(course._id);
+      if (fs.existsSync(course.imageUrl)) {
+        await unlink(course.imageUrl);
+      }
+    }
+
+    // Kullanıcının kurs kayıtlarını güncelleme
+    await Course.updateMany(
+      { enrollments: req.session.userID },
+      { $pull: { enrollments: req.session.userID } }
     );
 
-    if (!enrollment) throw { code: 2, message: "enrollment could not delete" };
+    // kullanıcının course statesini silme
+    await CourseStates.deleteMany({ user: req.session.userID });
 
     // Kullanıcıyı silme
-    const deletedUser = await User.findByIdAndDelete(req.session.userID);
-    if (!deletedUser) throw { code: 2, message: "User not found" };
+    const deleteAccount = await User.findByIdAndDelete(req.session.userID);
+    if (fs.existsSync(deleteAccount.image)) {
+      await unlink(deleteAccount.image);
+    }
 
     // Oturumu sonlandırma
     req.session.destroy();

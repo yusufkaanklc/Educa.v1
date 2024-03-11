@@ -127,11 +127,11 @@ const Account = () => {
   };
 
   const navigate = useNavigate();
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     try {
-      deleteAccount();
-      navigate("/");
+      await deleteAccount();
       Cookies.remove("isLoggedIn");
+      navigate("/");
       toast({
         title: "Success",
         description: "Your account has been deleted",
@@ -139,6 +139,8 @@ const Account = () => {
         duration: 5000,
         isClosable: true,
       });
+      // Hesap silindiği için sayfayı yeniden yükle
+      window.location.reload();
     } catch (error) {
       console.log(error);
       setErrors([...errors, error]);

@@ -15,12 +15,6 @@ const commentSchema = new Schema({
     default: 1,
     enum: [1, 2, 3, 4, 5],
   },
-  replies: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "comments",
-    },
-  ],
   createdAt: {
     type: Date,
     default: Date.now,

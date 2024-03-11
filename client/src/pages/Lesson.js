@@ -22,7 +22,7 @@ import {
 } from "@chakra-ui/react";
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import ReactPlayer from "react-player";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import dataContext from "../utils/contextApi";
 import {
@@ -480,6 +480,7 @@ const Lesson = () => {
         isClosable: true,
       });
       setCommentAddState(false);
+      setCommentData({ text: "" });
       try {
         const newLessons = await getLessons(courseSlug);
         setLessons(newLessons);

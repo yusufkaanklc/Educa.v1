@@ -251,11 +251,6 @@ const deleteLesson = async (req, res) => {
       for (const comment of comments) {
         // Yorumu sil
         await Comment.findByIdAndDelete(comment._id);
-
-        // Yoruma ait cevapları sil
-        for (const replyId of comment.replies) {
-          await Comment.findByIdAndDelete(replyId);
-        }
       }
     }
 

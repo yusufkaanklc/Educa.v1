@@ -6,6 +6,7 @@ import { unlink } from "fs/promises";
 import fs from "fs";
 import errorHandling from "../middlewares/errorHandling.js";
 import CourseStates from "../models/CourseStates.js";
+import Comment from "../models/Comment.js";
 
 const createCourse = async (req, res) => {
   try {
@@ -342,39 +343,39 @@ const deleteCourse = async (req, res) => {
   try {
     const courseSlug = req.params.courseSlug;
     const findCourse = await Course.findOne({ slug: courseSlug });
+
     if (findCourse.enrollments.length > 0) {
-      throw { code: 2, message: "Course has enrollment" };
+      return res
+        .status(400)
+        .json({ code: 2, message: "Course has enrollment" });
     }
 
-    await CourseStates.findOneAndDelete({
-      course: findCourse._id,
-    });
+    await CourseStates.findOneAndDelete({ course: findCourse._id });
 
-    const course = await Course.findOneAndDelete({ slug: courseSlug });
-    if (!course) throw { code: 2, message: "Course couldnt be deleted" };
-
-    if (course.imageUrl) {
-      fs.unlink(course.imageUrl, (err) => {
-        if (err) throw { code: 2, message: "Course image couldnt be deleted" };
-      });
+    const deletedCourse = await Course.findOneAndDelete({ slug: courseSlug });
+    if (!deletedCourse) {
+      return res.status(404).json({ code: 2, message: "Course not found" });
     }
 
-    await Lesson.deleteMany({
-      _id: { $in: course.lessons },
-    });
+    if (deletedCourse.imageUrl && fs.existsSync(deletedCourse.imageUrl)) {
+      await unlink(deletedCourse.imageUrl);
+    }
 
-    for (const lesson of course.lessons) {
-      if (lesson.videoUrl && lesson.videoUrl !== "") {
-        if (fs.existsSync(lesson.videoUrl)) {
-          fs.unlink(lesson.videoUrl, (err) => {
-            if (err)
-              throw { code: 2, message: "Course video couldnt be deleted" };
-          });
-        }
+    for (const lesson of deletedCourse.lessons) {
+      const findLesson = await Lesson.findById(lesson);
+
+      if (findLesson.videoUrl && fs.existsSync(findLesson.videoUrl)) {
+        await unlink(findLesson.videoUrl);
+      }
+
+      for (const comment of findLesson.comments) {
+        await Comment.findByIdAndDelete(comment);
       }
     }
 
-    res.status(200).json({ message: "Course deleted" });
+    await Lesson.deleteMany({ _id: { $in: deletedCourse.lessons } });
+
+    return res.status(200).json({ message: "Course deleted" });
   } catch (error) {
     errorHandling(error, req, res);
   }
