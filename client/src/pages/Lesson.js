@@ -22,8 +22,8 @@ import {
 } from "@chakra-ui/react";
 import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import ReactPlayer from "react-player";
-import { useContext, useEffect, useState } from "react";
-import { Link, useParams, useNavigate, useFetcher } from "react-router-dom";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import dataContext from "../utils/contextApi";
 import {
   deleteLesson,
@@ -412,6 +412,12 @@ const Lesson = () => {
           isClosable: true,
         });
       }
+      try {
+        const updatedLessons = await getLessons(courseSlug);
+        setLessons(updatedLessons);
+      } catch (error) {
+        throw error;
+      }
       setIsLessonEditing(false);
 
       if (lessonNeedsUpdate() || deletionLessonList.length > 0) {
@@ -511,7 +517,7 @@ const Lesson = () => {
       (el) => el.slug === lessonSlug
     )[0];
     setLesson(currentLesson);
-  }, [filteredLessonList]);
+  }, [filteredLessonList, lessonSlug]);
 
   useEffect(() => {
     if (lesson) {
@@ -915,11 +921,9 @@ const Lesson = () => {
                         setIsLessonEditing(!isLessonEditing);
                         setIsCommentEditing(!isCommentEditing);
                         if (isCommentEditing && isLessonEditing) {
-                          if (filteredCommentList.length > 0) {
-                            setUpdatedCommentList(comments);
-                            setDeletionCommentList([]);
-                            setFilteredCommentList(comments);
-                          }
+                          setUpdatedCommentList(comments);
+                          setDeletionCommentList([]);
+                          setFilteredCommentList(comments);
                           setDeletionLessonList([]);
                           setLessonUpdateData({
                             title: lesson.title,
@@ -952,54 +956,52 @@ const Lesson = () => {
             border={"2px dashed var(--secondary-color)"}
           >
             <Center h={"100%"} borderRadius={"10px"} overflow={"hidden"}>
-              {lesson && lesson.videoUrl && (
-                <FormControl position={"relative"}>
-                  <ReactPlayer
-                    style={{ position: "relative", top: "0", left: "0" }}
-                    onProgress={(state) =>
-                      setCurrentVideoTime(state.playedSeconds.toFixed(0))
-                    }
-                    controls
-                    width={"100%"}
-                    height={"100%"}
-                    url={apiUrl + lesson.videoUrl}
-                  ></ReactPlayer>
-                  <Input
-                    type="file"
-                    onChange={(e) => handleLessonChangeForVideo(e)}
-                    accept="video/*"
-                    name="video"
-                    display={"none"}
-                    id="video"
-                  ></Input>
-                  {isLessonEditing && (
-                    <FormLabel
-                      htmlFor="video"
-                      pos={"absolute"}
-                      top={0}
-                      left={0}
-                      w={"100%"}
-                      h={"100%"}
-                      opacity={0.5}
-                      display={"flex"}
-                      alignItems={"center"}
-                      justifyContent={"center"}
-                      cursor={"pointer"}
-                    >
-                      {isLessonEditing && (
-                        <i
-                          class="fi fi-rr-camera"
-                          style={{
-                            position: "relative",
-                            top: "2px",
-                            fontSize: responsive("", "5em", "7em"),
-                          }}
-                        ></i>
-                      )}
-                    </FormLabel>
-                  )}
-                </FormControl>
-              )}
+              <FormControl position={"relative"}>
+                <ReactPlayer
+                  style={{ position: "relative", top: "0", left: "0" }}
+                  onProgress={(state) =>
+                    setCurrentVideoTime(state.playedSeconds.toFixed(0))
+                  }
+                  controls
+                  width={"100%"}
+                  height={"100%"}
+                  url={apiUrl + lesson.videoUrl}
+                ></ReactPlayer>
+                <Input
+                  type="file"
+                  onChange={(e) => handleLessonChangeForVideo(e)}
+                  accept="video/*"
+                  name="video"
+                  display={"none"}
+                  id="video"
+                ></Input>
+                {isLessonEditing && (
+                  <FormLabel
+                    htmlFor="video"
+                    pos={"absolute"}
+                    top={0}
+                    left={0}
+                    w={"100%"}
+                    h={"100%"}
+                    opacity={0.5}
+                    display={"flex"}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    cursor={"pointer"}
+                  >
+                    {isLessonEditing && (
+                      <i
+                        class="fi fi-rr-camera"
+                        style={{
+                          position: "relative",
+                          top: "2px",
+                          fontSize: responsive("", "5em", "7em"),
+                        }}
+                      ></i>
+                    )}
+                  </FormLabel>
+                )}
+              </FormControl>
             </Center>
           </GridItem>
           <GridItem

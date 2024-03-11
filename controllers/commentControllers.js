@@ -22,7 +22,7 @@ const addComment = async (req, res) => {
       user: req.session.userID,
     };
 
-    if (point !== NaN) {
+    if (point) {
       newCommentData.point = point;
     } else {
       newCommentData.point = 1;
@@ -43,12 +43,21 @@ const addComment = async (req, res) => {
       throw { code: 3, message: "Course not found" };
     }
 
-    const newCoursePoint = Math.ceil((course.point + point) / 2);
-    await Course.findOneAndUpdate(
-      { slug: courseSlug },
-      { point: newCoursePoint },
-      { new: true }
-    );
+    if (point) {
+      const newCoursePoint = Math.ceil((course.point + point) / 2);
+      await Course.findOneAndUpdate(
+        { slug: courseSlug },
+        { point: newCoursePoint },
+        { new: true }
+      );
+    } else {
+      const newCoursePoint = Math.ceil((course.point + 1) / 2);
+      await Course.findOneAndUpdate(
+        { slug: courseSlug },
+        { point: newCoursePoint },
+        { new: true }
+      );
+    }
 
     res.status(200).json({ message: "Comment created successfully" });
   } catch (error) {
