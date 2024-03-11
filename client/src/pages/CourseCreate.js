@@ -566,11 +566,11 @@ const CourseCreate = () => {
             fontSize={responsive("", "md", "lg")}
             fontWeight={"500"}
             borderRadius={"10px"}
-            onClick={() =>
+            onClick={() => {
               courseSlug
                 ? handleLessonCreateSubmit(courseSlug)
-                : handleCreateCourseSubmit()
-            }
+                : handleCreateCourseSubmit();
+            }}
             border={"2px dashed var(--secondary-color)"}
             p={responsive("", "1em", "1em")}
             color={"white"}
