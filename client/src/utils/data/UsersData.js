@@ -130,6 +130,18 @@ const enrollCourse = async (courseSlug) => {
     };
   }
 };
+const unenrollCourse = async (courseSlug) => {
+  try {
+    const { data } = await axios.post(`/courses/${courseSlug}/disenroll`);
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-throw-literal
+    throw {
+      message: error.response.data,
+      status: error.response.status,
+    };
+  }
+};
 
 export {
   getUsers,
@@ -140,4 +152,5 @@ export {
   logout,
   updateAccount,
   enrollCourse,
+  unenrollCourse,
 };

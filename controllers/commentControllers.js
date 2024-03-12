@@ -43,7 +43,7 @@ const addComment = async (req, res) => {
       throw { code: 3, message: "Course not found" };
     }
 
-    if (point) {
+    if (point && course.point) {
       const newCoursePoint = Math.ceil((course.point + point) / 2);
       await Course.findOneAndUpdate(
         { slug: courseSlug },
@@ -60,27 +60,6 @@ const addComment = async (req, res) => {
     }
 
     res.status(200).json({ message: "Comment created successfully" });
-  } catch (error) {
-    errorHandling(error, req, res);
-  }
-};
-
-const getComments = async (req, res) => {
-  try {
-    const { lessonSlug } = req.params;
-    const lesson = await Lesson.findOne({ slug: lessonSlug });
-
-    const commentList = [];
-    for (const commentId of lesson.comments) {
-      const comment = await Comment.findById(commentId);
-      if (comment) {
-        commentList.push(comment);
-      }
-    }
-
-    if (commentList.length === 0) throw { code: 2, message: "No comments" };
-
-    res.status(200).json(commentList);
   } catch (error) {
     errorHandling(error, req, res);
   }
@@ -132,7 +111,6 @@ const deleteComment = async (req, res) => {
 
 export default {
   addComment,
-  getComments,
   updateComment,
   deleteComment,
 };

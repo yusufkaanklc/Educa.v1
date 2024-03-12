@@ -424,6 +424,17 @@ const Course = () => {
                     All courses
                   </BreadcrumbLink>
                 </BreadcrumbItem>
+              ) : page === "enrollments" ? (
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    fontWeight={500}
+                    opacity={0.9}
+                    as={Link}
+                    to={"/enrollments"}
+                  >
+                    Enrollments
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
               ) : (
                 <BreadcrumbItem>
                   <BreadcrumbLink
@@ -441,7 +452,7 @@ const Course = () => {
                   fontWeight={500}
                   opacity={0.9}
                   as={Link}
-                  to={`/courses/course/${slug}`}
+                  to={`/${page}/course/${slug}`}
                 >
                   {course?.title}
                 </BreadcrumbLink>

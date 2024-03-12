@@ -34,11 +34,6 @@ router
   .route("/courses/:courseSlug/lessons/:lessonSlug/add-comment")
   .post(commentControllers.addComment);
 
-// Bir kursun yorumlarını getirmek için GET isteği
-router
-  .route("/courses/:courseSlug/lessons/:lessonSlug/comments")
-  .get(commentControllers.getComments);
-
 // Bir kursun yorumunu güncellemek için PUT isteği
 router
   .route("/courses/:courseSlug/lessons/:lessonSlug/comments/:commentId")
@@ -56,11 +51,6 @@ router
 
 // Dersleri getirmek için GET isteği
 router.route("/courses/:courseSlug/lessons").get(lessonControllers.getLessons);
-
-// Bir dersi getirmek için GET isteği
-router
-  .route("/courses/:courseSlug/lessons/:lessonSlug")
-  .get(lessonControllers.getLesson);
 
 // Bir dersi güncellemek için PUT isteği
 router

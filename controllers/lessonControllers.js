@@ -141,31 +141,6 @@ const getLessons = async (req, res) => {
   }
 };
 
-const getLesson = async (req, res) => {
-  try {
-    const { courseSlug, lessonSlug } = req.params;
-
-    // Kursu ve dersi bul
-    const [course, lesson] = await Promise.all([
-      Course.findOne({ slug: courseSlug }),
-      Lesson.findOne({ slug: lessonSlug }),
-    ]);
-
-    // Kurs veya ders bulunamazsa 404 hatası dön
-    if (!course) throw { code: 2, message: "Course not found" };
-    if (!lesson) throw { code: 2, message: "Lesson not found" };
-
-    // Ders kursa ait değilse 404 hatası dön
-    if (!course.lessons.includes(lesson._id))
-      throw { code: 2, message: "Course could not have this lesson" };
-
-    // Hata yoksa dersi döndür
-    res.status(200).json(lesson);
-  } catch (error) {
-    errorHandling(error, req, res);
-  }
-};
-
 const updateLesson = async (req, res) => {
   try {
     const { courseSlug, lessonSlug } = req.params;
@@ -277,7 +252,6 @@ const deleteLesson = async (req, res) => {
 export default {
   createLesson,
   getLessons,
-  getLesson,
   updateLesson,
   deleteLesson,
 };

@@ -22,11 +22,6 @@ router
 // Kursları getirmek için GET isteği
 router.route("/").get(courseControllers.getAllCourses);
 
-// Kayıtlı olduğu kursları getirmek için GET isteği
-router
-  .route("/enrolled-courses")
-  .get(authMiddlewares.isLoggedIn, userControllers.getEnrollments);
-
 // Bir kursu getirmek için GET isteği
 router.route("/:courseSlug").get(courseControllers.getCourse);
 
@@ -72,11 +67,6 @@ router
 // Bir kursun derslerini getirmek için GET isteği
 router.route("/:courseSlug/lessons").get(lessonControllers.getLessons);
 
-// Bir dersi getirmek için GET isteği
-router
-  .route("/:courseSlug/lessons/:lessonSlug")
-  .get(lessonControllers.getLesson);
-
 //Bir dersi güncellemek için PUT isteği
 router
   .route("/:courseSlug/lessons/:lessonSlug")
@@ -104,11 +94,6 @@ router
     courseMiddlewares.ownershipAndEnrollControl,
     commentControllers.addComment
   );
-
-// Bir kursun yorumlarını getirmek için GET isteği
-router
-  .route("/:courseSlug/lessons/:lessonSlug/comments")
-  .get(commentControllers.getComments);
 
 // Bir kursun yorumunu güncellemek için PUT isteği
 router

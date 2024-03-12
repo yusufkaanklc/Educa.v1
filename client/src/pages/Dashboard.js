@@ -32,7 +32,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { deleteComment, updateComment } from "../utils/data/CommentData";
-import { deleteCourse } from "../utils/data/CoursesData";
+import { deleteCourse, getCourses } from "../utils/data/CoursesData";
 const Dashboard = () => {
   ChartJS.register(
     ArcElement,
@@ -49,6 +49,7 @@ const Dashboard = () => {
     isLaptop,
     setTargetScroll,
     courses,
+    setCourses,
     account,
     setErrors,
     errors,
@@ -234,8 +235,13 @@ const Dashboard = () => {
         });
         setIsCoursesEditing(!isCoursesEditing);
         setCourseDeleteList([]);
+        try {
+          const data = await getCourses();
+          setCourses(data);
+        } catch (error) {
+          throw error;
+        }
       } catch (error) {
-        console.log(error);
         setErrors([...errors, error]);
       }
     } else {
@@ -417,10 +423,12 @@ const Dashboard = () => {
                     justify={"space-between"}
                     transition={"all .3s ease"}
                   >
-                    <Flex>
-                      <Image />
-                      <Text fontWeight={"500"}>{course.title}</Text>
-                    </Flex>
+                    <Text
+                      fontWeight={"500"}
+                      fontSize={responsive("", "sm", "md")}
+                    >
+                      {course.title}
+                    </Text>
 
                     <Flex
                       fontWeight={"500"}

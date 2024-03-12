@@ -375,15 +375,6 @@ const enrollCourse = async (req, res) => {
   }
 };
 
-const getEnrollments = async (req, res) => {
-  try {
-    const enrollments = await Course.find({ enrollments: req.session.userID });
-    res.status(200).json(enrollments);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 const disenrollCourse = async (req, res) => {
   try {
     const courseSlug = req.params.courseSlug;
@@ -393,6 +384,15 @@ const disenrollCourse = async (req, res) => {
     );
 
     if (!course) throw { code: 2, message: "Course not found" };
+
+    const courseState = await CourseStates.findOneAndDelete({
+      course: course._id,
+      user: req.session.userID,
+    });
+
+    if (!courseState) {
+      throw { code: 2, message: "Course state relation could not deleted" };
+    }
 
     res.status(200).json({ message: "Course disenrolled" });
   } catch (error) {
@@ -435,7 +435,6 @@ export default {
   accountUpdateFunc,
   deleteAccount,
   enrollCourse,
-  getEnrollments,
   disenrollCourse,
   getOwnedCourses,
   getAllUsers,
