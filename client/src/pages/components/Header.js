@@ -20,8 +20,19 @@ const Header = () => {
     }
   };
 
-  const { isMobile, isLaptop, account, setAccount, setIsLogin } =
-    useContext(dataContext);
+  const {
+    isMobile,
+    isLaptop,
+    account,
+    setAccount,
+    setIsLogin,
+    setErrors,
+    setCourseCreateData,
+    setLessonCreateData,
+    setCourseUpdateData,
+    setSearchQuery,
+    setCreatedLessonsList,
+  } = useContext(dataContext);
   const [navVisible, setNavVisible] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -42,7 +53,29 @@ const Header = () => {
       .then(() => {
         Cookies.remove("isLoggedIn");
         setAccount(null);
+        setCourseCreateData({
+          title: "",
+          description: "",
+          image: "",
+          category: "",
+          price: "",
+        });
+        setLessonCreateData({
+          title: "",
+          description: "",
+          video: "",
+          notes: "",
+        });
+        setCourseUpdateData({
+          title: "",
+          description: "",
+          price: "",
+        });
+        setSearchQuery("");
+        setCreatedLessonsList([]);
+        setErrors([]);
         setIsLogin(false);
+
         toast({
           title: "Logout",
           description: "You have been logged out",
@@ -246,7 +279,7 @@ const Header = () => {
                       {account.role === "student" ? (
                         <ChakraLink
                           as={Link}
-                          to=""
+                          to="/enrollments"
                           fontSize={responsive("", "md", "lg")}
                           transition={"all 0.5s ease"}
                           _hover={{ textDecoration: "none" }}

@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import errorHandling from "../middlewares/errorHandling.js";
 
 const loginCheck = (req, res) => {
   return req.session.userID ? true : false;

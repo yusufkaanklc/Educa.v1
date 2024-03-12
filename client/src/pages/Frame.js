@@ -5,6 +5,7 @@ import Login from "./Login";
 import Course from "./Course";
 import AllCourses from "./AllCourses";
 import Dashboard from "./Dashboard";
+import Enrollments from "./Enrollments";
 import Lesson from "./Lesson";
 import { useContext, useEffect } from "react";
 import dataContext from "../utils/contextApi";
@@ -22,6 +23,7 @@ const Routers = () => {
     setCourses,
     setUsers,
     setAccount,
+    account,
     setErrors,
     errors,
     setCategories,
@@ -117,11 +119,33 @@ const Routers = () => {
         />
         <Route
           path="/dashboard"
-          element={isLogin ? <Dashboard /> : <Navigate to="/" replace />}
+          element={
+            isLogin && account && account.role !== "student" ? (
+              <Dashboard />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
         ></Route>
         <Route
           path="/create-course"
-          element={isLogin ? <CourseCreate /> : <Navigate to="/" replace />}
+          element={
+            isLogin && account && account.role !== "student" ? (
+              <CourseCreate />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        ></Route>
+        <Route
+          path="/enrollments"
+          element={
+            isLogin && account && account.role === "student" ? (
+              <Enrollments />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
         ></Route>
       </Routes>
     </>

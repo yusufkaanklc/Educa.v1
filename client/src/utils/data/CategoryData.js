@@ -10,7 +10,7 @@ const getCategories = async (searchQuery) => {
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
     throw {
-      message: error.response.data.message,
+      message: error.response.data,
       status: error.response.status,
     };
   }
