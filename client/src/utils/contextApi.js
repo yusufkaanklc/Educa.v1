@@ -13,6 +13,7 @@ export const DataProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(
     Cookies.get("isLoggedIn") ? true : false
   );
+  const [userRole, setUserRole] = useState(Cookies.get("role"));
   const [errors, setErrors] = useState([]);
   const [categories, setCategories] = useState([]);
   const [courseCreateData, setCourseCreateData] = useState({
@@ -66,6 +67,8 @@ export const DataProvider = ({ children }) => {
         setTargetScroll,
         isLogin,
         setIsLogin,
+        userRole,
+        setUserRole,
         courseUpdateData,
         setCourseUpdateData,
         errors,

@@ -23,16 +23,18 @@ const Routers = () => {
     setCourses,
     setUsers,
     setAccount,
-    account,
     setErrors,
     errors,
     setCategories,
+    userRole,
+    setUserRole,
   } = useContext(dataContext);
 
   const location = useLocation();
 
   useEffect(() => {
     setIsLogin(Cookies.get("isLoggedIn") ? true : false);
+    setUserRole(Cookies.get("role"));
 
     getCourses().then((data) => {
       const uniqueCategories = [];
@@ -120,7 +122,7 @@ const Routers = () => {
         <Route
           path="/dashboard"
           element={
-            isLogin && account && account.role !== "student" ? (
+            isLogin && userRole !== "student" ? (
               <Dashboard />
             ) : (
               <Navigate to="/" replace />
@@ -130,7 +132,7 @@ const Routers = () => {
         <Route
           path="/create-course"
           element={
-            isLogin && account && account.role !== "student" ? (
+            isLogin && userRole !== "student" ? (
               <CourseCreate />
             ) : (
               <Navigate to="/" replace />
@@ -140,7 +142,7 @@ const Routers = () => {
         <Route
           path="/enrollments"
           element={
-            isLogin && account && account.role === "student" ? (
+            isLogin && userRole === "student" ? (
               <Enrollments />
             ) : (
               <Navigate to="/" replace />

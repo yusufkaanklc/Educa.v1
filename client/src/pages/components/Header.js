@@ -26,6 +26,7 @@ const Header = () => {
     account,
     setAccount,
     setIsLogin,
+    setUserRole,
     setErrors,
     setCourseCreateData,
     setLessonCreateData,
@@ -52,6 +53,7 @@ const Header = () => {
     logout()
       .then(() => {
         Cookies.remove("isLoggedIn");
+        Cookies.remove("role");
         setAccount(null);
         setCourseCreateData({
           title: "",
@@ -75,6 +77,7 @@ const Header = () => {
         setCreatedLessonsList([]);
         setErrors([]);
         setIsLogin(false);
+        setUserRole(null);
 
         toast({
           title: "Logout",

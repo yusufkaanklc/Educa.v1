@@ -50,7 +50,7 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     loginUser(login)
-      .then(() => {
+      .then((data) => {
         toast({
           title: "login successful",
           description: "you are now logged in",
@@ -59,6 +59,7 @@ const Login = () => {
           isClosable: true,
         });
         Cookies.set("isLoggedIn", true, { expires: 1 });
+        Cookies.set("role", data.user.role, { expires: 1 });
         navigate("/");
       })
       .catch((error) => {

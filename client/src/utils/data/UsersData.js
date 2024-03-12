@@ -40,7 +40,8 @@ const registerUser = async (input) => {
 
 const loginUser = async (input) => {
   try {
-    await axios.post("/users/login", input);
+    const { data } = await axios.post("/users/login", input);
+    return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
     throw {

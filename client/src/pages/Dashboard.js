@@ -316,15 +316,14 @@ const Dashboard = () => {
             </BreadcrumbLink>
           </BreadcrumbItem>
         </Breadcrumb>
-        <Box mt={responsive("", "1em", "1.5em")}>
-          <Heading
-            fontWeight={"600"}
-            fontSize={responsive("", "2xl", "3xl")}
-            color={"var(--secondary-color)"}
-          >
-            Welcome {account?.username}
-          </Heading>
-        </Box>
+        <Heading
+          mt={responsive("", "1em", "1.5em")}
+          fontWeight={"600"}
+          fontSize={responsive("", "2xl", "3xl")}
+          color={"var(--secondary-color)"}
+        >
+          Welcome {account?.username}
+        </Heading>
         <Grid
           mt={responsive("", "2em", "3em")}
           templateRows="repeat(auto-fill, minmax(1em, auto))"
