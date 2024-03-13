@@ -8,11 +8,13 @@ import {
   useToast,
   useDisclosure,
   Drawer,
+  Center,
   DrawerBody,
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   DrawerContent,
+  Text,
   DrawerCloseButton,
 } from "@chakra-ui/react";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -135,25 +137,29 @@ const Header = () => {
     <>
       {isMobile ? (
         <>
-          <Button
-            ref={btnRef}
-            m={"1em"}
-            variant={"outline"}
-            bgColor={"white"}
-            color={"var(--primary-color)"}
-            onClick={() => onOpen()}
-            fontSize={responsive("", "sm", "md")}
-            border={"1px solid var(--primary-color)"}
-            _hover={{
-              bgColor: "var(--primary-color)",
-              color: "white",
-            }}
-          >
-            <i
-              class="fi fi-rr-menu-burger"
-              style={{ position: "relative", top: "2px" }}
-            ></i>
-          </Button>
+          <Box position={"fixed"} zIndex={"99"}>
+            <Button
+              ref={btnRef}
+              m={"1em"}
+              variant={"outline"}
+              bgColor={"white"}
+              opacity={0.5}
+              color={"var(--primary-color)"}
+              onClick={() => onOpen()}
+              size={"sm"}
+              border={"1px solid var(--primary-color)"}
+              _hover={{
+                bgColor: "var(--primary-color)",
+                color: "white",
+                opacity: "1",
+              }}
+            >
+              <i
+                class="fi fi-rr-menu-burger"
+                style={{ position: "relative", top: "2px" }}
+              ></i>
+            </Button>
+          </Box>
           <Drawer
             isOpen={isOpen}
             placement="left"
@@ -186,10 +192,13 @@ const Header = () => {
                 </Flex>
               </DrawerHeader>
 
-              <DrawerBody>
+              <DrawerBody my={"1em"}>
                 <Flex flexDir={"column"} gap={"1em"}>
                   <ChakraLink
-                    onClick={() => handleScroll("home")}
+                    onClick={() => {
+                      handleScroll("home");
+                      onClose();
+                    }}
                     fontSize={responsive("", "md", "lg")}
                     opacity={0.8}
                     fontWeight={"500"}
@@ -199,10 +208,19 @@ const Header = () => {
                       color: "black",
                     }}
                   >
-                    Home
+                    <Flex align={"center"} gap={".5em"}>
+                      <i
+                        class="fi fi-rr-home"
+                        style={{ position: "relative", top: "1px" }}
+                      ></i>
+                      <Text>Home</Text>
+                    </Flex>
                   </ChakraLink>
                   <ChakraLink
-                    onClick={() => handleScroll("about")}
+                    onClick={() => {
+                      handleScroll("about");
+                      onClose();
+                    }}
                     fontSize={responsive("", "md", "lg")}
                     opacity={0.8}
                     fontWeight={"500"}
@@ -212,10 +230,19 @@ const Header = () => {
                       color: "black",
                     }}
                   >
-                    About us
+                    <Flex align={"center"} gap={".5em"}>
+                      <i
+                        class="fi fi-rr-info"
+                        style={{ position: "relative", top: "1px" }}
+                      ></i>
+                      <Text>About us</Text>
+                    </Flex>
                   </ChakraLink>
                   <ChakraLink
-                    onClick={() => handleScroll("courses")}
+                    onClick={() => {
+                      handleScroll("courses");
+                      onClose();
+                    }}
                     fontSize={responsive("", "md", "lg")}
                     opacity={0.8}
                     fontWeight={"500"}
@@ -225,10 +252,19 @@ const Header = () => {
                       color: "black",
                     }}
                   >
-                    Courses
+                    <Flex align={"center"} gap={".5em"}>
+                      <i
+                        class="fi fi-rr-book-alt"
+                        style={{ position: "relative", top: "1px" }}
+                      ></i>
+                      <Text>Courses</Text>
+                    </Flex>
                   </ChakraLink>
                   <ChakraLink
-                    onClick={() => handleScroll("instructors")}
+                    onClick={() => {
+                      handleScroll("instructors");
+                      onClose();
+                    }}
                     fontSize={responsive("", "md", "lg")}
                     opacity={0.8}
                     fontWeight={"500"}
@@ -238,10 +274,19 @@ const Header = () => {
                       color: "black",
                     }}
                   >
-                    Instructors
+                    <Flex align={"center"} gap={".5em"}>
+                      <i
+                        class="fi fi-rr-chalkboard-user"
+                        style={{ position: "relative", top: "1px" }}
+                      ></i>
+                      <Text>Instructors</Text>
+                    </Flex>
                   </ChakraLink>
                   <ChakraLink
-                    onClick={() => handleScroll("events")}
+                    onClick={() => {
+                      handleScroll("events");
+                      onClose();
+                    }}
                     fontSize={responsive("", "md", "lg")}
                     opacity={0.8}
                     fontWeight={"500"}
@@ -251,16 +296,169 @@ const Header = () => {
                       color: "black",
                     }}
                   >
-                    Events
+                    <Flex align={"center"} gap={".5em"}>
+                      <i
+                        class="fi fi-rr-calendar-day"
+                        style={{ position: "relative", top: "1px" }}
+                      ></i>
+                      <Text>Events</Text>
+                    </Flex>
                   </ChakraLink>
+                  {account && (
+                    <>
+                      <hr />
+                      {account.role === "student" ? (
+                        <ChakraLink
+                          as={Link}
+                          to="/enrollments"
+                          fontSize={responsive("", "md", "lg")}
+                          opacity={0.8}
+                          fontWeight={"500"}
+                          transition={"all 0.5s ease"}
+                          _hover={{
+                            textDecoration: "none",
+                            opacity: 1,
+                            color: "black",
+                          }}
+                        >
+                          <i
+                            class="fi fi-rr-file-signature"
+                            style={{ position: "relative", top: "3px" }}
+                          ></i>
+                          &nbsp; Enrollments
+                        </ChakraLink>
+                      ) : (
+                        <>
+                          <ChakraLink
+                            as={Link}
+                            to="/dashboard"
+                            fontSize={responsive("", "md", "lg")}
+                            opacity={0.8}
+                            fontWeight={"500"}
+                            transition={"all 0.5s ease"}
+                            _hover={{
+                              textDecoration: "none",
+                              opacity: 1,
+                              color: "black",
+                            }}
+                          >
+                            <i
+                              class="fi fi-rr-chart-pie-alt"
+                              style={{ position: "relative", top: "3px" }}
+                            ></i>
+                            &nbsp; Dashboard
+                          </ChakraLink>
+                        </>
+                      )}
+                      <ChakraLink
+                        as={Link}
+                        to="/account"
+                        fontSize={responsive("", "md", "lg")}
+                        opacity={0.8}
+                        fontWeight={"500"}
+                        transition={"all 0.5s ease"}
+                        _hover={{
+                          textDecoration: "none",
+                          opacity: 1,
+                          color: "black",
+                        }}
+                      >
+                        <i
+                          class="fi fi-rr-user-pen"
+                          style={{ position: "relative", top: "3px" }}
+                        ></i>
+                        &nbsp; Account
+                      </ChakraLink>
+                      <ChakraLink
+                        onClick={() => handleLogout()}
+                        fontSize={responsive("", "md", "lg")}
+                        opacity={0.8}
+                        fontWeight={"500"}
+                        transition={"all 0.5s ease"}
+                        _hover={{
+                          textDecoration: "none",
+                          opacity: 1,
+                          color: "black",
+                        }}
+                      >
+                        <i
+                          class="fi fi-rr-sign-out-alt"
+                          style={{ position: "relative", top: "3px" }}
+                        ></i>
+                        &nbsp; Logout
+                      </ChakraLink>
+                    </>
+                  )}
                 </Flex>
               </DrawerBody>
-
-              <DrawerFooter>
-                <Button variant="outline" mr={3} onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button colorScheme="blue">Save</Button>
+              <DrawerFooter justifyContent={"space-between"}>
+                {!account ? (
+                  <>
+                    <ChakraLink
+                      as={Link}
+                      to="/login"
+                      fontSize={responsive("", "md", "lg")}
+                      fontWeight={"500"}
+                      padding={".5em 1em"}
+                      opacity={0.8}
+                      border={"1px solid transparent"}
+                      _hover={{
+                        textDecoration: "none",
+                        opacity: 1,
+                        color: "black",
+                      }}
+                    >
+                      <Flex gap={"0.5em"} align={"center"}>
+                        <i
+                          class="fi fi-rr-world"
+                          style={{
+                            position: "relative",
+                            top: "4px",
+                            fontSize: responsive("", "15px", "20px"),
+                          }}
+                        ></i>
+                        Login
+                      </Flex>
+                    </ChakraLink>
+                    <ChakraLink
+                      as={Link}
+                      to="/signup"
+                      fontSize={responsive("", "md", "lg")}
+                      color={"white"}
+                      padding={".5em 1.5em"}
+                      bgColor={"var(--primary-color)"}
+                      border={"1px solid transparent"}
+                      borderRadius={"30px"}
+                      fontWeight={"500"}
+                      transition={"all 0.5s ease"}
+                      _hover={{
+                        textDecoration: "none",
+                        opacity: 1,
+                        color: "black",
+                        bgColor: "white",
+                        border: "1px solid #007bff",
+                        transition: "all 0.5s ease",
+                      }}
+                    >
+                      Sign Up
+                    </ChakraLink>
+                  </>
+                ) : (
+                  <Center
+                    p={".5em"}
+                    w={"100%"}
+                    border={"2px dashed #cfcfcf"}
+                    bgColor={"white"}
+                    borderRadius={"10px"}
+                    color={"black"}
+                    fontWeight={"500"}
+                    opacity={0.8}
+                    fontSize={responsive("sm", "md", "lg")}
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  >
+                    {account.username}
+                  </Center>
+                )}
               </DrawerFooter>
             </DrawerContent>
           </Drawer>
