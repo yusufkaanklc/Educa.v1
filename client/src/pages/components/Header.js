@@ -111,26 +111,24 @@ const Header = () => {
   };
 
   useEffect(() => {
-    if (!isMobile) {
-      let lastScrollTop = 0;
-      let treshold = 100;
-      const handleScroll = () => {
-        const currentScrollTop = document.documentElement.scrollTop;
-        if (currentScrollTop > lastScrollTop && currentScrollTop > treshold) {
-          setNavVisible(false);
-        } else {
-          setNavVisible(true);
-        }
+    let lastScrollTop = 0;
+    let treshold = 100;
+    const handleScroll = () => {
+      const currentScrollTop = document.documentElement.scrollTop;
+      if (currentScrollTop > lastScrollTop && currentScrollTop > treshold) {
+        setNavVisible(false);
+      } else {
+        setNavVisible(true);
+      }
 
-        lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop;
-      };
+      lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop;
+    };
 
-      window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll);
 
-      return () => {
-        window.removeEventListener("scroll", handleScroll);
-      };
-    }
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (
@@ -160,6 +158,7 @@ const Header = () => {
               ></i>
             </Button>
           </Box>
+          <Box id="home"></Box>
           <Drawer
             isOpen={isOpen}
             placement="left"

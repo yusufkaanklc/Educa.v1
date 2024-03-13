@@ -345,16 +345,14 @@ const deleteCourse = async (req, res) => {
     const findCourse = await Course.findOne({ slug: courseSlug });
 
     if (findCourse.enrollments.length > 0) {
-      return res
-        .status(400)
-        .json({ code: 2, message: "Course has enrollment" });
+      throw { code: 2, message: "Course has enrollments" };
     }
 
     await CourseStates.findOneAndDelete({ course: findCourse._id });
 
     const deletedCourse = await Course.findOneAndDelete({ slug: courseSlug });
     if (!deletedCourse) {
-      return res.status(404).json({ code: 2, message: "Course not found" });
+      throw { code: 2, message: "Course not found" };
     }
 
     if (deletedCourse.imageUrl && fs.existsSync(deletedCourse.imageUrl)) {

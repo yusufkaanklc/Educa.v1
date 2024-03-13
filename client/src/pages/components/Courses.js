@@ -16,6 +16,10 @@ import { useContext, useEffect, useState } from "react";
 import { StarIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
 import dataContext from "../../utils/contextApi";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+
+import "swiper/css";
 
 const Courses = () => {
   const { courses, isMobile, isLaptop, apiUrl } = useContext(dataContext);
@@ -69,7 +73,17 @@ const Courses = () => {
         </Stack>
       </Center>
       {isMobile ? (
-        ""
+        <Swiper
+          centeredSlides={true}
+          slidesPerView={"auto"} // "1" yerine "auto" kullanabilirsiniz, eğer her slide'ın kendi genişliğine sahip olmasını isterseniz.
+          key={popularCourses.length} // Bu satır, popularCourses array'indeki herhangi bir değişiklik olduğunda Swiper'ın yeniden oluşturulmasını sağlar.
+          rebuildOnUpdate
+          shouldSwiperUpdate
+        >
+          {popularCourses.map((course, idx) => (
+            <SwiperSlide key={idx}>{course.title}</SwiperSlide>
+          ))}
+        </Swiper>
       ) : (
         <>
           <Flex

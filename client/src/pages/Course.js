@@ -33,6 +33,7 @@ import {
   updateCourse,
   updateCourseState,
 } from "../utils/data/CoursesData";
+
 import { enrollCourse } from "../utils/data/UsersData";
 import { deleteLesson, getLessons } from "../utils/data/LessonsData";
 import { useToast } from "@chakra-ui/react";
