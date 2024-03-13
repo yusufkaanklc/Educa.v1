@@ -10,8 +10,9 @@ const uploadFile = async (file, fileType) => {
   let uploadPath;
   if (fileType === "image") {
     uploadPath = join(
-      uploadDir,
-      `${fileType}_${cleanedFileName.split(".").slice(0, -1).join(".")}.webp`
+      uploadDir, // burada yüklenecdk konumun bilgisayardaki konumunu aldık public/uploads
+      `${fileType}_${cleanedFileName.split(".").slice(0, -1).join(".")}.webp` // image_denemeresmi.webp
+      // public/uploads/image_denemeresmi.webp
     );
   } else {
     uploadPath = join(uploadDir, `${fileType}_${cleanedFileName}`);

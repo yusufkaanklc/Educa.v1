@@ -32,8 +32,8 @@ router
   .route("/account")
   .put(
     authMiddlewares.isLoggedIn,
-    fileUploadMiddlewares(),
     validationMiddlewares.validateFunc("updateAccount"),
+    fileUploadMiddlewares(),
     userControllers.accountUpdate
   );
 
