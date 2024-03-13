@@ -8,3 +8,17 @@
   --primary-color: #0166ff;
   --bg-color: #f3f3f3;
 }
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+  font-size: 15px !important ;
+  font-weight: bolder;
+  color: black;
+}
+.swiper-button-next,
+.swiper-button-prev {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 5px !important;
+  background-color: rgba(128, 128, 128, 0.199);
+}
