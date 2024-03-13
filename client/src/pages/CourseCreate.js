@@ -20,7 +20,6 @@ import {
   Center,
   Button,
   useToast,
-  Skeleton,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -35,6 +34,7 @@ const CourseCreate = () => {
     setCourseCreateData,
     courseCreateData,
     setErrors,
+    courses,
     setSearchQuery,
     searchQuery,
     errors,
@@ -47,6 +47,11 @@ const CourseCreate = () => {
   const [categories, setCategories] = useState([]);
   const [showOptions, setShowOptions] = useState(false);
   const [course, setCourse] = useState(null);
+  const [courseTitleList, setCourseTitleList] = useState([]);
+  const [lessonTitleList, setLessonTitleList] = useState([]);
+  const [isCourseTitleExisting, setIsCourseTitleExisting] = useState(false);
+  const [isLessonTitleExisting, setIsLessonTitleExisting] = useState(false);
+
   const [searchParams] = useSearchParams();
   const courseSlug = searchParams.get("course");
 
@@ -92,63 +97,73 @@ const CourseCreate = () => {
   };
 
   const handleCreateCourseSubmit = () => {
-    const courseFormData = new FormData();
-    courseFormData.append("title", courseCreateData.title);
-    courseFormData.append("description", courseCreateData.description);
-    courseFormData.append("image", courseCreateData.image);
-    courseFormData.append("price", courseCreateData.price);
-    courseFormData.append("category", courseCreateData.category);
+    if (!isCourseTitleExisting && !isLessonTitleExisting) {
+      const courseFormData = new FormData();
+      courseFormData.append("title", courseCreateData.title);
+      courseFormData.append("description", courseCreateData.description);
+      courseFormData.append("image", courseCreateData.image);
+      courseFormData.append("price", courseCreateData.price);
+      courseFormData.append("category", courseCreateData.category);
 
-    const areFieldsEmptyCourse = Object.values(courseCreateData).some(
-      (value) => value === ""
-    );
+      const areFieldsEmptyCourse = Object.values(courseCreateData).some(
+        (value) => value === ""
+      );
 
-    if (!areFieldsEmptyCourse && createdLessonsList.length > 0) {
-      // Show loading toast
-      const loadingToastId = toast({
-        title: "Loading",
-        description: "Creating course...",
-        status: "info",
-        duration: null, // Set duration to null to keep the toast until it's manually closed
-        isClosable: false,
-      });
-
-      createCourse(courseFormData)
-        .then((data) => {
-          // Hide loading toast
-          toast.close(loadingToastId);
-
-          // Show success toast
-          toast({
-            title: "Success",
-            description: "Course created successfully",
-            status: "success",
-            duration: 5000,
-            isClosable: true,
-          });
-
-          handleLessonCreateSubmit(data.slug);
-        })
-        .catch((error) => {
-          // Hide loading toast
-          toast.close(loadingToastId);
-
-          // Show error toast
-          toast({
-            title: "Error",
-            description: "An error occurred while creating the course",
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-          });
-
-          setErrors([...errors, error]);
+      if (!areFieldsEmptyCourse && createdLessonsList.length > 0) {
+        // Show loading toast
+        const loadingToastId = toast({
+          title: "Loading",
+          description: "Creating course...",
+          status: "info",
+          duration: null, // Set duration to null to keep the toast until it's manually closed
+          isClosable: false,
         });
+
+        createCourse(courseFormData)
+          .then((data) => {
+            // Hide loading toast
+            toast.close(loadingToastId);
+
+            // Show success toast
+            toast({
+              title: "Success",
+              description: "Course created successfully",
+              status: "success",
+              duration: 5000,
+              isClosable: true,
+            });
+
+            handleLessonCreateSubmit(data.slug);
+          })
+          .catch((error) => {
+            // Hide loading toast
+            toast.close(loadingToastId);
+
+            // Show error toast
+            toast({
+              title: "Error",
+              description: "An error occurred while creating the course",
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+            });
+
+            setErrors([...errors, error]);
+          });
+      } else {
+        toast({
+          title: "Warning",
+          description: "Course fields or lessons are empty",
+          status: "warning",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     } else {
       toast({
-        title: "Warning",
-        description: "Course fields or lessons are empty",
-        status: "warning",
+        title: "Error",
+        description: `${courseCreateData.title} or ${lessonCreateData.title} already exists`,
+        status: "error",
         duration: 5000,
         isClosable: true,
       });
@@ -290,6 +305,33 @@ const CourseCreate = () => {
       getCourse(courseSlug).then((data) => setCourse(data));
     }
   }, [courseSlug]);
+
+  useEffect(() => {
+    if (courses.length > 0) {
+      const newCourseTitleList = courses.map((course) => course.title);
+      const lessonList = courses.flatMap((course) => course.lessons || []);
+      const newLessonTitleList = lessonList.map((lesson) => lesson.title);
+      // State'i güncelle
+      setLessonTitleList(newLessonTitleList);
+      setCourseTitleList(newCourseTitleList);
+    }
+  }, [courses]);
+
+  useEffect(() => {
+    if (courseTitleList.includes(courseCreateData.title)) {
+      setIsCourseTitleExisting(true);
+    } else {
+      setIsCourseTitleExisting(false);
+    }
+  }, [courseCreateData]);
+
+  useEffect(() => {
+    if (lessonTitleList.includes(lessonCreateData.title)) {
+      setIsLessonTitleExisting(true);
+    } else {
+      setIsLessonTitleExisting(false);
+    }
+  }, [lessonCreateData]);
 
   return (
     <Box
