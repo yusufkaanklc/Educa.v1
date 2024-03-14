@@ -292,13 +292,14 @@ const Dashboard = () => {
         bgColor={"white"}
         border={"2px dashed #cfcfcf"}
         borderRadius={"10px"}
-        p={responsive("", "1em ", "2em")}
-        mx={responsive("", "8em", "10em")}
-        my={responsive("", "2em", "3em")}
+        p={responsive("1em", "1em ", "2em")}
+        mx={responsive("1em", "8em", "10em")}
+        my={responsive("2em", "2em", "3em")}
       >
         <Breadcrumb
           spacing="8px"
           separator={<ChevronRightIcon color="gray.500" />}
+          fontSize={responsive("sm", "sm", "md")}
         >
           <BreadcrumbItem>
             <BreadcrumbLink
@@ -323,41 +324,44 @@ const Dashboard = () => {
           </BreadcrumbItem>
         </Breadcrumb>
         <Heading
-          mt={responsive("", "1em", "1.5em")}
+          mt={responsive("1em", "1em", "1.5em")}
           fontWeight={"600"}
-          fontSize={responsive("", "2xl", "3xl")}
+          fontSize={responsive("xl", "2xl", "3xl")}
           color={"var(--secondary-color)"}
         >
           Welcome {account?.username}
         </Heading>
         <Grid
-          mt={responsive("", "2em", "3em")}
-          templateRows="repeat(auto-fill, minmax(1em, auto))"
+          mt={responsive("1em", "2em", "3em")}
+          templateRows={responsive(
+            "auto",
+            "repeat(auto-fill, minmax(1em, auto))",
+            "repeat(auto-fill, minmax(1em, auto))"
+          )}
           templateColumns={responsive(
-            "1fr",
+            "auto",
             "repeat(3, 1fr)",
             "repeat(3, 1fr)"
           )}
-          gap={10}
+          gap={responsive("6", "10", "10")}
         >
           <GridItem
             rowSpan={10}
             colSpan={2}
-            maxH={"26em"}
-            display={"flex"}
-            flexDir={"column"}
+            maxH={responsive("20em", "26em", "26em")}
             gap={"1em"}
             p={"1em"}
+            display={"flex"}
+            flexDir={"column"}
             pr={0}
             borderRadius={"10px"}
-            pb={"1em"}
             bgColor={"var(--bg-color)"}
             border={"2px dashed var(--secondary-color)"}
           >
             <Flex align={"center"} justify={"space-between"} mr={"1em"}>
               <Text
                 fontWeight={"500"}
-                fontSize={responsive("", "md", "lg")}
+                fontSize={responsive("md", "md", "lg")}
                 w={"max-content"}
               >
                 Your Courses
@@ -365,11 +369,12 @@ const Dashboard = () => {
               <ButtonGroup>
                 {isCoursesEditing && (
                   <Button
+                    size={isMobile ? "sm" : "md"}
                     variant={"outline"}
                     onClick={() => handleDeleteCourseSubmit()}
                     bgColor={"var(--secondary-color)"}
                     color={"white"}
-                    fontSize={responsive("", "sm", "md")}
+                    fontSize={responsive("sm", "sm", "md")}
                     border={"1px solid var(--secondary-color)"}
                     _hover={{
                       bgColor: "white",
@@ -380,6 +385,7 @@ const Dashboard = () => {
                   </Button>
                 )}
                 <Button
+                  size={isMobile ? "sm" : "md"}
                   variant={"outline"}
                   onClick={() => {
                     setIsCoursesEditing(!isCoursesEditing);
@@ -394,7 +400,7 @@ const Dashboard = () => {
                   }}
                   bgColor={"var(--accent-color)"}
                   color={"white"}
-                  fontSize={responsive("", "sm", "md")}
+                  fontSize={responsive("sm", "sm", "md")}
                   border={"1px solid var(--accent-color)"}
                   _hover={{
                     bgColor: "white",
@@ -408,33 +414,90 @@ const Dashboard = () => {
             <Flex
               pr={"1em"}
               overflow={"auto"}
-              mt={responsive("", ".5em", ".5em")}
+              mt={responsive(".5em", ".5em", ".5em")}
               flexDir={"column"}
+              h={"100%"}
               gap={"1em"}
             >
               {ownedCourses && ownedCourses.length > 0 ? (
                 ownedCourses.map((course, index) => (
                   <Flex
                     bgColor={"white"}
-                    p={responsive("", ".5em", "1em")}
+                    p={responsive(".5em", ".5em", "1em")}
                     borderRadius={"10px"}
+                    flexDir={isMobile ? "column" : "row"}
                     key={index}
-                    align={"center"}
-                    justify={"space-between"}
+                    gap={isMobile && ".5em"}
+                    align={!isMobile && "center"}
+                    justify={!isMobile && "space-between"}
                     transition={"all .3s ease"}
                   >
-                    <Text
-                      fontWeight={"500"}
-                      fontSize={responsive("", "sm", "md")}
-                    >
-                      {course.title}
-                    </Text>
+                    {!isMobile && (
+                      <Text
+                        fontWeight={"500"}
+                        fontSize={responsive("sm", "sm", "md")}
+                      >
+                        {course.title}
+                      </Text>
+                    )}
+                    {isMobile && (
+                      <Flex align={"center"} justify={"space-between"}>
+                        <Text
+                          fontWeight={"500"}
+                          fontSize={responsive("sm", "sm", "md")}
+                        >
+                          {course.title}
+                        </Text>
+                        <ButtonGroup>
+                          <Button
+                            size={isMobile ? "sm" : "md"}
+                            as={Link}
+                            to={`/dashboard/course/${course.slug}`}
+                            variant={"outline"}
+                            bgColor={"var(--accent-color)"}
+                            color={"white"}
+                            fontSize={responsive("sm", "sm", "md")}
+                            border={"1px solid var(--accent-color)"}
+                            _hover={{
+                              bgColor: "white",
+                              color: "var(--accent-color)",
+                            }}
+                          >
+                            View
+                          </Button>
+                          {isCoursesEditing && (
+                            <Button
+                              size={isMobile ? "sm" : "md"}
+                              variant="outline"
+                              p=".5em"
+                              minH="max-content"
+                              minW="max-content"
+                              border={"1px solid var(--accent-color)"}
+                              color={"var(--accent-color)"}
+                              onClick={() =>
+                                handleCourseDeleteButton(course.slug)
+                              }
+                              fontSize={responsive("sm", "sm", "md")}
+                              _hover={{
+                                bgColor: "var(--accent-color)",
+                                color: "white",
+                              }}
+                            >
+                              <i
+                                className="fi fi-rr-trash"
+                                style={{ position: "relative", top: "2px" }}
+                              />
+                            </Button>
+                          )}
+                        </ButtonGroup>
+                      </Flex>
+                    )}
 
                     <Flex
                       fontWeight={"500"}
                       align={"center"}
                       gap={"1em"}
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                     >
                       <Flex gap={".5em"} align={"center"}>
                         <i
@@ -488,49 +551,55 @@ const Dashboard = () => {
                         </Text>
                       </Flex>
                     </Flex>
-                    <ButtonGroup>
-                      <Button
-                        as={Link}
-                        to={`/dashboard/course/${course.slug}`}
-                        variant={"outline"}
-                        bgColor={"var(--accent-color)"}
-                        color={"white"}
-                        fontSize={responsive("", "sm", "md")}
-                        border={"1px solid var(--accent-color)"}
-                        _hover={{
-                          bgColor: "white",
-                          color: "var(--accent-color)",
-                        }}
-                      >
-                        View
-                      </Button>
-                      {isCoursesEditing && (
+                    {!isMobile && (
+                      <ButtonGroup>
                         <Button
-                          variant="outline"
-                          p=".5em"
-                          minH="max-content"
-                          minW="max-content"
+                          size={isMobile ? "sm" : "md"}
+                          as={Link}
+                          to={`/dashboard/course/${course.slug}`}
+                          variant={"outline"}
+                          bgColor={"var(--accent-color)"}
+                          color={"white"}
+                          fontSize={responsive("sm", "sm", "md")}
                           border={"1px solid var(--accent-color)"}
-                          color={"var(--accent-color)"}
-                          onClick={() => handleCourseDeleteButton(course.slug)}
-                          fontSize={responsive("", "sm", "md")}
                           _hover={{
-                            bgColor: "var(--accent-color)",
-                            color: "white",
+                            bgColor: "white",
+                            color: "var(--accent-color)",
                           }}
                         >
-                          <i
-                            className="fi fi-rr-trash"
-                            style={{ position: "relative", top: "2px" }}
-                          />
+                          View
                         </Button>
-                      )}
-                    </ButtonGroup>
+                        {isCoursesEditing && (
+                          <Button
+                            size={isMobile ? "sm" : "md"}
+                            variant="outline"
+                            p=".5em"
+                            minH="max-content"
+                            minW="max-content"
+                            border={"1px solid var(--accent-color)"}
+                            color={"var(--accent-color)"}
+                            onClick={() =>
+                              handleCourseDeleteButton(course.slug)
+                            }
+                            fontSize={responsive("sm", "sm", "md")}
+                            _hover={{
+                              bgColor: "var(--accent-color)",
+                              color: "white",
+                            }}
+                          >
+                            <i
+                              className="fi fi-rr-trash"
+                              style={{ position: "relative", top: "2px" }}
+                            />
+                          </Button>
+                        )}
+                      </ButtonGroup>
+                    )}
                   </Flex>
                 ))
               ) : (
                 <Text
-                  fontSize={responsive("", "sm", "md")}
+                  fontSize={responsive("sm", "sm", "md")}
                   fontWeight={"500"}
                   opacity={"0.9"}
                 >
@@ -539,15 +608,15 @@ const Dashboard = () => {
               )}
             </Flex>
           </GridItem>
-          <GridItem colSpan={1} rowSpan={2}>
+          <GridItem colSpan={isMobile ? 2 : 1} rowSpan={2}>
             <Center
-              fontSize={responsive("", "md", "lg")}
+              fontSize={responsive("md", "md", "lg")}
               fontWeight={"500"}
               borderRadius={"10px"}
               border={"2px dashed var(--secondary-color)"}
               as={Link}
               to="/create-course"
-              p={responsive("", "1em", "1em")}
+              p={responsive(".5em", "1em", "1em")}
               color={"white"}
               bgColor={"var(--secondary-color)"}
               transition={"all .3s ease"}
@@ -562,16 +631,16 @@ const Dashboard = () => {
           </GridItem>
 
           <GridItem
-            colSpan={1}
+            colSpan={isMobile ? 2 : 1}
             rowSpan={8}
             bgColor={"var(--bg-color)"}
             borderRadius={"10px"}
-            p={responsive("", "1em", "1em")}
+            p={responsive("1em", "1em", "1em")}
             w={"100%"}
           >
             <Text
               fontWeight={"500"}
-              fontSize={responsive("", "md", "lg")}
+              fontSize={responsive("md", "md", "lg")}
               w={"max-content"}
               mb={"1em"}
             >
@@ -581,7 +650,7 @@ const Dashboard = () => {
               <Line
                 data={data}
                 options={options}
-                width={"200%"}
+                width={isMobile ? "150%" : "200%"}
                 height={"95%"}
               />
             </Box>
@@ -589,7 +658,7 @@ const Dashboard = () => {
           <GridItem
             rowSpan={10}
             colSpan={2}
-            maxH={"26em"}
+            maxH={responsive("20em", "26em", "26em")}
             display={"flex"}
             flexDir={"column"}
             gap={"1em"}
@@ -602,7 +671,7 @@ const Dashboard = () => {
           >
             <Text
               fontWeight={"500"}
-              fontSize={responsive("", "md", "lg")}
+              fontSize={responsive("md", "md", "lg")}
               w={"max-content"}
             >
               Your Lessons
@@ -610,7 +679,7 @@ const Dashboard = () => {
             <Flex
               pr={"1em"}
               overflow={"auto"}
-              mt={responsive("", ".5em", ".5em")}
+              mt={responsive(".5em", ".5em", ".5em")}
               flexDir={"column"}
               gap={"1em"}
             >
@@ -618,74 +687,145 @@ const Dashboard = () => {
                 lessons.map((lesson, index) => (
                   <Flex
                     bgColor={"white"}
-                    p={responsive("", ".5em", "1em")}
+                    flexDir={isMobile ? "column" : "row"}
+                    p={responsive(".5em", ".5em", "1em")}
                     borderRadius={"10px"}
                     key={index}
-                    align={"center"}
-                    justify={"space-between"}
+                    gap={isMobile && ".5em"}
+                    align={!isMobile && "center"}
+                    justify={!isMobile && "space-between"}
                     transition={"all .3s ease"}
                   >
-                    <Text
-                      fontWeight={"500"}
-                      fontSize={responsive("", "sm", "md")}
-                    >
-                      {lesson.title}
-                    </Text>
-                    <Text
-                      fontWeight={"500"}
-                      textOverflow={"ellipsis"}
-                      overflow={"hidden"}
-                      fontSize={responsive("", "sm", "md")}
-                      maxW={"30%"}
-                      whiteSpace={"nowrap"}
-                    >
-                      {lesson.description}
-                    </Text>
-                    <Flex
-                      fontWeight={"500"}
-                      align={"center"}
-                      gap={"1em"}
-                      fontSize={responsive("", "sm", "md")}
-                    >
-                      <Flex gap={".5em"} align={"center"}>
-                        <i
-                          class="fi fi-rr-comment-alt"
-                          style={{ position: "relative", top: "2px" }}
-                        ></i>
-                        <Text>{lesson.comments.length}</Text>
-                      </Flex>
-                      <Flex gap={".5em"} align={"center"}>
-                        <i
-                          class="fi fi-rr-clock-three"
-                          style={{ position: "relative", top: "2px" }}
-                        ></i>
-                        <Text>
-                          {lesson.duration < 60
-                            ? lesson.duration + " sec"
-                            : Math.round(lesson.duration / 60) + " min"}
-                        </Text>
-                      </Flex>
-                    </Flex>
+                    {isMobile ? (
+                      <>
+                        <Flex align={"center"} justify={"space-between"}>
+                          <Text
+                            fontWeight={"500"}
+                            fontSize={responsive("sm", "sm", "md")}
+                          >
+                            {lesson.title}
+                          </Text>
+                          <Text
+                            fontWeight={"500"}
+                            textOverflow={"ellipsis"}
+                            overflow={"hidden"}
+                            fontSize={responsive("sm", "sm", "md")}
+                            maxW={"30%"}
+                            whiteSpace={"nowrap"}
+                          >
+                            {lesson.description}
+                          </Text>
+                        </Flex>
+                        <Flex align={"center"} justify={"space-between"}>
+                          <Flex
+                            fontWeight={"500"}
+                            align={"center"}
+                            gap={"1em"}
+                            fontSize={responsive("sm", "sm", "md")}
+                          >
+                            <Flex gap={".5em"} align={"center"}>
+                              <i
+                                class="fi fi-rr-comment-alt"
+                                style={{ position: "relative", top: "2px" }}
+                              ></i>
+                              <Text>{lesson.comments.length}</Text>
+                            </Flex>
+                            <Flex gap={".5em"} align={"center"}>
+                              <i
+                                class="fi fi-rr-clock-three"
+                                style={{ position: "relative", top: "2px" }}
+                              ></i>
+                              <Text>
+                                {lesson.duration < 60
+                                  ? lesson.duration + " sec"
+                                  : Math.round(lesson.duration / 60) + " min"}
+                              </Text>
+                            </Flex>
+                          </Flex>
 
-                    <Button
-                      variant={"outline"}
-                      bgColor={"var(--accent-color)"}
-                      color={"white"}
-                      onClick={() => navigateLesson(lesson)}
-                      fontSize={responsive("", "sm", "md")}
-                      border={"1px solid var(--accent-color)"}
-                      _hover={{
-                        bgColor: "white",
-                        color: "var(--accent-color)",
-                      }}
-                    >
-                      View
-                    </Button>
+                          <Button
+                            size={isMobile ? "sm" : "md"}
+                            variant={"outline"}
+                            bgColor={"var(--accent-color)"}
+                            color={"white"}
+                            onClick={() => navigateLesson(lesson)}
+                            fontSize={responsive("sm", "sm", "md")}
+                            border={"1px solid var(--accent-color)"}
+                            _hover={{
+                              bgColor: "white",
+                              color: "var(--accent-color)",
+                            }}
+                          >
+                            View
+                          </Button>
+                        </Flex>
+                      </>
+                    ) : (
+                      <>
+                        <Text
+                          fontWeight={"500"}
+                          fontSize={responsive("sm", "sm", "md")}
+                        >
+                          {lesson.title}
+                        </Text>
+                        <Text
+                          fontWeight={"500"}
+                          textOverflow={"ellipsis"}
+                          overflow={"hidden"}
+                          fontSize={responsive("sm", "sm", "md")}
+                          maxW={"30%"}
+                          whiteSpace={"nowrap"}
+                        >
+                          {lesson.description}
+                        </Text>
+                        <Flex
+                          fontWeight={"500"}
+                          align={"center"}
+                          gap={"1em"}
+                          fontSize={responsive("sm", "sm", "md")}
+                        >
+                          <Flex gap={".5em"} align={"center"}>
+                            <i
+                              class="fi fi-rr-comment-alt"
+                              style={{ position: "relative", top: "2px" }}
+                            ></i>
+                            <Text>{lesson.comments.length}</Text>
+                          </Flex>
+                          <Flex gap={".5em"} align={"center"}>
+                            <i
+                              class="fi fi-rr-clock-three"
+                              style={{ position: "relative", top: "2px" }}
+                            ></i>
+                            <Text>
+                              {lesson.duration < 60
+                                ? lesson.duration + " sec"
+                                : Math.round(lesson.duration / 60) + " min"}
+                            </Text>
+                          </Flex>
+                        </Flex>
+
+                        <Button
+                          size={isMobile ? "sm" : "md"}
+                          variant={"outline"}
+                          bgColor={"var(--accent-color)"}
+                          color={"white"}
+                          onClick={() => navigateLesson(lesson)}
+                          fontSize={responsive("sm", "sm", "md")}
+                          border={"1px solid var(--accent-color)"}
+                          _hover={{
+                            bgColor: "white",
+                            color: "var(--accent-color)",
+                          }}
+                        >
+                          View
+                        </Button>
+                      </>
+                    )}
                   </Flex>
                 ))
               ) : (
                 <Text
-                  fontSize={responsive("", "sm", "md")}
+                  fontSize={responsive("sm", "sm", "md")}
                   fontWeight={"500"}
                   opacity={"0.9"}
                 >
@@ -697,20 +837,23 @@ const Dashboard = () => {
 
           <GridItem
             rowSpan={20}
-            colSpan={1}
-            maxH={"50em"}
+            colSpan={isMobile ? 2 : 1}
+            maxH={responsive("30em", "50em", "50em")}
             display={"flex"}
             flexDir={"column"}
             gap={"1em"}
             p={"1em"}
-            pr={0}
+            pr={!isMobile ? 0 : "1em"}
             borderRadius={"10px"}
-            pb={"1em"}
             bgColor={"var(--bg-color)"}
             border={"2px dashed var(--secondary-color)"}
           >
-            <Flex align={"center"} justify={"space-between"} mr={"1em"}>
-              <Text fontWeight={"500"} fontSize={responsive("", "md", "lg")}>
+            <Flex
+              align={"center"}
+              justify={"space-between"}
+              mr={!isMobile && "1em"}
+            >
+              <Text fontWeight={"500"} fontSize={responsive("md", "md", "lg")}>
                 Your Comments
               </Text>
               <ButtonGroup>
@@ -725,7 +868,7 @@ const Dashboard = () => {
                     bgColor={"var(--secondary-color)"}
                     type={"submit"}
                     color={"white"}
-                    fontSize={responsive("", "sm", "md")}
+                    fontSize={responsive("sm", "sm", "md")}
                     border={"1px solid var(--secondary-color)"}
                     _hover={{
                       bgColor: "white",
@@ -745,7 +888,7 @@ const Dashboard = () => {
                   }}
                   bgColor={"var(--accent-color)"}
                   color={"white"}
-                  fontSize={responsive("", "sm", "md")}
+                  fontSize={responsive("sm", "sm", "md")}
                   border={"1px solid var(--accent-color)"}
                   _hover={{
                     bgColor: "var(--bg-color)",
@@ -759,9 +902,9 @@ const Dashboard = () => {
             <Flex
               maxH={"100%"}
               overflow={"auto"}
-              pr={"1em"}
+              pr={!isMobile && "1em"}
               h={"100%"}
-              mt={responsive("", ".5em", ".5em")}
+              mt={responsive(".5em", ".5em", ".5em")}
               flexDir={"column"}
               gap={"1em"}
             >
@@ -782,7 +925,7 @@ const Dashboard = () => {
                       <Flex
                         key={index}
                         bgColor="white"
-                        p={responsive("", ".5em", "1em")}
+                        p={responsive(".5em", ".5em", "1em")}
                         borderRadius="10px"
                         justify="space-between"
                         flexDir="column"
@@ -791,17 +934,17 @@ const Dashboard = () => {
                         <Flex align="center" justify="space-between">
                           <Flex gap=".5em" align="center">
                             <Avatar
-                              src={apiUrl + comment?.user.image}
+                              src={apiUrl + comment.user?.image}
                               bgColor="var(--secondary-color)"
-                              name={comment?.user.username}
-                              size={responsive("", "sm", "sm")}
+                              name={comment.user?.username}
+                              size={responsive("sm", "sm", "sm")}
                             />
                             <Text
                               fontWeight="500"
-                              fontSize={responsive("", "sm", "md")}
+                              fontSize={responsive("sm", "sm", "md")}
                               opacity={0.9}
                             >
-                              {comment?.user.username}
+                              {comment.user?.username}
                             </Text>
                           </Flex>
                           {commentsEdit && (
@@ -813,7 +956,7 @@ const Dashboard = () => {
                               onClick={() =>
                                 handleCommentButtonClick(index, comment)
                               }
-                              fontSize={responsive("", "sm", "md")}
+                              fontSize={responsive("sm", "sm", "md")}
                               _hover={{
                                 bgColor: activeButtonIndices[index]
                                   ? "var(--accent-color)"
@@ -837,7 +980,7 @@ const Dashboard = () => {
                           border={"2px dashed #cfcfcf"}
                           readOnly={!commentsEdit}
                           value={
-                            updatedComment ? updatedComment.text : comment.text
+                            updatedComment ? updatedComment.text : comment?.text
                           }
                           _focus={{
                             boxShadow: "none",
@@ -847,7 +990,7 @@ const Dashboard = () => {
                             const updatedCommentTextList = [...commentTextList];
                             const commentIndex =
                               updatedCommentTextList.findIndex(
-                                (c) => c.commentId === comment._id
+                                (c) => c.commentId === comment?._id
                               );
                             if (commentIndex !== -1) {
                               updatedCommentTextList[commentIndex].text =
@@ -860,20 +1003,20 @@ const Dashboard = () => {
                           <Flex align={"center"} gap={"1em"}>
                             <Text
                               fontWeight="500"
-                              fontSize={responsive("", "sm", "md")}
+                              fontSize={responsive("sm", "sm", "md")}
                               opacity={0.9}
                             >
                               {comment.lesson?.title}
                             </Text>
                             <Flex
-                              fontSize={responsive("", "sm", "md")}
+                              fontSize={responsive("sm", "sm", "md")}
                               fontWeight={500}
                               opacity={0.9}
                               color={"var(--accent-color)"}
                               gap={".3em"}
                               align={"center"}
                             >
-                              <Text>{comment.point}</Text>
+                              <Text>{comment?.point}</Text>
                               <StarIcon
                                 pos={"relative"}
                                 bottom={"2px"}
@@ -883,9 +1026,9 @@ const Dashboard = () => {
                           <Text
                             fontWeight="500"
                             opacity={0.9}
-                            fontSize={responsive("", "sm", "md")}
+                            fontSize={responsive("sm", "sm", "md")}
                           >
-                            {getDate(comment.createdAt)}
+                            {getDate(comment?.createdAt)}
                           </Text>
                         </Flex>
                       </Flex>
@@ -894,7 +1037,7 @@ const Dashboard = () => {
                 })
               ) : (
                 <Text
-                  fontSize={responsive("", "sm", "md")}
+                  fontSize={responsive("sm", "sm", "md")}
                   fontWeight={"500"}
                   opacity={"0.9"}
                 >
