@@ -349,7 +349,7 @@ const Dashboard = () => {
             rowSpan={10}
             colSpan={2}
             maxH={responsive("20em", "26em", "26em")}
-            gap={"1em"}
+            gap={isMobile ? ".5em" : "1em"}
             p={"1em"}
             display={"flex"}
             flexDir={"column"}
@@ -427,7 +427,7 @@ const Dashboard = () => {
                     borderRadius={"10px"}
                     flexDir={isMobile ? "column" : "row"}
                     key={index}
-                    gap={isMobile && ".5em"}
+                    gap={isMobile && "1em"}
                     align={!isMobile && "center"}
                     justify={!isMobile && "space-between"}
                     transition={"all .3s ease"}
@@ -497,7 +497,7 @@ const Dashboard = () => {
                       fontWeight={"500"}
                       align={"center"}
                       gap={"1em"}
-                      fontSize={responsive("sm", "sm", "md")}
+                      fontSize={responsive("xs", "sm", "md")}
                     >
                       <Flex gap={".5em"} align={"center"}>
                         <i
@@ -661,7 +661,7 @@ const Dashboard = () => {
             maxH={responsive("20em", "26em", "26em")}
             display={"flex"}
             flexDir={"column"}
-            gap={"1em"}
+            gap={isMobile ? ".5em" : "1em"}
             p={"1em"}
             pr={0}
             borderRadius={"10px"}
@@ -691,7 +691,7 @@ const Dashboard = () => {
                     p={responsive(".5em", ".5em", "1em")}
                     borderRadius={"10px"}
                     key={index}
-                    gap={isMobile && ".5em"}
+                    gap={isMobile && "1em"}
                     align={!isMobile && "center"}
                     justify={!isMobile && "space-between"}
                     transition={"all .3s ease"}
@@ -721,7 +721,7 @@ const Dashboard = () => {
                             fontWeight={"500"}
                             align={"center"}
                             gap={"1em"}
-                            fontSize={responsive("sm", "sm", "md")}
+                            fontSize={responsive("xs", "sm", "md")}
                           >
                             <Flex gap={".5em"} align={"center"}>
                               <i
@@ -841,7 +841,7 @@ const Dashboard = () => {
             maxH={responsive("30em", "50em", "50em")}
             display={"flex"}
             flexDir={"column"}
-            gap={"1em"}
+            gap={isMobile ? ".5em" : "1em"}
             p={"1em"}
             pr={!isMobile ? 0 : "1em"}
             borderRadius={"10px"}
@@ -859,6 +859,7 @@ const Dashboard = () => {
               <ButtonGroup>
                 {commentsEdit && (
                   <Button
+                    size={isMobile ? "sm" : "md"}
                     variant={"outline"}
                     onClick={() => {
                       setCommentsEdit(!commentsEdit);
@@ -879,6 +880,7 @@ const Dashboard = () => {
                   </Button>
                 )}
                 <Button
+                  size={isMobile ? "sm" : "md"}
                   variant={"outline"}
                   onClick={() => {
                     setCommentsEdit(!commentsEdit);

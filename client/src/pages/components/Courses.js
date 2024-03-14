@@ -93,7 +93,7 @@ const Courses = () => {
                   _hover={{
                     textDecoration: "none",
                     borderRadius: "10px",
-                    border: "2px dashed #cfcfcf",
+                    border: !isMobile && "2px dashed #cfcfcf",
                   }}
                 >
                   <Card maxW={responsive("100%", "xs", "sm")} h={"100%"}>

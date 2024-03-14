@@ -490,7 +490,11 @@ const AllCourses = () => {
         >
           Categories
         </Text>
-        <Flex align={"center"} gap={"1em"}>
+        <Flex
+          align={"center"}
+          gap={responsive(".5em", "1em", "1em")}
+          flexWrap={"wrap"}
+        >
           {categories.length > 0 &&
             categories.map((category, index) => (
               <Button

@@ -39,9 +39,8 @@ const Instructors = () => {
       borderRadius={"10px"}
       bgColor={"var(--bg-color)"}
       mx={responsive("1em", "8em", "10em")}
-      py={!isMobile && "4em"}
-      pt={isMobile && "2em"}
-      pb={isMobile && "4em"}
+      pt={isMobile ? "2em" : "4em"}
+      pb={isMobile ? "4em" : "4em"}
       id="instructors"
     >
       <Stack
@@ -84,20 +83,20 @@ const Instructors = () => {
                   justifyContent: "center",
                 }}
               >
-                <Card maxW={responsive("100%", "xs", "sm")}>
+                <Card maxW={"100%"}>
                   <CardBody>
                     <Flex
                       flexDir={"column"}
                       justify={"space-between"}
                       h={"100%"}
                     >
-                      <Box pos={"relative"}>
+                      <Box>
                         {instructor.image ? (
                           <Center
                             overflow={"hidden"}
                             borderRadius={"lg"}
-                            w={responsive("18em", "18em", "22em")}
-                            h={responsive("8em", "10.3em", "14em")}
+                            w={"18em"}
+                            h={"8em"}
                           >
                             <Image
                               src={
@@ -115,8 +114,8 @@ const Instructors = () => {
                         ) : (
                           <Skeleton
                             borderRadius={"lg"}
-                            h={responsive("8em", "11em", "14em")}
-                            w={responsive("14em", "18em", "22em")}
+                            w={"18em"}
+                            h={"8em"}
                           ></Skeleton>
                         )}
                         <Center
@@ -149,7 +148,7 @@ const Instructors = () => {
                               class="fi fi-rr-smile"
                               style={{ position: "relative", top: "1.5px" }}
                             ></i>
-                            {(instructor.point / 5) * 100 + "% "}
+                            {(Math.round(instructor.point) / 5) * 100 + "% "}
                             positive feedback
                           </Flex>
                         </Center>
@@ -214,7 +213,7 @@ const Instructors = () => {
                         <Skeleton
                           borderRadius={"lg"}
                           h={responsive("", "11em", "14em")}
-                          w={responsive("", "18em", "22em")}
+                          w={responsive("", "17em", "21em")}
                         ></Skeleton>
                       )}
                       <Center

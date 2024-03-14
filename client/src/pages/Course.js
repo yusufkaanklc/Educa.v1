@@ -1086,55 +1086,59 @@ const Course = () => {
                               " sec"
                           : "0 min"}
                       </Text>
-                      <ChakraLink
-                        as={Link}
-                        onClick={() => handleLessonClick()}
-                        _hover={{ textDecor: "none" }}
-                        to={
-                          enroll ||
-                          (account && course && account._id === course.ownerId)
-                            ? `/${page}/course/${slug}/lessons/${lesson.slug}`
-                            : ""
-                        }
-                      >
-                        <Button
-                          border={"1px solid transparent"}
-                          bgColor={"var(--accent-color)"}
-                          fontSize={responsive("sm", "sm", "md")}
-                          size={isMobile ? "sm" : "md"}
-                          color={"white"}
-                          _hover={{
-                            bgColor: "var(--bg-color)",
-                            color: "orange",
-                            border: "1px solid var(--accent-color)",
-                          }}
+                      <ButtonGroup>
+                        <ChakraLink
+                          as={Link}
+                          onClick={() => handleLessonClick()}
+                          _hover={{ textDecor: "none" }}
+                          to={
+                            enroll ||
+                            (account &&
+                              course &&
+                              account._id === course.ownerId)
+                              ? `/${page}/course/${slug}/lessons/${lesson.slug}`
+                              : ""
+                          }
                         >
-                          View
-                        </Button>
-                      </ChakraLink>
+                          <Button
+                            border={"1px solid transparent"}
+                            bgColor={"var(--accent-color)"}
+                            fontSize={responsive("sm", "sm", "md")}
+                            size={isMobile ? "sm" : "md"}
+                            color={"white"}
+                            _hover={{
+                              bgColor: "var(--bg-color)",
+                              color: "orange",
+                              border: "1px solid var(--accent-color)",
+                            }}
+                          >
+                            View
+                          </Button>
+                        </ChakraLink>
 
-                      {isLessonsEditing && (
-                        <Button
-                          variant="outline"
-                          p=".5em"
-                          minH="max-content"
-                          minW="max-content"
-                          size={isMobile ? "sm" : "md"}
-                          color={"white"}
-                          onClick={() => handleDeleteLesson(lesson.title)}
-                          fontSize={responsive("sm", "sm", "md")}
-                          _hover={{
-                            bgColor: "var(--bg-color)",
-                            color: "var(--accent-color)",
-                          }}
-                          bgColor={"var(--accent-color)"}
-                        >
-                          <i
-                            className="fi fi-rr-trash"
-                            style={{ position: "relative", top: "2px" }}
-                          />
-                        </Button>
-                      )}
+                        {isLessonsEditing && (
+                          <Button
+                            variant="outline"
+                            p=".5em"
+                            minH="max-content"
+                            minW="max-content"
+                            size={isMobile ? "sm" : "md"}
+                            color={"white"}
+                            onClick={() => handleDeleteLesson(lesson.title)}
+                            fontSize={responsive("sm", "sm", "md")}
+                            _hover={{
+                              bgColor: "var(--bg-color)",
+                              color: "var(--accent-color)",
+                            }}
+                            bgColor={"var(--accent-color)"}
+                          >
+                            <i
+                              className="fi fi-rr-trash"
+                              style={{ position: "relative", top: "2px" }}
+                            />
+                          </Button>
+                        )}
+                      </ButtonGroup>
                     </Flex>
                   </Flex>
                 ))}

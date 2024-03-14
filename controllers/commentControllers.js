@@ -20,13 +20,9 @@ const addComment = async (req, res) => {
     const newCommentData = {
       text,
       user: req.session.userID,
+      point: parseInt(point, 10) || 1, // point'i sayıya dönüştür, başarısız olursa 1 kullan
     };
 
-    if (point) {
-      newCommentData.point = point;
-    } else {
-      newCommentData.point = 1;
-    }
     const newComment = new Comment(newCommentData);
     await newComment.save();
 
@@ -35,29 +31,22 @@ const addComment = async (req, res) => {
       { $push: { comments: newComment._id } }
     );
 
-    const course = await Course.findOne({
-      slug: courseSlug,
-      lessons: lesson._id,
-    });
+    const course = await Course.findOne({ slug: courseSlug });
     if (!course) {
       throw { code: 3, message: "Course not found" };
     }
 
-    if (point && course.point) {
-      const newCoursePoint = Math.ceil((course.point + point) / 2);
-      await Course.findOneAndUpdate(
-        { slug: courseSlug },
-        { point: newCoursePoint },
-        { new: true }
-      );
-    } else {
-      const newCoursePoint = Math.ceil((course.point + 1) / 2);
-      await Course.findOneAndUpdate(
-        { slug: courseSlug },
-        { point: newCoursePoint },
-        { new: true }
-      );
-    }
+    let coursePoint = course.point ? parseInt(course.point, 10) : 0; // course.point sayıya dönüştürülüyor, başarısız olursa 0 kullanılıyor
+    let userPoint = newCommentData.point; // Kullanıcının verdiği puan
+    let newCoursePoint = coursePoint
+      ? Math.round((coursePoint + userPoint) / 2)
+      : userPoint;
+
+    await Course.findOneAndUpdate(
+      { slug: courseSlug },
+      { point: newCoursePoint },
+      { new: true }
+    );
 
     res.status(200).json({ message: "Comment created successfully" });
   } catch (error) {

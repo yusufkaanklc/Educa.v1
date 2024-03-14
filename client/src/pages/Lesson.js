@@ -593,22 +593,23 @@ const Lesson = () => {
   return (
     <Box
       bgColor={"white"}
-      border={"2px dashed #cfcfcf"}
+      border={!isMobile && "2px dashed #cfcfcf"}
       borderRadius={"10px"}
-      p={responsive("", "1em ", "2em")}
-      mx={responsive("", "8em", "10em")}
-      my={responsive("", "2em", "3em")}
+      p={responsive("0", "1em ", "2em")}
+      mx={responsive("1em", "8em", "10em")}
+      my={responsive("2em", "2em", "3em")}
     >
       {isLoading ? (
         <Skeleton
-          h={responsive("", "1em", "1.5em")}
-          w={responsive("", "10em", "15em")}
+          h={responsive("1em", "1em", "1.5em")}
+          w={responsive("10em", "10em", "15em")}
           borderRadius={"10px"}
         />
       ) : (
         <Breadcrumb
           spacing="8px"
           separator={<ChevronRightIcon color="gray.500" />}
+          fontSize={responsive("sm", "sm", "md")}
         >
           <BreadcrumbItem>
             <BreadcrumbLink
@@ -696,40 +697,318 @@ const Lesson = () => {
             "repeat(4, 1fr)",
             "repeat(4, 1fr)"
           )}
-          gap={10}
+          gap={responsive(6, 10, 10)}
         >
-          <GridItem colSpan={1} rowSpan={17}>
-            <Skeleton w={"100%"} h={"100%"} borderRadius={"10px"}></Skeleton>
-          </GridItem>
-          <GridItem colSpan={3} rowSpan={7}>
-            <Skeleton w={"100%"} h={"100%"} borderRadius={"10px"}></Skeleton>
-          </GridItem>
-          <GridItem colSpan={3} rowSpan={10}>
-            <Skeleton w={"100%"} h={"100%"} borderRadius={"10px"}></Skeleton>
-          </GridItem>
-          <GridItem colSpan={1} rowSpan={7}></GridItem>
-          <GridItem colSpan={3} rowSpan={7}>
-            <Skeleton w={"100%"} h={"100%"} borderRadius={"10px"}></Skeleton>
-          </GridItem>
-          <GridItem colSpan={1} rowSpan={17}></GridItem>
-          <GridItem colSpan={3} rowSpan={17}>
-            <Skeleton w={"100%"} h={"100%"} borderRadius={"10px"}></Skeleton>
-          </GridItem>
+          {isMobile ? (
+            <>
+              <GridItem colSpan={3} rowSpan={6}>
+                <Skeleton
+                  w={"100%"}
+                  h={"100%"}
+                  borderRadius={"10px"}
+                ></Skeleton>
+              </GridItem>
+              <GridItem colSpan={3} rowSpan={6}>
+                <Skeleton
+                  w={"100%"}
+                  h={"100%"}
+                  borderRadius={"10px"}
+                ></Skeleton>
+              </GridItem>
+              <GridItem colSpan={3} rowSpan={10}>
+                <Skeleton
+                  w={"100%"}
+                  h={"100%"}
+                  borderRadius={"10px"}
+                ></Skeleton>
+              </GridItem>
+
+              <GridItem colSpan={3} rowSpan={10}>
+                <Skeleton
+                  w={"100%"}
+                  h={"100%"}
+                  borderRadius={"10px"}
+                ></Skeleton>
+              </GridItem>
+
+              <GridItem colSpan={3} rowSpan={17}>
+                <Skeleton
+                  w={"100%"}
+                  h={"100%"}
+                  borderRadius={"10px"}
+                ></Skeleton>
+              </GridItem>
+            </>
+          ) : (
+            <>
+              <GridItem colSpan={1} rowSpan={17}>
+                <Skeleton
+                  w={"100%"}
+                  h={"100%"}
+                  borderRadius={"10px"}
+                ></Skeleton>
+              </GridItem>
+              <GridItem colSpan={3} rowSpan={7}>
+                <Skeleton
+                  w={"100%"}
+                  h={"100%"}
+                  borderRadius={"10px"}
+                ></Skeleton>
+              </GridItem>
+              <GridItem colSpan={3} rowSpan={10}>
+                <Skeleton
+                  w={"100%"}
+                  h={"100%"}
+                  borderRadius={"10px"}
+                ></Skeleton>
+              </GridItem>
+              <GridItem colSpan={1} rowSpan={7}></GridItem>
+              <GridItem colSpan={3} rowSpan={7}>
+                <Skeleton
+                  w={"100%"}
+                  h={"100%"}
+                  borderRadius={"10px"}
+                ></Skeleton>
+              </GridItem>
+              <GridItem colSpan={1} rowSpan={17}></GridItem>
+              <GridItem colSpan={3} rowSpan={17}>
+                <Skeleton
+                  w={"100%"}
+                  h={"100%"}
+                  borderRadius={"10px"}
+                ></Skeleton>
+              </GridItem>
+            </>
+          )}
         </Grid>
       ) : (
         <Grid
-          mt={responsive("", "2em", "3em")}
+          mt={responsive("2em", "2em", "3em")}
           templateRows="repeat(auto-fill, minmax(1em, auto))"
           templateColumns={responsive(
             "1fr",
             "repeat(4, 1fr)",
             "repeat(4, 1fr)"
           )}
-          gap={10}
+          gap={responsive(6, 10, 10)}
         >
+          {isMobile && (
+            <>
+              <GridItem
+                colSpan={3}
+                rowSpan={6}
+                p={"1em"}
+                borderRadius={"10px"}
+                bgColor={"var(--bg-color)"}
+                border={"2px dashed var(--secondary-color)"}
+              >
+                <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
+                  <Flex flexDir={"column"} gap={"1em"}>
+                    {isLessonEditing ? (
+                      <>
+                        <FormControl>
+                          <Input
+                            autoFocus
+                            type={"text"}
+                            name="title"
+                            color={"var(--secondary-color)"}
+                            variant={"flushed"}
+                            fontWeight={"600"}
+                            value={lessonUpdateData.title}
+                            fontFamily={"Montserrat, sans-serif;"}
+                            fontSize={responsive("xl", "2xl", "3xl")}
+                            onChange={(e) => handleLessonChange(e)}
+                            _focus={{
+                              borderColor: "#cdcdcd",
+                              outline: 0,
+                              boxShadow: "none",
+                            }}
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <Input
+                            type={"text"}
+                            name="description"
+                            variant={"flushed"}
+                            value={lessonUpdateData.description}
+                            fontFamily={"Montserrat, sans-serif;"}
+                            fontWeight={500}
+                            opacity={0.9}
+                            fontSize={responsive("sm", "sm", "md")}
+                            onChange={(e) => handleLessonChange(e)}
+                            _focus={{
+                              borderColor: "#cdcdcd",
+                              outline: 0,
+                              boxShadow: "none",
+                            }}
+                          />
+                        </FormControl>
+                      </>
+                    ) : (
+                      <>
+                        <Heading
+                          fontSize={responsive("xl", "2xl", "3xl")}
+                          fontWeight={600}
+                          color={"var(--secondary-color)"}
+                        >
+                          {lessonUpdateData?.title}
+                        </Heading>
+
+                        <Text
+                          fontWeight={500}
+                          opacity={0.9}
+                          fontSize={responsive("sm", "sm", "md")}
+                        >
+                          {lessonUpdateData?.description}
+                        </Text>
+                      </>
+                    )}
+                  </Flex>
+                  <Flex align={"center"} justify={"space-between"}>
+                    <Flex
+                      align={"center"}
+                      gap={".5em"}
+                      fontSize={responsive("sm", "sm", "md")}
+                    >
+                      <Box color={"var(--accent-color)"}>
+                        {starList.length > 0 ? (
+                          starList.map((star) => (
+                            <StarIcon
+                              key={star}
+                              style={{ position: "relative", bottom: "3px" }}
+                            ></StarIcon>
+                          ))
+                        ) : (
+                          <i
+                            class="fi fi-rr-star"
+                            style={{ position: "relative", top: "2px" }}
+                          ></i>
+                        )}
+                      </Box>
+                      <Text
+                        fontWeight={500}
+                        opacity={0.9}
+                        fontSize={responsive("sm", "sm", "md")}
+                      >
+                        ({lesson?.comments && lesson.comments.length})
+                      </Text>
+                    </Flex>
+                    {account && course && account._id === course.ownerId && (
+                      <ButtonGroup>
+                        {isLessonEditing && (
+                          <Button
+                            size={isMobile ? "sm" : "md"}
+                            variant={"outline"}
+                            bgColor={"var(--secondary-color)"}
+                            color={"white"}
+                            onClick={(e) => handleUpdateLessonSubmit(e)}
+                            fontSize={responsive("sm", "sm", "md")}
+                            border={"1px solid var(--secondary-color)"}
+                            _hover={{
+                              bgColor: "var(--bg-color)",
+                              color: "var(--secondary-color)",
+                            }}
+                          >
+                            Save
+                          </Button>
+                        )}
+                        <Button
+                          variant={"outline"}
+                          size={isMobile ? "sm" : "md"}
+                          bgColor={"var(--accent-color)"}
+                          color={"white"}
+                          onClick={() => {
+                            setIsLessonEditing(!isLessonEditing);
+                            setIsCommentEditing(!isCommentEditing);
+                            if (isCommentEditing && isLessonEditing) {
+                              setUpdatedCommentList(comments);
+                              setDeletionCommentList([]);
+                              setFilteredCommentList(comments);
+                              setDeletionLessonList([]);
+                              setLessonUpdateData({
+                                title: lesson.title,
+                                description: lesson.description,
+                                notes: lesson.notes,
+                              });
+                              setFilteredLessonList(lessons);
+                            }
+                          }}
+                          fontSize={responsive("sm", "sm", "md")}
+                          border={"1px solid var(--accent-color)"}
+                          _hover={{
+                            bgColor: "var(--bg-color)",
+                            color: "var(--accent-color)",
+                          }}
+                        >
+                          {isLessonEditing ? "Reset changes" : "Edit Lesson"}
+                        </Button>
+                      </ButtonGroup>
+                    )}
+                  </Flex>
+                </Flex>
+              </GridItem>
+              <GridItem
+                colSpan={3}
+                rowSpan={6}
+                p={"1em"}
+                borderRadius={"10px"}
+                bgColor={"var(--bg-color)"}
+                border={"2px dashed var(--secondary-color)"}
+              >
+                <Center h={"100%"} borderRadius={"10px"} overflow={"hidden"}>
+                  <FormControl position={"relative"}>
+                    <ReactPlayer
+                      style={{ position: "relative", top: "0", left: "0" }}
+                      onProgress={(state) =>
+                        setCurrentVideoTime(state.playedSeconds.toFixed(0))
+                      }
+                      controls
+                      width={"100%"}
+                      height={"100%"}
+                      url={apiUrl + lesson.videoUrl}
+                    ></ReactPlayer>
+                    <Input
+                      type="file"
+                      onChange={(e) => handleLessonChangeForVideo(e)}
+                      accept="video/*"
+                      name="video"
+                      display={"none"}
+                      id="video"
+                    ></Input>
+                    {isLessonEditing && (
+                      <FormLabel
+                        htmlFor="video"
+                        pos={"absolute"}
+                        top={0}
+                        left={0}
+                        w={"100%"}
+                        h={"100%"}
+                        opacity={0.5}
+                        display={"flex"}
+                        alignItems={"center"}
+                        justifyContent={"center"}
+                        cursor={"pointer"}
+                      >
+                        {isLessonEditing && (
+                          <i
+                            class="fi fi-rr-camera"
+                            style={{
+                              position: "relative",
+                              top: "2px",
+                              fontSize: responsive("3em", "5em", "7em"),
+                            }}
+                          ></i>
+                        )}
+                      </FormLabel>
+                    )}
+                  </FormControl>
+                </Center>
+              </GridItem>
+            </>
+          )}
           <GridItem
-            colSpan={1}
-            rowSpan={17}
+            colSpan={responsive(3, 1, 1)}
+            rowSpan={responsive(10, 17, 17)}
             display={"flex"}
             flexDir={"column"}
             gap={"1.5em"}
@@ -739,7 +1018,7 @@ const Lesson = () => {
             bgColor={"var(--bg-color)"}
             border={"2px dashed var(--secondary-color)"}
           >
-            <Heading fontSize={responsive("", "md", "lg")} fontWeight={"600"}>
+            <Heading fontSize={responsive("sm", "md", "lg")} fontWeight={"600"}>
               Lessons
             </Heading>
             {filteredLessonList &&
@@ -773,7 +1052,7 @@ const Lesson = () => {
                       overflow={"hidden"}
                       textOverflow={"ellipsis"}
                       whiteSpace={"nowrap"}
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                     >
                       {lesson.title}
                     </Text>
@@ -781,13 +1060,14 @@ const Lesson = () => {
 
                   {isLessonEditing && (
                     <Button
+                      size={isMobile ? "sm" : "md"}
                       variant="outline"
                       p=".5em"
                       minH="max-content"
                       minW="max-content"
                       onClick={() => handleDeleteLesson(lesson.slug)}
                       border={"1px solid var(--accent-color)"}
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                       color={"white"}
                       _hover={{
                         color: "var(--accent-color)",
@@ -808,224 +1088,232 @@ const Lesson = () => {
               ))}
           </GridItem>
 
-          <GridItem
-            colSpan={3}
-            rowSpan={7}
-            p={"1em"}
-            borderRadius={"10px"}
-            bgColor={"var(--bg-color)"}
-            border={"2px dashed var(--secondary-color)"}
-          >
-            <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
-              <Flex flexDir={"column"} gap={"1em"}>
-                {isLessonEditing ? (
-                  <>
-                    <FormControl>
-                      <Input
-                        autoFocus
-                        type={"text"}
-                        name="title"
-                        color={"var(--secondary-color)"}
-                        variant={"flushed"}
-                        fontWeight={"600"}
-                        value={lessonUpdateData.title}
-                        fontFamily={"Montserrat, sans-serif;"}
-                        fontSize={responsive("", "2xl", "3xl")}
-                        onChange={(e) => handleLessonChange(e)}
-                        _focus={{
-                          borderColor: "#cdcdcd",
-                          outline: 0,
-                          boxShadow: "none",
-                        }}
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <Input
-                        type={"text"}
-                        name="description"
-                        variant={"flushed"}
-                        value={lessonUpdateData.description}
-                        fontFamily={"Montserrat, sans-serif;"}
+          {!isMobile && (
+            <>
+              <GridItem
+                colSpan={3}
+                rowSpan={7}
+                p={"1em"}
+                borderRadius={"10px"}
+                bgColor={"var(--bg-color)"}
+                border={"2px dashed var(--secondary-color)"}
+              >
+                <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
+                  <Flex flexDir={"column"} gap={"1em"}>
+                    {isLessonEditing ? (
+                      <>
+                        <FormControl>
+                          <Input
+                            autoFocus
+                            type={"text"}
+                            name="title"
+                            color={"var(--secondary-color)"}
+                            variant={"flushed"}
+                            fontWeight={"600"}
+                            value={lessonUpdateData.title}
+                            fontFamily={"Montserrat, sans-serif;"}
+                            fontSize={responsive("xl", "2xl", "3xl")}
+                            onChange={(e) => handleLessonChange(e)}
+                            _focus={{
+                              borderColor: "#cdcdcd",
+                              outline: 0,
+                              boxShadow: "none",
+                            }}
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <Input
+                            type={"text"}
+                            name="description"
+                            variant={"flushed"}
+                            value={lessonUpdateData.description}
+                            fontFamily={"Montserrat, sans-serif;"}
+                            fontWeight={500}
+                            opacity={0.9}
+                            fontSize={responsive("sm", "sm", "md")}
+                            onChange={(e) => handleLessonChange(e)}
+                            _focus={{
+                              borderColor: "#cdcdcd",
+                              outline: 0,
+                              boxShadow: "none",
+                            }}
+                          />
+                        </FormControl>
+                      </>
+                    ) : (
+                      <>
+                        <Heading
+                          fontSize={responsive("xl", "2xl", "3xl")}
+                          fontWeight={600}
+                          color={"var(--secondary-color)"}
+                        >
+                          {lessonUpdateData?.title}
+                        </Heading>
+
+                        <Text
+                          fontWeight={500}
+                          opacity={0.9}
+                          fontSize={responsive("sm", "sm", "md")}
+                        >
+                          {lessonUpdateData?.description}
+                        </Text>
+                      </>
+                    )}
+                  </Flex>
+                  <Flex align={"center"} justify={"space-between"}>
+                    <Flex
+                      align={"center"}
+                      gap={".5em"}
+                      fontSize={responsive("sm", "sm", "md")}
+                    >
+                      <Box color={"var(--accent-color)"}>
+                        {starList.length > 0 ? (
+                          starList.map((star) => (
+                            <StarIcon
+                              key={star}
+                              style={{ position: "relative", bottom: "3px" }}
+                            ></StarIcon>
+                          ))
+                        ) : (
+                          <i
+                            class="fi fi-rr-star"
+                            style={{ position: "relative", top: "2px" }}
+                          ></i>
+                        )}
+                      </Box>
+                      <Text
                         fontWeight={500}
                         opacity={0.9}
-                        fontSize={responsive("", "sm", "md")}
-                        onChange={(e) => handleLessonChange(e)}
-                        _focus={{
-                          borderColor: "#cdcdcd",
-                          outline: 0,
-                          boxShadow: "none",
-                        }}
-                      />
-                    </FormControl>
-                  </>
-                ) : (
-                  <>
-                    <Heading
-                      fontSize={responsive("", "2xl", "3xl")}
-                      fontWeight={600}
-                      color={"var(--secondary-color)"}
-                    >
-                      {lessonUpdateData?.title}
-                    </Heading>
-
-                    <Text
-                      fontWeight={500}
-                      opacity={0.9}
-                      fontSize={responsive("", "sm", "md")}
-                    >
-                      {lessonUpdateData?.description}
-                    </Text>
-                  </>
-                )}
-              </Flex>
-              <Flex align={"center"} justify={"space-between"}>
-                <Flex
-                  align={"center"}
-                  gap={".5em"}
-                  fontSize={responsive("", "sm", "md")}
-                >
-                  <Box color={"var(--accent-color)"}>
-                    {starList.length > 0 ? (
-                      starList.map((star) => (
-                        <StarIcon
-                          key={star}
-                          style={{ position: "relative", bottom: "3px" }}
-                        ></StarIcon>
-                      ))
-                    ) : (
-                      <i
-                        class="fi fi-rr-star"
-                        style={{ position: "relative", top: "2px" }}
-                      ></i>
-                    )}
-                  </Box>
-                  <Text
-                    fontWeight={500}
-                    opacity={0.9}
-                    fontSize={responsive("", "sm", "md")}
-                  >
-                    ({lesson?.comments && lesson.comments.length})
-                  </Text>
-                </Flex>
-                {account && course && account._id === course.ownerId && (
-                  <ButtonGroup>
-                    {isLessonEditing && (
-                      <Button
-                        variant={"outline"}
-                        bgColor={"var(--secondary-color)"}
-                        color={"white"}
-                        onClick={(e) => handleUpdateLessonSubmit(e)}
-                        fontSize={responsive("", "sm", "md")}
-                        border={"1px solid var(--secondary-color)"}
-                        _hover={{
-                          bgColor: "var(--bg-color)",
-                          color: "var(--secondary-color)",
-                        }}
+                        fontSize={responsive("sm", "sm", "md")}
                       >
-                        Save
-                      </Button>
+                        ({lesson?.comments && lesson.comments.length})
+                      </Text>
+                    </Flex>
+                    {account && course && account._id === course.ownerId && (
+                      <ButtonGroup>
+                        {isLessonEditing && (
+                          <Button
+                            size={isMobile ? "sm" : "md"}
+                            variant={"outline"}
+                            bgColor={"var(--secondary-color)"}
+                            color={"white"}
+                            onClick={(e) => handleUpdateLessonSubmit(e)}
+                            fontSize={responsive("sm", "sm", "md")}
+                            border={"1px solid var(--secondary-color)"}
+                            _hover={{
+                              bgColor: "var(--bg-color)",
+                              color: "var(--secondary-color)",
+                            }}
+                          >
+                            Save
+                          </Button>
+                        )}
+                        <Button
+                          size={isMobile ? "sm" : "md"}
+                          variant={"outline"}
+                          bgColor={"var(--accent-color)"}
+                          color={"white"}
+                          onClick={() => {
+                            setIsLessonEditing(!isLessonEditing);
+                            setIsCommentEditing(!isCommentEditing);
+                            if (isCommentEditing && isLessonEditing) {
+                              setUpdatedCommentList(comments);
+                              setDeletionCommentList([]);
+                              setFilteredCommentList(comments);
+                              setDeletionLessonList([]);
+                              setLessonUpdateData({
+                                title: lesson.title,
+                                description: lesson.description,
+                                notes: lesson.notes,
+                              });
+                              setFilteredLessonList(lessons);
+                            }
+                          }}
+                          fontSize={responsive("sm", "sm", "md")}
+                          border={"1px solid var(--accent-color)"}
+                          _hover={{
+                            bgColor: "var(--bg-color)",
+                            color: "var(--accent-color)",
+                          }}
+                        >
+                          {isLessonEditing ? "Reset changes" : "Edit Lesson"}
+                        </Button>
+                      </ButtonGroup>
                     )}
-                    <Button
-                      variant={"outline"}
-                      bgColor={"var(--accent-color)"}
-                      color={"white"}
-                      onClick={() => {
-                        setIsLessonEditing(!isLessonEditing);
-                        setIsCommentEditing(!isCommentEditing);
-                        if (isCommentEditing && isLessonEditing) {
-                          setUpdatedCommentList(comments);
-                          setDeletionCommentList([]);
-                          setFilteredCommentList(comments);
-                          setDeletionLessonList([]);
-                          setLessonUpdateData({
-                            title: lesson.title,
-                            description: lesson.description,
-                            notes: lesson.notes,
-                          });
-                          setFilteredLessonList(lessons);
-                        }
-                      }}
-                      fontSize={responsive("", "sm", "md")}
-                      border={"1px solid var(--accent-color)"}
-                      _hover={{
-                        bgColor: "var(--bg-color)",
-                        color: "var(--accent-color)",
-                      }}
-                    >
-                      {isLessonEditing ? "Reset changes" : "Edit Lesson"}
-                    </Button>
-                  </ButtonGroup>
-                )}
-              </Flex>
-            </Flex>
-          </GridItem>
-          <GridItem
-            colSpan={3}
-            rowSpan={10}
-            p={"1em"}
-            borderRadius={"10px"}
-            bgColor={"var(--bg-color)"}
-            border={"2px dashed var(--secondary-color)"}
-          >
-            <Center h={"100%"} borderRadius={"10px"} overflow={"hidden"}>
-              <FormControl position={"relative"}>
-                <ReactPlayer
-                  style={{ position: "relative", top: "0", left: "0" }}
-                  onProgress={(state) =>
-                    setCurrentVideoTime(state.playedSeconds.toFixed(0))
-                  }
-                  controls
-                  width={"100%"}
-                  height={"100%"}
-                  url={apiUrl + lesson.videoUrl}
-                ></ReactPlayer>
-                <Input
-                  type="file"
-                  onChange={(e) => handleLessonChangeForVideo(e)}
-                  accept="video/*"
-                  name="video"
-                  display={"none"}
-                  id="video"
-                ></Input>
-                {isLessonEditing && (
-                  <FormLabel
-                    htmlFor="video"
-                    pos={"absolute"}
-                    top={0}
-                    left={0}
-                    w={"100%"}
-                    h={"100%"}
-                    opacity={0.5}
-                    display={"flex"}
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                    cursor={"pointer"}
-                  >
+                  </Flex>
+                </Flex>
+              </GridItem>
+              <GridItem
+                colSpan={3}
+                rowSpan={10}
+                p={"1em"}
+                borderRadius={"10px"}
+                bgColor={"var(--bg-color)"}
+                border={"2px dashed var(--secondary-color)"}
+              >
+                <Center h={"100%"} borderRadius={"10px"} overflow={"hidden"}>
+                  <FormControl position={"relative"}>
+                    <ReactPlayer
+                      style={{ position: "relative", top: "0", left: "0" }}
+                      onProgress={(state) =>
+                        setCurrentVideoTime(state.playedSeconds.toFixed(0))
+                      }
+                      controls
+                      width={"100%"}
+                      height={"100%"}
+                      url={apiUrl + lesson.videoUrl}
+                    ></ReactPlayer>
+                    <Input
+                      type="file"
+                      onChange={(e) => handleLessonChangeForVideo(e)}
+                      accept="video/*"
+                      name="video"
+                      display={"none"}
+                      id="video"
+                    ></Input>
                     {isLessonEditing && (
-                      <i
-                        class="fi fi-rr-camera"
-                        style={{
-                          position: "relative",
-                          top: "2px",
-                          fontSize: responsive("", "5em", "7em"),
-                        }}
-                      ></i>
+                      <FormLabel
+                        htmlFor="video"
+                        pos={"absolute"}
+                        top={0}
+                        left={0}
+                        w={"100%"}
+                        h={"100%"}
+                        opacity={0.5}
+                        display={"flex"}
+                        alignItems={"center"}
+                        justifyContent={"center"}
+                        cursor={"pointer"}
+                      >
+                        {isLessonEditing && (
+                          <i
+                            class="fi fi-rr-camera"
+                            style={{
+                              position: "relative",
+                              top: "2px",
+                              fontSize: responsive("3em", "5em", "7em"),
+                            }}
+                          ></i>
+                        )}
+                      </FormLabel>
                     )}
-                  </FormLabel>
-                )}
-              </FormControl>
-            </Center>
-          </GridItem>
-          <GridItem
-            colSpan={1}
-            rowSpan={7}
-            p={"1em"}
-            borderRadius={"10px"}
-          ></GridItem>
+                  </FormControl>
+                </Center>
+              </GridItem>
+            </>
+          )}
+          {!isMobile && (
+            <GridItem
+              colSpan={1}
+              rowSpan={7}
+              p={"1em"}
+              borderRadius={"10px"}
+            ></GridItem>
+          )}
           <GridItem
             colSpan={3}
             rowSpan={7}
-            maxH={responsive("", "60em", "62em")}
+            maxH={responsive("58em", "60em", "62em")}
             p={"1em"}
             borderRadius={"10px"}
             bgColor={"var(--bg-color)"}
@@ -1034,7 +1322,7 @@ const Lesson = () => {
             <Flex flexDir={"column"} justify={"space-between"} h={"100%"}>
               <Stack gap={"1em"}>
                 <Heading
-                  fontSize={responsive("", "md", "lg")}
+                  fontSize={responsive("md", "md", "lg")}
                   fontWeight={"600"}
                 >
                   Lesson Note
@@ -1049,7 +1337,7 @@ const Lesson = () => {
                     border: "2px dashed #cfcfcf",
                     boxShadow: "none",
                   }}
-                  fontSize={responsive("", "sm", "md")}
+                  fontSize={responsive("sm", "sm", "md")}
                   fontWeight={500}
                   opacity={0.9}
                   value={lessonUpdateData?.notes}
@@ -1058,13 +1346,14 @@ const Lesson = () => {
               <Flex justify={"flex-end"}>
                 {account && course && account._id !== course.ownerId && (
                   <Button
+                    size={isMobile ? "sm" : "md"}
                     mt={"1em"}
                     variant={"outline"}
                     bgColor={"var(--accent-color)"}
                     color={"white"}
                     isDisabled={isFinishButtonClicked}
                     onClick={() => updateLessonStateFunc(lesson.slug)}
-                    fontSize={responsive("", "sm", "md")}
+                    fontSize={responsive("sm", "sm", "md")}
                     border={"1px solid var(--accent-color)"}
                     _hover={{
                       bgColor: "white",
@@ -1077,7 +1366,7 @@ const Lesson = () => {
               </Flex>
             </Flex>
           </GridItem>
-          <GridItem colSpan={1} rowSpan={17}></GridItem>
+          {!isMobile && <GridItem colSpan={1} rowSpan={17}></GridItem>}
           <GridItem
             colSpan={3}
             rowSpan={17}
@@ -1087,17 +1376,21 @@ const Lesson = () => {
             border={"2px dashed var(--secondary-color)"}
           >
             <Flex align={"center"} justify={"space-between"} mb={"1em"}>
-              <Heading fontSize={responsive("", "md", "lg")} fontWeight={"600"}>
+              <Heading
+                fontSize={responsive("md", "md", "lg")}
+                fontWeight={"600"}
+              >
                 Lesson Comments
               </Heading>
               <ButtonGroup>
                 {!isCommentEditing && (
                   <Button
+                    size={isMobile ? "sm" : "md"}
                     variant={"outline"}
                     onClick={() => setCommentAddState(!commentAddState)}
                     bgColor={"var(--secondary-color)"}
                     color={"white"}
-                    fontSize={responsive("", "sm", "md")}
+                    fontSize={responsive("sm", "sm", "md")}
                     border={"1px solid var(--secondary-color)"}
                     _hover={{
                       bgColor: "var(--bg-color)",
@@ -1109,11 +1402,12 @@ const Lesson = () => {
                 )}
                 {isCommentEditing && course.ownerId !== account._id && (
                   <Button
+                    size={isMobile ? "sm" : "md"}
                     variant={"outline"}
                     onClick={(e) => handleUpdateCommentSubmit(e)}
                     bgColor={"var(--secondary-color)"}
                     color={"white"}
-                    fontSize={responsive("", "sm", "md")}
+                    fontSize={responsive("sm", "sm", "md")}
                     border={"1px solid var(--secondary-color)"}
                     _hover={{
                       bgColor: "var(--bg-color)",
@@ -1131,6 +1425,7 @@ const Lesson = () => {
                   updatedCommentList.length > 0 && (
                     <Button
                       variant={"outline"}
+                      size={isMobile ? "sm" : "md"}
                       onClick={() => {
                         setCommentAddState(false);
                         setIsCommentEditing(!isCommentEditing);
@@ -1142,7 +1437,7 @@ const Lesson = () => {
                       }}
                       bgColor={"var(--accent-color)"}
                       color={"white"}
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                       border={"1px solid var(--accent-color)"}
                       _hover={{
                         bgColor: "var(--bg-color)",
@@ -1156,14 +1451,14 @@ const Lesson = () => {
             </Flex>
             <Flex
               flexDir={"column"}
-              gap={responsive("", "1em", "1.5em")}
-              maxH={responsive("", "35em", "37em")}
+              gap={responsive(".7em", "1em", "1.5em")}
+              maxH={responsive("33em", "35em", "37em")}
               overflow={"auto"}
             >
               {commentAddState && (
                 <Flex
                   bgColor="white"
-                  p={responsive("", ".5em", "1em")}
+                  p={responsive(".5em", ".5em", "1em")}
                   borderRadius="10px"
                   justify="space-between"
                   flexDir="column"
@@ -1180,22 +1475,23 @@ const Lesson = () => {
                         src={apiUrl + account.image}
                         bgColor={"var(--secondary-color)"}
                         name={account.username}
-                        size={responsive("", "sm", "sm")}
+                        size={responsive("sm", "sm", "sm")}
                       />
                       <Text
                         fontWeight={500}
-                        fontSize={responsive("", "sm", "md")}
+                        fontSize={responsive("sm", "sm", "md")}
                         opacity={0.9}
                       >
                         {account.username}
                       </Text>
                     </Flex>
                     <Button
+                      size={isMobile ? "sm" : "md"}
                       variant={"outline"}
                       onClick={(e) => handleSubmitCreateComment(e)}
                       bgColor={"var(--secondary-color)"}
                       color={"white"}
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                       border={"1px solid var(--secondary-color)"}
                       _hover={{
                         bgColor: "var(--bg-color)",
@@ -1214,13 +1510,13 @@ const Lesson = () => {
                       border: "2px dashed #cfcfcf",
                       boxShadow: "none",
                     }}
-                    fontSize={responsive("", "sm", "md")}
+                    fontSize={responsive("sm", "sm", "md")}
                     fontWeight={500}
                     opacity={0.9}
                   ></Textarea>
                   <Flex align={"center"} justify={"space-between"}>
                     <Flex
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                       fontWeight={500}
                       opacity={0.9}
                       gap={".3em"}
@@ -1244,11 +1540,11 @@ const Lesson = () => {
                       />
                     </Flex>
                     <Text
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                       fontWeight={500}
                       opacity={0.9}
                     >
-                      {getDate(new Date().toLocaleDateString())}
+                      {getDate(new Date())}
                     </Text>
                   </Flex>
                 </Flex>
@@ -1258,7 +1554,7 @@ const Lesson = () => {
                     <Flex
                       key={index}
                       bgColor="white"
-                      p={responsive("", ".5em", "1em")}
+                      p={responsive(".5em", ".5em", "1em")}
                       borderRadius="10px"
                       justify="space-between"
                       flexDir="column"
@@ -1275,11 +1571,11 @@ const Lesson = () => {
                                   src={apiUrl + owner.image}
                                   bgColor={"var(--secondary-color)"}
                                   name={owner.username}
-                                  size={responsive("", "sm", "sm")}
+                                  size={responsive("sm", "sm", "sm")}
                                 />
                                 <Text
                                   fontWeight={500}
-                                  fontSize={responsive("", "sm", "md")}
+                                  fontSize={responsive("sm", "sm", "md")}
                                   opacity={0.9}
                                 >
                                   {owner.username}
@@ -1293,12 +1589,13 @@ const Lesson = () => {
                               (account._id === comment.user &&
                                 isCommentEditing) ? (
                                 <Button
+                                  size={isMobile ? "sm" : "md"}
                                   variant="outline"
                                   p=".5em"
                                   minH="max-content"
                                   minW="max-content"
                                   border={"1px solid var(--accent-color)"}
-                                  fontSize={responsive("", "sm", "md")}
+                                  fontSize={responsive("sm", "sm", "md")}
                                   onClick={() =>
                                     handleDeleteComment(comment._id)
                                   }
@@ -1335,13 +1632,13 @@ const Lesson = () => {
                           border: "2px dashed #cfcfcf",
                           boxShadow: "none",
                         }}
-                        fontSize={responsive("", "sm", "md")}
+                        fontSize={responsive("sm", "sm", "md")}
                         fontWeight={500}
                         opacity={0.9}
                       ></Textarea>
                       <Flex align={"center"} justify={"space-between"}>
                         <Flex
-                          fontSize={responsive("", "sm", "md")}
+                          fontSize={responsive("sm", "sm", "md")}
                           fontWeight={500}
                           opacity={0.9}
                           color={"var(--accent-color)"}
@@ -1352,7 +1649,7 @@ const Lesson = () => {
                           <StarIcon pos={"relative"} bottom={"2px"}></StarIcon>
                         </Flex>
                         <Text
-                          fontSize={responsive("", "sm", "md")}
+                          fontSize={responsive("sm", "sm", "md")}
                           fontWeight={500}
                           opacity={0.9}
                         >
