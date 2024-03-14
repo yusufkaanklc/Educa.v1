@@ -77,27 +77,36 @@ const Login = () => {
 
   return (
     <>
-      <Center h={"100vh"} bgPos={"center"} position={"relative"}>
+      <Center
+        h={"100vh"}
+        bgPos={"center"}
+        position={"relative"}
+        flexDirection={isMobile ? "column" : "row"}
+        px={isMobile && "1em"}
+      >
         <Box
           pos={"absolute"}
-          top={responsive("", "1.5em", "2em")}
-          left={responsive("", "1.5em", "2em")}
-          p={responsive("", "1em", "1em 2em")}
-          bgColor={"var(--secondary-color)"}
+          top={responsive("7%", "1.5em", "2em")}
+          left={responsive("1em", "1.5em", "2em")}
+          p={responsive("1em", "1em", "1em 2em")}
+          bgColor={isMobile ? "unset" : "var(--secondary-color)"}
           w={"max-content"}
         >
           <Heading
-            color={"white"}
-            fontSize={responsive("", "xl", "2xl")}
+            color={isMobile ? "black" : "white"}
+            fontSize={responsive("lg", "xl", "2xl")}
             fontWeight={"600"}
             mb={"1em"}
           >
             Login
           </Heading>
           <Breadcrumb
-            color={"white"}
+            color={isMobile ? "black" : "white"}
+            fontSize={responsive("sm", "sm", "md")}
             spacing="8px"
-            separator={<ChevronRightIcon color="white" />}
+            separator={
+              <ChevronRightIcon color={isMobile ? "black" : "white"} />
+            }
           >
             <BreadcrumbItem>
               <BreadcrumbLink
@@ -117,7 +126,7 @@ const Login = () => {
             </BreadcrumbItem>
           </Breadcrumb>
         </Box>
-        <Box position={"relative"} w={"35%"}>
+        <Box position={"relative"} w={isMobile ? "100%" : "35%"}>
           <Box
             pos={"absolute"}
             top={responsive("", "-3em", "-4em")}
@@ -129,8 +138,8 @@ const Login = () => {
           ></Box>
           <Box
             bgColor={"white"}
-            p={responsive("", "2em 3em", "4em 5em")}
-            pb={responsive("", "2em", "3em")}
+            p={responsive("1em 2em", "2em 3em", "4em 5em")}
+            pb={responsive("1em", "2em", "3em")}
             borderRadius={"10px"}
             boxShadow={"0 0 50px 0 rgba(0,0,0,0.2)"}
             border={"2px dashed  #cfcfcf"}
@@ -138,11 +147,11 @@ const Login = () => {
             <form onSubmit={handleSubmit}>
               <Flex flexDirection={"column"} gap={"1em"}>
                 <FormControl isRequired>
-                  <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                  <FormLabel fontSize={responsive("sm", "sm", "md")}>
                     Email
                   </FormLabel>
                   <Input
-                    h={responsive("", "2.5em", "3em")}
+                    h={responsive("2em", "2.5em", "3em")}
                     variant={"outline"}
                     border={"1px solid rgba(0,0,0,0.2)"}
                     type="text"
@@ -155,17 +164,17 @@ const Login = () => {
                   />
                 </FormControl>
                 <FormControl isRequired>
-                  <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                  <FormLabel fontSize={responsive("sm", "sm", "md")}>
                     Password
                   </FormLabel>
                   <InputGroup display={"flex"} alignItems={"center"}>
                     <Input
-                      h={responsive("", "2.5em", "3em")}
+                      h={responsive("2em", "2.5em", "3em")}
                       variant={"outline"}
                       border={"1px solid rgba(0,0,0,0.2)"}
                       type={passwordShow ? "text" : "password"}
                       name="password"
-                      pr={"4.5rem"}
+                      pr={isMobile ? ".5em" : "4.5rem"}
                       value={login.password}
                       onChange={handleLoginChange}
                       _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
@@ -174,7 +183,11 @@ const Login = () => {
                     />
 
                     <InputRightElement width="4.5rem" top={"unset"}>
-                      <Button h="1.75rem" size="sm" onClick={handleClick}>
+                      <Button
+                        h={isMobile ? "1.5rem" : "1.75rem"}
+                        size={responsive("xs", "sm", "sm")}
+                        onClick={handleClick}
+                      >
                         {passwordShow ? "Hide" : "Show"}
                       </Button>
                     </InputRightElement>
@@ -183,12 +196,13 @@ const Login = () => {
               </Flex>
               <Flex flexDir={"column"} gap={"1em"} mt={"2em"}>
                 <Button
+                  size={isMobile ? "sm" : "md"}
                   variant={"solid"}
                   type="submit"
                   bgColor={"var(--secondary-color)"}
                   w={"100%"}
                   p={"1.3em"}
-                  fontSize={responsive("", "1em", "1.2em")}
+                  fontSize={responsive("sm", "sm", "md")}
                   border={"1px solid transparent"}
                   color={"white"}
                   _hover={{
@@ -199,8 +213,12 @@ const Login = () => {
                 >
                   Login
                 </Button>
-                <ChakraLink as={Link} to={"/signup"} ml={"1em"}>
-                  {" "}
+                <ChakraLink
+                  as={Link}
+                  fontSize={responsive("sm", "sm", "md")}
+                  to={"/signup"}
+                  ml={"1em"}
+                >
                   Are you not registered?
                 </ChakraLink>
               </Flex>

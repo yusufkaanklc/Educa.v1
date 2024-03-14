@@ -18,7 +18,6 @@ import { Link } from "react-router-dom";
 import dataContext from "../../utils/contextApi";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
-
 import "swiper/css";
 import "swiper/css/navigation";
 
@@ -77,11 +76,9 @@ const Courses = () => {
       {isMobile ? (
         popularCourses.length > 0 && (
           <Swiper
-            centeredSlides={true}
-            slidesPerView={"auto"} // "1" yerine "auto" kullanabilirsiniz, eğer her slide'ın kendi genişliğine sahip olmasını isterseniz.
-            rebuildOnUpdate="true"
-            shouldSwiperUpdate
-            observer="true"
+            spaceBetween={20}
+            loop={true}
+            slidesPerView={"1"} // "1" yerine "auto" kullanabilirsiniz, eğer her slide'ın kendi genişliğine sahip olmasını isterseniz.
             navigation
             modules={[Navigation]}
           >

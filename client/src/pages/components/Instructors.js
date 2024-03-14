@@ -39,7 +39,9 @@ const Instructors = () => {
       borderRadius={"10px"}
       bgColor={"var(--bg-color)"}
       mx={responsive("1em", "8em", "10em")}
-      py={"4em"}
+      py={!isMobile && "4em"}
+      pt={isMobile && "2em"}
+      pb={isMobile && "4em"}
       id="instructors"
     >
       <Stack
@@ -66,11 +68,9 @@ const Instructors = () => {
       </Stack>
       {isMobile ? (
         <Swiper
-          centeredSlides={true}
-          slidesPerView={"auto"} // "1" yerine "auto" kullanabilirsiniz, eğer her slide'ın kendi genişliğine sahip olmasını isterseniz.
-          rebuildOnUpdate="true"
-          shouldSwiperUpdate
-          observer="true"
+          slidesPerView={"1"}
+          loop={true}
+          spaceBetween={20}
           navigation
           modules={[Navigation]}
         >

@@ -178,16 +178,17 @@ const Account = () => {
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent mx={isMobile && "1em"}>
           <ModalHeader>
             Are you sure you want to delete the account?
           </ModalHeader>
           <ModalBody>
             <ButtonGroup gap={"1em"}>
               <Button
+                size={isMobile ? "sm" : "md"}
                 border={"1px solid transparent"}
                 bgColor={"var(--secondary-color)"}
-                fontSize={responsive("", "sm", "md")}
+                fontSize={responsive("sm", "sm", "md")}
                 onClick={() => handleDeleteAccount()}
                 color={"white"}
                 _hover={{
@@ -199,9 +200,10 @@ const Account = () => {
                 Yes
               </Button>
               <Button
+                size={isMobile ? "sm" : "md"}
                 border={"1px solid transparent"}
                 bgColor={"var(--accent-color)"}
-                fontSize={responsive("", "sm", "md")}
+                fontSize={responsive("sm", "sm", "md")}
                 onClick={() => onClose()}
                 color={"white"}
                 _hover={{
@@ -216,24 +218,32 @@ const Account = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
-      <Box h={"100vh"} pl={"2em"} pt={"2em"}>
+      <Box
+        h={"100vh"}
+        pl={isMobile ? "1em" : "2em"}
+        pt={isMobile ? "1em" : "2em"}
+        pr={isMobile && "1em"}
+      >
         <Box
-          p={responsive("", "1em", "1em 2em")}
-          bgColor={"var(--secondary-color)"}
+          p={responsive(".5em", "1em", "1em 2em")}
+          bgColor={isMobile ? "unset" : "var(--secondary-color)"}
           w={"max-content"}
         >
           <Heading
-            color={"white"}
-            fontSize={responsive("", "xl", "2xl")}
+            color={isMobile ? "black" : "white"}
+            fontSize={responsive("lg", "xl", "2xl")}
             fontWeight={"600"}
             mb={"1em"}
           >
             Account
           </Heading>
           <Breadcrumb
-            color={"white"}
+            color={isMobile ? "black" : "white"}
             spacing="8px"
-            separator={<ChevronRightIcon color="white" />}
+            fontSize={responsive("sm", "sm", "md")}
+            separator={
+              <ChevronRightIcon color={isMobile ? "black" : "white"} />
+            }
           >
             <BreadcrumbItem>
               <BreadcrumbLink
@@ -253,39 +263,43 @@ const Account = () => {
             </BreadcrumbItem>
           </Breadcrumb>
         </Box>
-        <Center h={"70%"}>
+        <Center h={isMobile ? "80%" : "70%"}>
           <Box
             bgColor={"white"}
             border={"2px dashed #cfcfcf"}
             position={"relative"}
             borderRadius={"10px"}
-            p={responsive("", "1em ", "2em")}
-            w={"30%"}
+            p={responsive("1em", "1em ", "2em")}
+            w={isMobile ? "100%" : "30%"}
             h={"max-content"}
             boxShadow={"0 0 50px 0 rgba(0,0,0,0.2)"}
           >
-            <Box
-              pos={"absolute"}
-              top={responsive("", "-3em", "-4em")}
-              right={responsive("", "-3em", "-4em")}
-              zIndex={-1}
-              w={responsive("", "8em", "10em")}
-              h={responsive("", "8em", "10em")}
-              bgColor={"var(--secondary-color)"}
-            ></Box>
+            {!isMobile && (
+              <Box
+                pos={"absolute"}
+                top={responsive("", "-3em", "-4em")}
+                right={responsive("", "-3em", "-4em")}
+                zIndex={-1}
+                w={responsive("", "8em", "10em")}
+                h={responsive("", "8em", "10em")}
+                bgColor={"var(--secondary-color)"}
+              ></Box>
+            )}
             <form onSubmit={handleSubmit}>
               <Flex flexDir={"column"} gap={"2em"}>
-                <Box mt={responsive("", "2em", "3em")}>
-                  <Flex align={"center"} gap={responsive("", "1em", "2em")}>
+                <Box mt={responsive("1em", "2em", "3em")}>
+                  <Flex align={"center"} gap={responsive("1em", "1em", "2em")}>
                     <FormControl position={"relative"} w={"max-content"}>
                       {isLoading || !account ? (
-                        <SkeletonCircle size={responsive("", "6em", "8em")} />
+                        <SkeletonCircle
+                          size={responsive("4em", "6em", "8em")}
+                        />
                       ) : (
                         <Avatar
                           pos={"relative"}
                           name={account?.username}
                           src={account?.image}
-                          size={responsive("", "xl", "2xl")}
+                          size={responsive("lg", "xl", "2xl")}
                           color={"white"}
                           bgColor={"var(--accent-color)"}
                         />
@@ -293,15 +307,15 @@ const Account = () => {
                       <FormLabel
                         htmlFor="image"
                         pos={"absolute"}
-                        bottom={responsive("", "-.3em", "-.5em")}
-                        right={responsive("", "-.3em", "-.5em")}
+                        bottom={responsive("-.7em", "-.3em", "-.5em")}
+                        right={responsive("-.7em", "-.3em", "-.5em")}
                         display={isEditing ? "block" : "none"}
                       >
                         <Center
                           bgColor={"white"}
                           borderRadius={"full"}
-                          w={responsive("", "1em", "2em")}
-                          h={responsive("", "1em", "2em")}
+                          w={responsive("1em", "1em", "2em")}
+                          h={responsive("1em", "1em", "2em")}
                         >
                           <i
                             className="fi fi-rr-camera"
@@ -334,7 +348,7 @@ const Account = () => {
                               variant={"flushed"}
                               fontWeight={"600"}
                               fontFamily={"Montserrat, sans-serif;"}
-                              fontSize={responsive("", "xl", "2xl")}
+                              fontSize={responsive("lg", "xl", "2xl")}
                               onChange={(e) => handleChange(e)}
                               _focus={{
                                 borderColor: "#cdcdcd",
@@ -351,7 +365,7 @@ const Account = () => {
                               variant={"flushed"}
                               fontWeight={"600"}
                               fontFamily={"Montserrat, sans-serif;"}
-                              fontSize={responsive("", "sm", "md")}
+                              fontSize={responsive("sm", "sm", "md")}
                               onChange={(e) => handleChange(e)}
                               _focus={{
                                 borderColor: "#cdcdcd",
@@ -364,21 +378,16 @@ const Account = () => {
                             <FormControl>
                               <Input
                                 type={"text"}
-                                mt={responsive("", ".5em", "1em")}
+                                mt={responsive(".5em", ".5em", "1em")}
                                 value={formData.profession}
                                 name={"profession"}
                                 variant={"outline"}
                                 border={"1px solid var(--secondary-color)"}
                                 fontFamily={"Poppins, sans-serif;"}
                                 fontWeight={"300"}
-                                fontSize={responsive("", "sx", "sm")}
+                                fontSize={responsive("xs", "xs", "sm")}
                                 color={"var(--secondary-color)"}
-                                p={responsive(
-                                  "",
-                                  "2px 5px",
-                                  "3px 7px",
-                                  "5px 10px"
-                                )}
+                                p={responsive("2px 5px", "3px 7px", "5px 10px")}
                                 w={"max-content"}
                                 h={"max-content"}
                                 onChange={(e) => handleChange(e)}
@@ -399,18 +408,18 @@ const Account = () => {
                           {isLoading || !account ? (
                             <>
                               <Skeleton
-                                h={responsive("", "1em", "1em")}
-                                w={responsive("", "10em", "15em")}
+                                h={responsive("1em", "1em", "1em")}
+                                w={responsive("8em", "10em", "15em")}
                                 borderRadius={"10px"}
                               />
                               <Skeleton
-                                h={responsive("", "1em", "1em")}
-                                w={responsive("", "10em", "15em")}
+                                h={responsive("1em", "1em", "1em")}
+                                w={responsive("8em", "10em", "15em")}
                                 borderRadius={"10px"}
                               />
                               <Skeleton
-                                h={responsive("", "1em", "1em")}
-                                w={responsive("", "10em", "15em")}
+                                h={responsive("1em", "1em", "1em")}
+                                w={responsive("8em", "10em", "15em")}
                                 borderRadius={"10px"}
                               />
                             </>
@@ -418,13 +427,13 @@ const Account = () => {
                             <>
                               <Heading
                                 fontWeight={"600"}
-                                fontSize={responsive("", "xl", "2xl")}
+                                fontSize={responsive("lg", "xl", "2xl")}
                               >
                                 {account?.username}
                               </Heading>
                               <Text
                                 fontWeight={"500"}
-                                fontSize={responsive("", "sm", "md")}
+                                fontSize={responsive("sm", "sm", "md")}
                               >
                                 {account?.email}
                               </Text>
@@ -432,7 +441,6 @@ const Account = () => {
                                 <>
                                   <Center
                                     p={responsive(
-                                      "",
                                       "2px 5px",
                                       "3px 7px",
                                       "5px 10px"
@@ -441,7 +449,7 @@ const Account = () => {
                                     borderRadius={"5px"}
                                     w={"max-content"}
                                     color={"var(--secondary-color)"}
-                                    fontSize={responsive("", "xs", "sm")}
+                                    fontSize={responsive("xs", "xs", "sm")}
                                   >
                                     {account?.profession}
                                   </Center>
@@ -453,9 +461,9 @@ const Account = () => {
                       )}
                       <Flex
                         fontWeight={"500"}
-                        fontSize={responsive("", "xs", "sm")}
+                        fontSize={responsive("xs", "xs", "sm")}
                         gap={"1em"}
-                        mt={responsive("", ".5em", "1em")}
+                        mt={responsive(".5em", ".5em", "1em")}
                       >
                         <Text>Joined on : </Text>
                         <Text opacity={0.9}>{formattedDate}</Text>
@@ -474,7 +482,7 @@ const Account = () => {
                           variant={"flushed"}
                           fontWeight={"600"}
                           fontFamily={"Montserrat, sans-serif;"}
-                          fontSize={responsive("", "sm", "md")}
+                          fontSize={responsive("sm", "sm", "md")}
                           onChange={(e) => handleChange(e)}
                           _focus={{
                             borderColor: "#cdcdcd",
@@ -492,7 +500,7 @@ const Account = () => {
                           variant={"flushed"}
                           fontWeight={"600"}
                           fontFamily={"Montserrat, sans-serif;"}
-                          fontSize={responsive("", "sm", "md")}
+                          fontSize={responsive("sm", "sm", "md")}
                           onChange={(e) => handleChange(e)}
                           _focus={{
                             borderColor: "#cdcdcd",
@@ -505,12 +513,12 @@ const Account = () => {
                   )}
                 </Box>
                 {account && account.role === "teacher" && (
-                  <Box mt={responsive("", "1em", "1em")}>
+                  <Box mt={responsive("1em", "1em", "1em")}>
                     <Text fontWeight={"600"}>Introduce</Text>
                     {isEditing ? (
                       <FormControl>
                         <Textarea
-                          minH={responsive("", "7em", "9em")}
+                          minH={responsive("5em", "7em", "9em")}
                           onChange={(e) => handleChange(e)}
                           value={formData.introduce}
                           name={"introduce"}
@@ -525,7 +533,7 @@ const Account = () => {
                       <Textarea
                         readOnly
                         _hover={{ borderColor: "var(--secondary-color)" }}
-                        minH={responsive("", "7em", "9em")}
+                        minH={responsive("5em", "7em", "9em")}
                         value={account?.introduce}
                         name={"introduce"}
                         border={"2px dashed var(--secondary-color)"}
@@ -540,16 +548,17 @@ const Account = () => {
 
                 <Flex
                   justifyContent={"center"}
-                  mt={responsive("", "1em", "2em")}
+                  mt={responsive("1em", "1em", "2em")}
                 >
                   {isEditing && (
                     <>
                       <Flex gap={"1em"}>
                         <Button
+                          size={isMobile ? "sm" : "md"}
                           border={"1px solid transparent"}
                           bgColor={"var(--secondary-color)"}
                           type="submit"
-                          fontSize={responsive("", "sm", "md")}
+                          fontSize={responsive("sm", "sm", "md")}
                           color={"white"}
                           _hover={{
                             bgColor: "var(--bg-color)",
@@ -560,6 +569,7 @@ const Account = () => {
                           Save Changes
                         </Button>
                         <Button
+                          size={isMobile ? "sm" : "md"}
                           type="submit"
                           border={"1px solid transparent"}
                           onClick={() => {
@@ -576,7 +586,7 @@ const Account = () => {
                             });
                           }}
                           bgColor={"var(--accent-color)"}
-                          fontSize={responsive("", "sm", "md")}
+                          fontSize={responsive("sm", "sm", "md")}
                           color={"white"}
                           _hover={{
                             bgColor: "var(--bg-color)",
@@ -593,8 +603,8 @@ const Account = () => {
                     <>
                       {isLoading || !account ? (
                         <Skeleton
-                          h={responsive("", "1.5em", "2em")}
-                          w={responsive("", "10em", "16em")}
+                          h={responsive("1em", "1.5em", "2em")}
+                          w={responsive("6em", "10em", "16em")}
                           borderRadius={"5px"}
                         />
                       ) : (
@@ -606,7 +616,7 @@ const Account = () => {
                           <Button
                             border={"1px solid transparent"}
                             bgColor={"var(--secondary-color)"}
-                            fontSize={responsive("", "sm", "md")}
+                            fontSize={responsive("sm", "sm", "md")}
                             onClick={() => setIsEditing(!isEditing)}
                             color={"white"}
                             _hover={{
@@ -620,7 +630,7 @@ const Account = () => {
                           <Button
                             border={"1px solid transparent"}
                             bgColor={"var(--accent-color)"}
-                            fontSize={responsive("", "sm", "md")}
+                            fontSize={responsive("sm", "sm", "md")}
                             onClick={() => onOpen()}
                             color={"white"}
                             _hover={{
@@ -638,15 +648,17 @@ const Account = () => {
                 </Flex>
               </Flex>
             </form>
-            <Box
-              pos={"absolute"}
-              bottom={responsive("", "-3em", "-4em")}
-              left={responsive("", "-3em", "-4em")}
-              zIndex={-1}
-              w={responsive("", "8em", "10em")}
-              h={responsive("", "8em", "10em")}
-              bgColor={"var(--secondary-color)"}
-            ></Box>
+            {!isMobile && (
+              <Box
+                pos={"absolute"}
+                bottom={responsive("", "-3em", "-4em")}
+                left={responsive("", "-3em", "-4em")}
+                zIndex={-1}
+                w={responsive("", "8em", "10em")}
+                h={responsive("", "8em", "10em")}
+                bgColor={"var(--secondary-color)"}
+              ></Box>
+            )}
           </Box>
         </Center>
       </Box>

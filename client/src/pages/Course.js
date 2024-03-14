@@ -370,28 +370,32 @@ const Course = () => {
   return (
     <Box
       bgColor={"white"}
-      border={"2px dashed #cfcfcf"}
+      border={!isMobile && "2px dashed #cfcfcf"}
       borderRadius={"10px"}
-      p={responsive("", "1em ", "2em")}
+      p={responsive("1em", "1em ", "2em")}
       mx={responsive("", "8em", "10em")}
       my={responsive("", "2em", "3em")}
     >
       <Flex
-        mb={responsive("", "2em", "3em")}
-        justifyContent={"space-between"}
-        align={"center"}
+        mb={responsive("1em", "2em", "3em")}
+        justifyContent={!isMobile && "space-between"}
+        align={!isMobile && "center"}
+        flexDir={isMobile ? "column" : "row"}
+        gap={isMobile && "1em"}
       >
         {isLoading ? (
           <Skeleton
-            h={responsive("", "1em", "1.5em")}
-            w={responsive("", "10em", "15em")}
+            h={responsive("1em", "1em", "1.5em")}
+            w={responsive("9em", "10em", "15em")}
             borderRadius={"10px"}
           />
         ) : (
           <>
             <Breadcrumb
+              mb={isMobile && "1em"}
               spacing="8px"
               separator={<ChevronRightIcon color="gray.500" />}
+              fontSize={responsive("sm", "sm", "md")}
             >
               <BreadcrumbItem>
                 <BreadcrumbLink
@@ -463,20 +467,21 @@ const Course = () => {
         )}
         {isLoading ? (
           <Skeleton
-            h={responsive("", "1em", "1.5em")}
-            w={responsive("", "20em", "30em")}
+            h={responsive("1em", "1em", "1.5em")}
+            w={responsive("10em", "20em", "30em")}
             borderRadius={"10px"}
           />
         ) : (
           enroll && (
             <Flex
               flexDir={"column"}
-              align={"flex-end"}
-              gap={responsive("", ".75em", "1em")}
+              align={isMobile ? "flex-start" : "flex-end"}
+              gap={responsive(".5em", ".75em", "1em")}
+              mb={isMobile && "1em"}
             >
-              <Flex align={"center"} gap={responsive("", "1em", "2em")}>
+              <Flex align={"center"} gap={responsive("1em", "1em", "2em")}>
                 <Heading
-                  fontSize={responsive("", "xl", "2xl")}
+                  fontSize={responsive("lg", "xl", "2xl")}
                   fontWeight={600}
                   opacity={0.9}
                 >
@@ -485,12 +490,14 @@ const Course = () => {
                 <Progress
                   value={progressValue}
                   colorScheme="orange"
-                  w={responsive("", "15em", "20em")}
+                  w={responsive("12em", "15em", "20em")}
                   borderRadius={"10px"}
-                  size={responsive("", "md", "lg")}
+                  size={responsive("md", "md", "lg")}
                   bgColor={"var(--bg-color)"}
                 />
-                <Text>{progressValue + "%"}</Text>
+                <Text fontSize={responsive("sm", "sm", "md")}>
+                  {progressValue + "%"}
+                </Text>
               </Flex>
             </Flex>
           )
@@ -558,14 +565,14 @@ const Course = () => {
             flexDirection={"column"}
             justifyContent={"space-between"}
             bgColor={"var(--bg-color)"}
-            p={responsive("", "1em", "2em 1em")}
+            p={responsive("1em", "1em", "2em 1em")}
           >
-            <Stack gap={responsive("", ".75em", "1em")}>
+            <Stack gap={responsive(".5em", ".75em", "1em")}>
               <FormControl pos={"relative"}>
                 {course && course.imageUrl !== "" && course.imageUrl ? (
                   <Center
                     borderRadius={"10px"}
-                    maxH={responsive("", "16em", "20em")}
+                    maxH={responsive("12em", "16em", "20em")}
                     overflow={"hidden"}
                   >
                     <Image
@@ -578,35 +585,35 @@ const Course = () => {
                   </Center>
                 ) : (
                   <Skeleton
-                    h={responsive("", "16em", "20em")}
-                    w={responsive("", "36em", "44em")}
+                    h={responsive("12em", "16em", "20em")}
+                    w={responsive("30em", "36em", "44em")}
                     borderRadius={"10px"}
                   />
                 )}
-                <FormLabel
-                  htmlFor="image"
-                  pos={"absolute"}
-                  top={0}
-                  left={0}
-                  w={"100%"}
-                  h={"100%"}
-                  opacity={0.5}
-                  display={"flex"}
-                  alignItems={"center"}
-                  justifyContent={"center"}
-                  cursor={"pointer"}
-                >
-                  {isCourseEditing && (
+                {isCourseEditing && (
+                  <FormLabel
+                    htmlFor="image"
+                    pos={"absolute"}
+                    top={0}
+                    left={0}
+                    w={"100%"}
+                    h={"100%"}
+                    opacity={0.5}
+                    display={"flex"}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    cursor={"pointer"}
+                  >
                     <i
                       class="fi fi-rr-camera"
                       style={{
                         position: "relative",
                         top: "2px",
-                        fontSize: responsive("", "5em", "7em"),
+                        fontSize: responsive("3em", "5em", "7em"),
                       }}
                     ></i>
-                  )}
-                </FormLabel>
+                  </FormLabel>
+                )}
                 <Input
                   type="file"
                   onChange={(e) => handleCourseChangeImage(e)}
@@ -626,7 +633,7 @@ const Course = () => {
                     fontWeight={"600"}
                     value={courseUpdateData.title}
                     fontFamily={"Montserrat, sans-serif;"}
-                    fontSize={responsive("", "xl", "2xl")}
+                    fontSize={responsive("lg", "xl", "2xl")}
                     onChange={(e) => handleCourseChange(e)}
                     _focus={{
                       borderColor: "#cdcdcd",
@@ -637,7 +644,7 @@ const Course = () => {
                 </FormControl>
               ) : (
                 <Heading
-                  fontSize={responsive("", "xl", "2xl")}
+                  fontSize={responsive("lg", "xl", "2xl")}
                   fontWeight={"600"}
                 >
                   {course && course.title}
@@ -645,7 +652,7 @@ const Course = () => {
               )}
 
               <Textarea
-                fontSize={responsive("", "sm", "md")}
+                fontSize={responsive("sm", "sm", "md")}
                 readOnly={!isCourseEditing}
                 fontWeight={500}
                 opacity={0.9}
@@ -653,18 +660,20 @@ const Course = () => {
                 name="description"
                 value={courseUpdateData.description}
                 onChange={(e) => handleCourseChange(e)}
-                border={"2px dashed var(--secondary-color)"}
+                border={"2px dashed #cfcfcf"}
                 _focus={{
                   boxShadow: "none",
-                  border: "2px dashed var(--secondary-color)",
+                  border: "2px dashed #cfcfcf",
                 }}
-                _hover={{ border: "2px dashed var(--secondary-color)" }}
+                _hover={{
+                  border: "2px dashed #cfcfcf",
+                }}
               >
                 {course && course.description}
               </Textarea>
               <Flex gap={".5em"}>
                 <Text
-                  fontSize={responsive("", "sm", "md")}
+                  fontSize={responsive("sm", "sm", "md")}
                   fontWeight={500}
                   opacity={0.9}
                 >
@@ -682,7 +691,11 @@ const Course = () => {
                 ) : (
                   <i
                     class="fi fi-rr-star"
-                    style={{ position: "relative", top: "2px" }}
+                    style={{
+                      fontSize: responsive("13px", "15px", "15px"),
+                      position: "relative",
+                      top: isMobile ? "2px" : "2px",
+                    }}
                   ></i>
                 )}
               </Flex>
@@ -698,7 +711,7 @@ const Course = () => {
                     value={courseUpdateData.price}
                     fontFamily={"Montserrat, sans-serif;"}
                     opacity={"0.9"}
-                    fontSize={responsive("", "sm", "md")}
+                    fontSize={responsive("sm", "sm", "md")}
                     onChange={(e) => handleCourseChange(e)}
                     _focus={{
                       borderColor: "#cdcdcd",
@@ -709,7 +722,7 @@ const Course = () => {
                 </FormControl>
               ) : (
                 <Text
-                  fontSize={responsive("", "sm", "md")}
+                  fontSize={responsive("sm", "sm", "md")}
                   fontWeight={"500"}
                   opacity={"0.9"}
                 >
@@ -719,9 +732,10 @@ const Course = () => {
               <ButtonGroup>
                 {isCourseEditing && (
                   <Button
+                    size={isMobile ? "sm" : "md"}
                     border={"1px solid transparent"}
                     bgColor={"var(--secondary-color)"}
-                    fontSize={responsive("", "sm", "md")}
+                    fontSize={responsive("sm", "sm", "md")}
                     onClick={() => handleCourseUpdateSubmit()}
                     color={"white"}
                     _hover={{
@@ -734,9 +748,10 @@ const Course = () => {
                   </Button>
                 )}
                 <Button
+                  size={isMobile ? "sm" : "md"}
                   border={"1px solid transparent"}
                   bgColor={"var(--accent-color)"}
-                  fontSize={responsive("", "sm", "md")}
+                  fontSize={responsive("sm", "sm", "md")}
                   onClick={() => {
                     if (account && course.ownerId === account._id) {
                       setIsCourseEditing(!isCourseEditing);
@@ -797,15 +812,20 @@ const Course = () => {
             colSpan={1}
             border={"2px dashed var(--secondary-color)"}
             bgColor={"var(--bg-color)"}
-            p={responsive("", "1em", "2em 1em")}
+            p={responsive("1em", "1em", "2em 1em")}
           >
             <Flex
               align={"center"}
               justify={"space-between"}
-              mb={responsive("", "1em", "1em")}
+              mb={responsive("1em", "1em", "1em")}
             >
               <Box>
-                <Flex gap={".5em"} align={"center"} fontWeight={600} mb={"1em"}>
+                <Flex
+                  gap={".5em"}
+                  align={"center"}
+                  fontWeight={600}
+                  mb={isMobile ? ".5em" : "1em"}
+                >
                   <i
                     class="fi fi-rr-chalkboard-user"
                     style={{
@@ -816,10 +836,11 @@ const Course = () => {
                   <Text>Instructor</Text>
                 </Flex>
                 <Center
-                  p={responsive("", "2px 5px", "3px 7px", "5px 10px")}
+                  p={responsive("1px 3px", "2px 5px", "3px 7px", "5px 10px")}
                   mb={".5em"}
                   border={"1px solid var(--secondary-color)"}
                   borderRadius={"5px"}
+                  fontSize={responsive("sm", "sm", "md")}
                   color={"var(--secondary-color)"}
                   w={"max-content"}
                 >
@@ -829,8 +850,8 @@ const Course = () => {
               {course && course.ownerImage ? (
                 <Center
                   border={"2px solid var(--secondary-color)"}
-                  w={responsive("", "5.5em", "6.5em")}
-                  h={responsive("", "5.5em", "6.5em")}
+                  w={responsive("3.3em", "5.5em", "6.5em")}
+                  h={responsive("3.3em", "5.5em", "6.5em")}
                   borderRadius={"full"}
                   overflow={"hidden"}
                 >
@@ -846,13 +867,13 @@ const Course = () => {
                   border={"2px dashed var(--secondary-color)"}
                   bgColor={"var(--secondary-color)"}
                   name={course && course.ownerName}
-                  size={responsive("", "xl", "xl")}
+                  size={responsive("lg", "xl", "xl")}
                 ></Avatar>
               )}
             </Flex>
 
             <Text
-              fontSize={responsive("", "sm", "md")}
+              fontSize={responsive("sm", "sm", "md")}
               fontWeight={500}
               opacity={0.9}
             >
@@ -866,7 +887,7 @@ const Course = () => {
             border={"2px dashed var(--secondary-color)"}
             colSpan={1}
             bgColor={"var(--bg-color)"}
-            p={responsive("", "1em", "2em 1em")}
+            p={responsive("1em", "1em", "2em 1em")}
           >
             <Flex align={"center"} justify={"space-between"}>
               <Flex align={"center"} gap={".5em"}>
@@ -879,7 +900,7 @@ const Course = () => {
                   }}
                 ></i>
                 <Heading
-                  fontSize={responsive("", "xl", "2xl")}
+                  fontSize={responsive("lg", "xl", "2xl")}
                   fontWeight={600}
                 >
                   Lessons
@@ -888,9 +909,10 @@ const Course = () => {
               <ButtonGroup>
                 {isLessonsEditing && (
                   <Button
+                    size={isMobile ? "sm" : "md"}
                     border={"1px solid transparent"}
                     bgColor={"var(--secondary-color)"}
-                    fontSize={responsive("", "sm", "md")}
+                    fontSize={responsive("sm", "sm", "md")}
                     onClick={() => handleLessonDeleteSubmit()}
                     color={"white"}
                     _hover={{
@@ -905,9 +927,10 @@ const Course = () => {
 
                 {account && course && account._id === course.ownerId && (
                   <Button
+                    size={isMobile ? "sm" : "md"}
                     border={"1px solid transparent"}
                     bgColor={"var(--accent-color)"}
-                    fontSize={responsive("", "sm", "md")}
+                    fontSize={responsive("sm", "sm", "md")}
                     onClick={() => {
                       account &&
                         course.ownerId === account._id &&
@@ -937,61 +960,121 @@ const Course = () => {
             </Flex>
             <Flex
               flexDir={"column"}
-              gap={responsive("", "1em", "2em")}
-              mt={responsive("", "1em", "2em")}
+              gap={responsive(".5em", "1em", "2em")}
+              mt={responsive("1em", "1em", "2em")}
             >
               {filteredLessonList.length > 0 &&
                 filteredLessonList.map((lesson, index) => (
                   <Flex
+                    bgColor={isMobile && "white"}
+                    p={isMobile && "1em"}
+                    borderRadius={isMobile && "5px"}
                     key={index}
-                    align={"center"}
-                    justify={"space-between"}
+                    gap={isMobile && "1em"}
+                    align={!isMobile && "center"}
+                    flexDir={isMobile ? "column" : "row"}
+                    justify={!isMobile && "space-between"}
                     w={"100%"}
                   >
-                    <Flex
-                      gap={".5em"}
-                      align={"center"}
-                      fontSize={responsive("", "sm", "md")}
-                    >
-                      <Box
-                        w={"1em"}
-                        h={"1em"}
-                        borderRadius={"full"}
-                        bgColor={"var(--accent-color)"}
-                      ></Box>
-                      <Tooltip label={lesson.title} aria-label="A tooltip">
-                        <Text
-                          textOverflow={"ellipsis"}
-                          whiteSpace={"nowrap"}
-                          overflow={"hidden"}
-                          fontWeight={500}
-                          maxW={responsive("", "10em", "12em")}
-                          fontSize={responsive("", "sm", "md")}
-                          opacity={0.9}
+                    {isMobile ? (
+                      <Flex align={"center"} justify={"space-between"}>
+                        <Flex
+                          gap={".5em"}
+                          align={"center"}
+                          fontSize={responsive("sm", "sm", "md")}
                         >
-                          {lesson.title}
-                        </Text>
-                      </Tooltip>
-                    </Flex>
-                    <Tooltip label={lesson.description} aria-label="A tooltip">
-                      <Text
-                        textOverflow={"ellipsis"}
-                        whiteSpace={"nowrap"}
-                        overflow={"hidden"}
-                        fontWeight={500}
-                        maxW={responsive("", "10em", "12em")}
-                        fontSize={responsive("", "sm", "md")}
-                        opacity={0.9}
-                      >
-                        {lesson.description}
-                      </Text>
-                    </Tooltip>
+                          <Box
+                            w={"1em"}
+                            h={"1em"}
+                            borderRadius={"full"}
+                            bgColor={"var(--accent-color)"}
+                          ></Box>
+                          <Tooltip label={lesson.title} aria-label="A tooltip">
+                            <Text
+                              textOverflow={"ellipsis"}
+                              whiteSpace={"nowrap"}
+                              overflow={"hidden"}
+                              fontWeight={500}
+                              maxW={responsive("8em", "10em", "12em")}
+                              fontSize={responsive("sm", "sm", "md")}
+                              opacity={0.9}
+                            >
+                              {lesson.title}
+                            </Text>
+                          </Tooltip>
+                        </Flex>
+                        <Tooltip
+                          label={lesson.description}
+                          aria-label="A tooltip"
+                        >
+                          <Text
+                            textOverflow={"ellipsis"}
+                            whiteSpace={"nowrap"}
+                            overflow={"hidden"}
+                            fontWeight={500}
+                            maxW={responsive("10em", "10em", "12em")}
+                            fontSize={responsive("sm", "sm", "md")}
+                            opacity={0.9}
+                          >
+                            {lesson.description}
+                          </Text>
+                        </Tooltip>
+                      </Flex>
+                    ) : (
+                      <>
+                        <Flex
+                          gap={".5em"}
+                          align={"center"}
+                          fontSize={responsive("sm", "sm", "md")}
+                        >
+                          <Box
+                            w={"1em"}
+                            h={"1em"}
+                            borderRadius={"full"}
+                            bgColor={"var(--accent-color)"}
+                          ></Box>
+                          <Tooltip label={lesson.title} aria-label="A tooltip">
+                            <Text
+                              textOverflow={"ellipsis"}
+                              whiteSpace={"nowrap"}
+                              overflow={"hidden"}
+                              fontWeight={500}
+                              maxW={responsive("8em", "10em", "12em")}
+                              fontSize={responsive("sm", "sm", "md")}
+                              opacity={0.9}
+                            >
+                              {lesson.title}
+                            </Text>
+                          </Tooltip>
+                        </Flex>
+                        <Tooltip
+                          label={lesson.description}
+                          aria-label="A tooltip"
+                        >
+                          <Text
+                            textOverflow={"ellipsis"}
+                            whiteSpace={"nowrap"}
+                            overflow={"hidden"}
+                            fontWeight={500}
+                            maxW={responsive("5em", "10em", "12em")}
+                            fontSize={responsive("sm", "sm", "md")}
+                            opacity={0.9}
+                          >
+                            {lesson.description}
+                          </Text>
+                        </Tooltip>
+                      </>
+                    )}
 
-                    <Flex align={"center"} gap={"1em"}>
+                    <Flex
+                      align={"center"}
+                      gap={"1em"}
+                      justify={isMobile && "space-between"}
+                    >
                       <Text
                         opacity={0.9}
                         fontWeight={500}
-                        fontSize={responsive("", "sm", "md")}
+                        fontSize={responsive("sm", "sm", "md")}
                         w={"max-content"}
                       >
                         {lesson.duration
@@ -1017,7 +1100,8 @@ const Course = () => {
                         <Button
                           border={"1px solid transparent"}
                           bgColor={"var(--accent-color)"}
-                          fontSize={responsive("", "sm", "md")}
+                          fontSize={responsive("sm", "sm", "md")}
+                          size={isMobile ? "sm" : "md"}
                           color={"white"}
                           _hover={{
                             bgColor: "var(--bg-color)",
@@ -1035,9 +1119,10 @@ const Course = () => {
                           p=".5em"
                           minH="max-content"
                           minW="max-content"
+                          size={isMobile ? "sm" : "md"}
                           color={"white"}
                           onClick={() => handleDeleteLesson(lesson.title)}
-                          fontSize={responsive("", "sm", "md")}
+                          fontSize={responsive("sm", "sm", "md")}
                           _hover={{
                             bgColor: "var(--bg-color)",
                             color: "var(--accent-color)",
@@ -1055,12 +1140,13 @@ const Course = () => {
                 ))}
               {isLessonsEditing && (
                 <Button
+                  size={isMobile ? "sm" : "md"}
                   border={"2px dashed transparent"}
                   borderRadius={"7px"}
                   bgColor={"var(--secondary-color)"}
                   color={"white"}
-                  px={responsive("", "1em", "1em")}
-                  fontSize={responsive("", "sm", "md")}
+                  px={responsive(".5em", "1em", "1em")}
+                  fontSize={responsive("sm", "sm", "md")}
                   transition={"0.3s ease"}
                   _hover={{
                     bgColor: "var(--bg-color)",
@@ -1084,85 +1170,29 @@ const Course = () => {
               )}
             </Flex>
           </GridItem>
-          <GridItem
-            border={"2px dashed transparent"}
-            borderRadius={"10px"}
-            rowSpan={3}
-            colSpan={1}
-            bgColor={"var(--secondary-color)"}
-            color={"white"}
-            px={responsive("", "1em", "1em")}
-            transition={"0.3s ease"}
-            _hover={{
-              bgColor: "white",
-              color: "var(--secondary-color)",
-              border: "2px dashed var(--secondary-color)",
-            }}
-          >
-            <Flex align={"center"} justify={"space-between"} h={"100%"}>
-              <Flex gap={".5em"} align={"center"} fontWeight={600}>
-                <i
-                  class="fi fi-rr-book-alt"
-                  style={{
-                    position: "relative",
-                    top: "2px",
-                  }}
-                ></i>
-                <Text fontSize={responsive("", "sm", "md")}>
-                  Course Details
-                </Text>
-              </Flex>
-              <Flex align={"center"} gap={".5em"}>
-                <Flex
-                  gap={".5em"}
-                  align={"center"}
-                  fontWeight={500}
-                  opacity={0.9}
-                >
-                  <i
-                    class="fi fi-rr-users-alt"
-                    style={{
-                      position: "relative",
-                      top: "2px",
-                    }}
-                  ></i>
-                  <Text fontSize={responsive("", "sm", "md")}>
-                    {course && course.enrollments && course.enrollments.length}
-                    &nbsp;Enrollments
-                  </Text>
-                </Flex>
-                /
-                <Flex
-                  gap={".5em"}
-                  align={"center"}
-                  fontWeight={500}
-                  opacity={0.9}
-                >
-                  <i
-                    class="fi fi-rr-clock-three"
-                    style={{
-                      position: "relative",
-                      top: "2px",
-                    }}
-                  ></i>
-                  <Text fontSize={responsive("", "sm", "md")}>
-                    {course && course.duration
-                      ? course.duration < 60
-                        ? course.duration + " sec"
-                        : Math.floor(course.duration / 60) +
-                          " min " +
-                          (course.duration % 60) +
-                          " sec"
-                      : "0 min"}
-                  </Text>
-                </Flex>
-                /
-                <Flex
-                  gap={".5em"}
-                  align={"center"}
-                  fontWeight={500}
-                  opacity={0.9}
-                >
+          {!isMobile && (
+            <GridItem
+              border={"2px dashed transparent"}
+              borderRadius={"10px"}
+              rowSpan={3}
+              colSpan={1}
+              bgColor={"var(--secondary-color)"}
+              color={"white"}
+              px={responsive(".5em", "1em", "1em")}
+              transition={"0.3s ease"}
+              _hover={{
+                bgColor: "white",
+                color: "var(--secondary-color)",
+                border: "2px dashed var(--secondary-color)",
+              }}
+            >
+              <Flex
+                align={"center"}
+                justify={"space-between"}
+                h={"100%"}
+                flexWrap={"wrap"}
+              >
+                <Flex gap={".5em"} align={"center"} fontWeight={600}>
                   <i
                     class="fi fi-rr-book-alt"
                     style={{
@@ -1170,13 +1200,79 @@ const Course = () => {
                       top: "2px",
                     }}
                   ></i>
-                  <Text fontSize={responsive("", "sm", "md")}>
-                    {course && course.lessons && course.lessons.length} Lessons
+                  <Text fontSize={responsive("sm", "sm", "md")}>
+                    Course Details
                   </Text>
                 </Flex>
+                <Flex align={"center"} gap={".5em"}>
+                  <Flex
+                    gap={".5em"}
+                    align={"center"}
+                    fontWeight={500}
+                    opacity={0.9}
+                  >
+                    <i
+                      class="fi fi-rr-users-alt"
+                      style={{
+                        position: "relative",
+                        top: "2px",
+                      }}
+                    ></i>
+                    <Text fontSize={responsive("sm", "sm", "md")}>
+                      {course &&
+                        course.enrollments &&
+                        course.enrollments.length}
+                      &nbsp;Enrollments
+                    </Text>
+                  </Flex>
+                  /
+                  <Flex
+                    gap={".5em"}
+                    align={"center"}
+                    fontWeight={500}
+                    opacity={0.9}
+                  >
+                    <i
+                      class="fi fi-rr-clock-three"
+                      style={{
+                        position: "relative",
+                        top: "2px",
+                      }}
+                    ></i>
+                    <Text fontSize={responsive("sm", "sm", "md")}>
+                      {course && course.duration
+                        ? course.duration < 60
+                          ? course.duration + " sec"
+                          : Math.floor(course.duration / 60) +
+                            " min " +
+                            (course.duration % 60) +
+                            " sec"
+                        : "0 min"}
+                    </Text>
+                  </Flex>
+                  /
+                  <Flex
+                    gap={".5em"}
+                    align={"center"}
+                    fontWeight={500}
+                    opacity={0.9}
+                  >
+                    <i
+                      class="fi fi-rr-book-alt"
+                      style={{
+                        position: "relative",
+                        top: "2px",
+                      }}
+                    ></i>
+                    <Text fontSize={responsive("sm", "sm", "md")}>
+                      {course && course.lessons && course.lessons.length}{" "}
+                      Lessons
+                    </Text>
+                  </Flex>
+                </Flex>
               </Flex>
-            </Flex>
-          </GridItem>
+            </GridItem>
+          )}
         </Grid>
       )}
     </Box>

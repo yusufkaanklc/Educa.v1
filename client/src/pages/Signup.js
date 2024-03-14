@@ -278,11 +278,12 @@ const Signup = () => {
                   Account Type
                 </FormLabel>
                 <Select
-                  h={responsive("2em", "2.5em", "3em")}
+                  h={responsive("2.2em", "2.5em", "3em")}
                   variant={"outline"}
                   border={"1px solid rgba(0,0,0,0.2)"}
                   name="role"
                   value={register.role}
+                  fontSize={responsive("sm", "sm", "md")}
                   onChange={handleregisterChange}
                   _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
                   _focus={{ border: "1px solid var(--secondary-color)" }}
@@ -290,12 +291,12 @@ const Signup = () => {
                   placeholder="Select account type"
                 >
                   <option
-                    style={{ fontSize: responsive("1em", "1em", "1.2em") }}
+                    style={{ fontSize: responsive(".8em", "1em", "1em") }}
                   >
                     Student
                   </option>
                   <option
-                    style={{ fontSize: responsive("1em", "1em", "1.2em") }}
+                    style={{ fontSize: responsive(".8em", "1em", "1em") }}
                   >
                     Teacher
                   </option>
@@ -304,12 +305,13 @@ const Signup = () => {
             </Flex>
             <Flex flexDir={"column"} gap={"1em"} mt={"2em"}>
               <Button
+                size={isMobile ? "sm" : "md"}
                 variant={"solid"}
                 type="submit"
                 bgColor={"var(--secondary-color)"}
                 w={"100%"}
                 p={"1.3em"}
-                fontSize={responsive("1em", "1em", "1.2em")}
+                fontSize={responsive("sm", "sm", "md")}
                 border={"1px solid transparent"}
                 color={"white"}
                 _hover={{
