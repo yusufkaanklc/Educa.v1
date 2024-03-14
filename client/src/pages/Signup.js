@@ -99,27 +99,33 @@ const Signup = () => {
     setTargetScroll("home");
   }, []);
   return (
-    <Center h={"100vh"} bgPos={"center"} position={"relative"}>
+    <Center
+      h={"100vh"}
+      position={"relative"}
+      flexDirection={isMobile ? "column" : "row"}
+      px={isMobile && "1em"}
+    >
       <Box
         pos={"absolute"}
-        top={responsive("", "1.5em", "2em")}
-        left={responsive("", "1.5em", "2em")}
-        p={responsive("", "1em", "1em 2em")}
-        bgColor={"var(--secondary-color)"}
+        top={responsive("1em", "1.5em", "2em")}
+        left={responsive("1em", "1.5em", "2em")}
+        p={responsive("1em", "1em", "1em 2em")}
+        bgColor={isMobile ? "unset" : "var(--secondary-color)"}
         w={"max-content"}
       >
         <Heading
-          color={"white"}
-          fontSize={responsive("", "xl", "2xl")}
+          color={isMobile ? "black" : "white"}
+          fontSize={responsive("lg", "xl", "2xl")}
           fontWeight={"600"}
           mb={"1em"}
         >
           Signup
         </Heading>
         <Breadcrumb
-          color={"white"}
+          color={isMobile ? "black" : "white"}
+          fontSize={responsive("sm", "sm", "md")}
           spacing="8px"
-          separator={<ChevronRightIcon color="white" />}
+          separator={<ChevronRightIcon color={isMobile ? "black" : "white"} />}
         >
           <BreadcrumbItem>
             <BreadcrumbLink
@@ -139,20 +145,27 @@ const Signup = () => {
           </BreadcrumbItem>
         </Breadcrumb>
       </Box>
-      <Box position={"relative"} zIndex={2} w={"35%"}>
-        <Box
-          pos={"absolute"}
-          top={responsive("", "-3em", "-4em")}
-          right={responsive("", "-3em", "-4em")}
-          zIndex={-1}
-          w={responsive("", "8em", "10em")}
-          h={responsive("", "8em", "10em")}
-          bgColor={"var(--secondary-color)"}
-        ></Box>
+      <Box
+        position={"relative"}
+        zIndex={isMobile ? "unset" : "2"}
+        w={isMobile ? "100%" : "35%"}
+        mt={isMobile && "2em"}
+      >
+        {!isMobile && (
+          <Box
+            pos={"absolute"}
+            top={responsive("", "-3em", "-4em")}
+            right={responsive("", "-3em", "-4em")}
+            zIndex={-1}
+            w={responsive("", "8em", "10em")}
+            h={responsive("", "8em", "10em")}
+            bgColor={"var(--secondary-color)"}
+          ></Box>
+        )}
         <Box
           bgColor={"white"}
-          p={responsive("", "2em 3em", "4em 5em")}
-          pb={responsive("", "2em", "3em")}
+          p={responsive("1em 2em", "2em 3em", "4em 5em")}
+          pb={responsive("1em", "2em", "3em")}
           borderRadius={"10px"}
           boxShadow={"0 0 50px 0 rgba(0,0,0,0.2)"}
           border={"2px dashed  #cfcfcf"}
@@ -160,11 +173,11 @@ const Signup = () => {
           <form onSubmit={handleSubmit}>
             <Flex flexDirection={"column"} gap={"1em"}>
               <FormControl isRequired>
-                <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                <FormLabel fontSize={responsive("1em", "1em", "1.2em")}>
                   Username
                 </FormLabel>
                 <Input
-                  h={responsive("", "2.5em", "3em")}
+                  h={responsive("2em", "2.5em", "3em")}
                   variant={"outline"}
                   border={"1px solid rgba(0,0,0,0.2)"}
                   type="text"
@@ -177,11 +190,11 @@ const Signup = () => {
                 />
               </FormControl>
               <FormControl isRequired>
-                <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                <FormLabel fontSize={responsive("1em", "1em", "1.2em")}>
                   Email
                 </FormLabel>
                 <Input
-                  h={responsive("", "2.5em", "3em")}
+                  h={responsive("2em", "2.5em", "3em")}
                   variant={"outline"}
                   border={"1px solid rgba(0,0,0,0.2)"}
                   type="text"
@@ -194,7 +207,7 @@ const Signup = () => {
                 />
               </FormControl>
               <FormControl isRequired>
-                <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                <FormLabel fontSize={responsive("1em", "1em", "1.2em")}>
                   <Tooltip
                     label="Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, one number, and one special character."
                     placement="top"
@@ -208,12 +221,12 @@ const Signup = () => {
                 </FormLabel>
                 <InputGroup display={"flex"} alignItems={"center"}>
                   <Input
-                    h={responsive("", "2.5em", "3em")}
+                    h={responsive("2em", "2.5em", "3em")}
                     variant={"outline"}
                     border={"1px solid rgba(0,0,0,0.2)"}
                     type={passwordShow ? "text" : "password"}
                     name="password"
-                    pr={"4.5rem"}
+                    pr={isMobile ? ".5em" : "4.5rem"}
                     value={register.password}
                     onChange={handleregisterChange}
                     _hover={{ border: "1px solid rgba(0,0,0,0.2)" }}
@@ -222,7 +235,11 @@ const Signup = () => {
                   />
 
                   <InputRightElement width="4.5rem" top={"unset"}>
-                    <Button h="1.75rem" size="sm" onClick={handleClick}>
+                    <Button
+                      h={isMobile ? "1.5rem" : "1.75rem"}
+                      size={responsive("xs", "sm", "sm")}
+                      onClick={handleClick}
+                    >
                       {passwordShow ? "Hide" : "Show"}
                     </Button>
                   </InputRightElement>
@@ -231,7 +248,7 @@ const Signup = () => {
 
               {register.role === "Teacher" && (
                 <FormControl isRequired>
-                  <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                  <FormLabel fontSize={responsive("1em", "1em", "1.2em")}>
                     <Tooltip
                       label="Write your profession"
                       placement="top"
@@ -244,7 +261,7 @@ const Signup = () => {
                     </Tooltip>
                   </FormLabel>
                   <Input
-                    h={responsive("", "2.5em", "3em")}
+                    h={responsive("2em", "2.5em", "3em")}
                     variant={"outline"}
                     border={"1px solid rgba(0,0,0,0.2)"}
                     name="profession"
@@ -257,11 +274,11 @@ const Signup = () => {
                 </FormControl>
               )}
               <FormControl>
-                <FormLabel fontSize={responsive("", "1em", "1.2em")}>
+                <FormLabel fontSize={responsive("1em", "1em", "1.2em")}>
                   Account Type
                 </FormLabel>
                 <Select
-                  h={responsive("", "2.5em", "3em")}
+                  h={responsive("2em", "2.5em", "3em")}
                   variant={"outline"}
                   border={"1px solid rgba(0,0,0,0.2)"}
                   name="role"
@@ -272,8 +289,16 @@ const Signup = () => {
                   _active={{ bgColor: "transparent" }}
                   placeholder="Select account type"
                 >
-                  <option>Student</option>
-                  <option>Teacher</option>
+                  <option
+                    style={{ fontSize: responsive("1em", "1em", "1.2em") }}
+                  >
+                    Student
+                  </option>
+                  <option
+                    style={{ fontSize: responsive("1em", "1em", "1.2em") }}
+                  >
+                    Teacher
+                  </option>
                 </Select>
               </FormControl>
             </Flex>
@@ -284,7 +309,7 @@ const Signup = () => {
                 bgColor={"var(--secondary-color)"}
                 w={"100%"}
                 p={"1.3em"}
-                fontSize={responsive("", "1em", "1.2em")}
+                fontSize={responsive("1em", "1em", "1.2em")}
                 border={"1px solid transparent"}
                 color={"white"}
                 _hover={{
@@ -295,22 +320,28 @@ const Signup = () => {
               >
                 Sign up
               </Button>
-              <ChakraLink as={Link} to={"/login"} ml={"1em"}>
-                {" "}
+              <ChakraLink
+                as={Link}
+                to={"/login"}
+                ml={"1em"}
+                fontSize={responsive("sm", "sm", "md")}
+              >
                 Already have an account?
               </ChakraLink>
             </Flex>
           </form>
         </Box>
-        <Box
-          pos={"absolute"}
-          bottom={responsive("", "-3em", "-4em")}
-          left={responsive("", "-3em", "-4em")}
-          zIndex={-1}
-          w={responsive("", "8em", "10em")}
-          h={responsive("", "8em", "10em")}
-          bgColor={"var(--secondary-color)"}
-        ></Box>
+        {!isMobile && (
+          <Box
+            pos={"absolute"}
+            bottom={responsive("", "-3em", "-4em")}
+            left={responsive("", "-3em", "-4em")}
+            zIndex={-1}
+            w={responsive("", "8em", "10em")}
+            h={responsive("", "8em", "10em")}
+            bgColor={"var(--secondary-color)"}
+          ></Box>
+        )}
       </Box>
     </Center>
   );

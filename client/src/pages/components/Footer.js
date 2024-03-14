@@ -14,11 +14,13 @@ const Footer = () => {
   };
   return (
     <Flex
+      flexDir={isMobile ? "column" : "row"}
+      gap={isMobile && ".5em"}
       align={"center"}
       borderTop={"1px solid var(--bg-color)"}
       justifyContent={"space-between"}
-      px={responsive("", "8em", "10em")}
-      py={responsive("", ".5em", "1em")}
+      px={responsive("1em", "8em", "10em")}
+      py={responsive(".5em", ".5em", "1em")}
     >
       <Text opacity={0.8} fontWeight={600}>
         Copyright © 2024 Educa

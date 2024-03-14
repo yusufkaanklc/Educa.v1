@@ -68,8 +68,9 @@ const Courses = () => {
             Browse Our Popular Courses
           </Heading>
           <Text opacity={0.9} fontSize={responsive("sm", "sm", "md")}>
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Delectus,
-            minima! Lorem ipsum dolor sit amet.
+            Discover an array of our highly sought-after courses that cater to
+            various interests and skill levels, designed to empower and enrich
+            your learning journey.
           </Text>
         </Stack>
       </Center>
