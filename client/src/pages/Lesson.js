@@ -1012,7 +1012,7 @@ const Lesson = () => {
             display={"flex"}
             flexDir={"column"}
             gap={"1.5em"}
-            maxW={"22em"}
+            maxW={!isMobile && "22em"}
             p={"1em"}
             borderRadius={"10px"}
             bgColor={"var(--bg-color)"}

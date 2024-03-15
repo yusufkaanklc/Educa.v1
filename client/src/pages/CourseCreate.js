@@ -336,13 +336,14 @@ const CourseCreate = () => {
   return (
     <Box
       bgColor={"white"}
-      border={"2px dashed #cfcfcf"}
+      border={!isMobile && "2px dashed #cfcfcf"}
       borderRadius={"10px"}
       p={responsive("", "1em ", "2em")}
-      mx={responsive("", "8em", "10em")}
-      my={responsive("", "2em", "3em")}
+      mx={responsive("1em", "8em", "10em")}
+      my={responsive("2em", "2em", "3em")}
     >
       <Breadcrumb
+        fontSize={responsive("sm", "sm", "md")}
         spacing="8px"
         separator={<ChevronRightIcon color="gray.500" />}
       >
@@ -396,17 +397,17 @@ const CourseCreate = () => {
           </BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
-      <Box mt={responsive("", "1em", "1.5em")}>
+      <Box mt={responsive("2em", "1em", "1.5em")}>
         <Heading
           fontWeight={"600"}
-          fontSize={responsive("", "2xl", "3xl")}
+          fontSize={responsive("xl", "2xl", "3xl")}
           color={"var(--secondary-color)"}
         >
           {courseSlug ? "Create lessons" : "Create course"}
         </Heading>
       </Box>
       <Grid
-        mt={responsive("", "2em", "3em")}
+        mt={responsive("1em", "2em", "3em")}
         templateRows="repeat(auto-fill, minmax(1em, auto))"
         templateColumns={responsive("1fr", "repeat(3, 1fr)", "repeat(3, 1fr)")}
         gap={10}
@@ -436,7 +437,7 @@ const CourseCreate = () => {
               <Text
                 fontWeight={"500"}
                 opacity={"0.9"}
-                fontSize={responsive("", "sm", "md")}
+                fontSize={responsive("sm", "sm", "md")}
               >
                 currently unavailable
               </Text>
@@ -444,24 +445,73 @@ const CourseCreate = () => {
           )}
           <Text
             fontWeight={"500"}
-            fontSize={responsive("", "md", "lg")}
+            fontSize={responsive("sm", "md", "lg")}
             w={"max-content"}
           >
             Course Information
           </Text>
 
           <Flex
-            mt={responsive("", ".5em", "1em")}
+            mt={responsive(".5em", ".5em", "1em")}
             justify={"space-between"}
             align={"center"}
+            flexDir={isMobile ? "column" : "row"}
             gap={"1em"}
           >
-            <Flex flexDir={"column"} gap={"1em"} w={"60%"}>
+            <Flex
+              flexDir={"column"}
+              gap={isMobile ? ".5em" : "1em"}
+              w={isMobile ? "100%" : "60%"}
+            >
+              {isMobile && (
+                <>
+                  <FormControl mb={".5em"}>
+                    <Input
+                      type="file"
+                      name="image"
+                      accept="image/*"
+                      display={"none"}
+                      onChange={(e) => handleChangeForCourseImage(e)}
+                      id="image"
+                      placeholder="Course Title"
+                    />
+                    <Button
+                      size={"sm"}
+                      variant={"outline"}
+                      bgColor={"var(--secondary-color)"}
+                      color={"white"}
+                      fontSize={responsive("sm", "sm", "md")}
+                      border={"1px solid var(--secondary-color)"}
+                      _hover={{
+                        bgColor: "var(--bg-color)",
+                      }}
+                    >
+                      <FormLabel
+                        h={"100%"}
+                        w={"100%"}
+                        display={"flex"}
+                        alignItems={"center"}
+                        htmlFor="image"
+                        m={0}
+                        _hover={{ color: "var(--secondary-color)" }}
+                      >
+                        <Text fontWeight={500} opacity={0.9}>
+                          Select Your Thumbnail
+                        </Text>
+                      </FormLabel>
+                    </Button>
+                  </FormControl>
+                  <Text fontSize={responsive("sm", "sm", "md")}>
+                    {courseCreateData.image?.name}
+                  </Text>
+                </>
+              )}
               <FormControl>
                 <Input
                   bgColor={"white"}
                   h={"3em"}
                   borderWidth={"2px"}
+                  fontSize={responsive("sm", "sm", "md")}
                   type={"text"}
                   value={courseCreateData.title}
                   onChange={(e) => handleChangeForCourse(e)}
@@ -476,6 +526,7 @@ const CourseCreate = () => {
               </FormControl>
               <FormControl>
                 <Textarea
+                  fontSize={responsive("sm", "sm", "md")}
                   bgColor={"white"}
                   borderWidth={"2px"}
                   name={"description"}
@@ -491,57 +542,71 @@ const CourseCreate = () => {
                 ></Textarea>
               </FormControl>
             </Flex>
-            <Box
-              h={"15em"}
-              border={"2px dashed #cfcfcf"}
-              borderTop={"none"}
-              borderBottom={"none"}
-              borderLeft={"none"}
-              mx={"1em"}
-            ></Box>
-            <Flex w={"40%"} flexDir={"column"} gap={"1em"} h={"18em"}>
-              <FormControl mb={".5em"}>
-                <Input
-                  type="file"
-                  name="image"
-                  accept="image/*"
-                  display={"none"}
-                  onChange={(e) => handleChangeForCourseImage(e)}
-                  id="image"
-                  placeholder="Course Title"
-                />
-                <Button
-                  variant={"outline"}
-                  bgColor={"var(--secondary-color)"}
-                  color={"white"}
-                  fontSize={responsive("", "sm", "md")}
-                  border={"1px solid var(--secondary-color)"}
-                  _hover={{
-                    bgColor: "var(--bg-color)",
-                  }}
-                >
-                  <FormLabel
-                    h={"100%"}
-                    w={"100%"}
-                    display={"flex"}
-                    alignItems={"center"}
-                    htmlFor="image"
-                    m={0}
-                    _hover={{ color: "var(--secondary-color)" }}
-                  >
-                    <Text fontWeight={500} opacity={0.9}>
-                      Select Your Thumbnail
-                    </Text>
-                  </FormLabel>
-                </Button>
-              </FormControl>
-              <Text>{courseCreateData.image?.name}</Text>
+            {!isMobile && (
+              <Box
+                h={"15em"}
+                border={"2px dashed #cfcfcf"}
+                borderTop={"none"}
+                borderBottom={"none"}
+                borderLeft={"none"}
+                mx={"1em"}
+              ></Box>
+            )}
+            <Flex
+              w={isMobile ? "100%" : "40%"}
+              flexDir={"column"}
+              gap={"1em"}
+              h={!isMobile && "18em"}
+            >
+              {!isMobile && (
+                <>
+                  <FormControl mb={".5em"}>
+                    <Input
+                      type="file"
+                      name="image"
+                      accept="image/*"
+                      display={"none"}
+                      onChange={(e) => handleChangeForCourseImage(e)}
+                      id="image"
+                      placeholder="Course Title"
+                    />
+                    <Button
+                      variant={"outline"}
+                      bgColor={"var(--secondary-color)"}
+                      color={"white"}
+                      fontSize={responsive("", "sm", "md")}
+                      border={"1px solid var(--secondary-color)"}
+                      _hover={{
+                        bgColor: "var(--bg-color)",
+                      }}
+                    >
+                      <FormLabel
+                        h={"100%"}
+                        w={"100%"}
+                        display={"flex"}
+                        alignItems={"center"}
+                        htmlFor="image"
+                        m={0}
+                        _hover={{ color: "var(--secondary-color)" }}
+                      >
+                        <Text fontWeight={500} opacity={0.9}>
+                          Select Your Thumbnail
+                        </Text>
+                      </FormLabel>
+                    </Button>
+                  </FormControl>
+                  <Text fontSize={responsive("sm", "sm", "md")}>
+                    {courseCreateData.image?.name}
+                  </Text>
+                </>
+              )}
 
               <FormControl>
                 <Input
                   bgColor={"white"}
                   h={"3em"}
                   type={"number"}
+                  fontSize={responsive("sm", "sm", "md")}
                   borderWidth={"2px"}
                   name={"price"}
                   value={courseCreateData.price}
@@ -557,6 +622,7 @@ const CourseCreate = () => {
               <FormControl>
                 <VStack spacing={2}>
                   <Input
+                    fontSize={responsive("sm", "sm", "md")}
                     bgColor={"white"}
                     h={"3em"}
                     borderWidth={"2px"}
@@ -586,6 +652,7 @@ const CourseCreate = () => {
                             key={index}
                             p={2}
                             cursor="pointer"
+                            fontSize={responsive("sm", "sm", "md")}
                             onClick={() => handleSelect(option)}
                             fontWeight={"500"}
                             opacity={0.7}
@@ -603,34 +670,195 @@ const CourseCreate = () => {
           </Flex>
         </GridItem>
 
-        <GridItem colSpan={1} rowSpan={2}>
-          <Center
-            fontSize={responsive("", "md", "lg")}
-            fontWeight={"500"}
+        {!isMobile && (
+          <GridItem colSpan={1} rowSpan={2}>
+            <Center
+              fontSize={responsive("", "md", "lg")}
+              fontWeight={"500"}
+              borderRadius={"10px"}
+              onClick={() => {
+                courseSlug
+                  ? handleLessonCreateSubmit(courseSlug)
+                  : handleCreateCourseSubmit();
+              }}
+              border={"2px dashed var(--secondary-color)"}
+              p={responsive("", "1em", "1em")}
+              color={"white"}
+              bgColor={"var(--secondary-color)"}
+              transition={"all .3s ease"}
+              _hover={{
+                bgColor: "white",
+                color: "var(--secondary-color)",
+                cursor: "pointer",
+              }}
+            >
+              Create
+            </Center>
+          </GridItem>
+        )}
+        {isMobile && (
+          <GridItem
+            rowSpan={10}
+            colSpan={2}
+            display={"flex"}
+            flexDir={"column"}
+            gap={isMobile ? ".5em" : "1em"}
+            p={"1em"}
             borderRadius={"10px"}
-            onClick={() => {
-              courseSlug
-                ? handleLessonCreateSubmit(courseSlug)
-                : handleCreateCourseSubmit();
-            }}
+            bgColor={"var(--bg-color)"}
             border={"2px dashed var(--secondary-color)"}
-            p={responsive("", "1em", "1em")}
-            color={"white"}
-            bgColor={"var(--secondary-color)"}
-            transition={"all .3s ease"}
-            _hover={{
-              bgColor: "white",
-              color: "var(--secondary-color)",
-              cursor: "pointer",
-            }}
           >
-            Create
-          </Center>
-        </GridItem>
+            <Flex align={"center"} justify={"space-between"}>
+              <Text
+                fontWeight={"500"}
+                fontSize={responsive("sm", "md", "lg")}
+                w={"max-content"}
+              >
+                Create Lesson
+              </Text>
+              <Button
+                size={"sm"}
+                variant={"outline"}
+                bgColor={"var(--accent-color)"}
+                color={"white"}
+                onClick={() => addCreatedLessonList()}
+                fontSize={responsive("sm", "sm", "md")}
+                border={"1px solid var(--accent-color)"}
+                _hover={{
+                  bgColor: "white",
+                  color: "var(--accent-color)",
+                }}
+              >
+                Save
+              </Button>
+            </Flex>
 
+            <Flex
+              flexDir={"column"}
+              gap={isMobile ? ".5em" : "1em"}
+              w={"100%"}
+              mt={responsive(".5em", ".5em", "1em")}
+            >
+              <Flex
+                align={!isMobile && "center"}
+                gap={isMobile ? ".5em" : "1em"}
+                flexDir={isMobile ? "column-reverse" : "row"}
+                w={"100%"}
+              >
+                <FormControl>
+                  <Input
+                    bgColor={"white"}
+                    h={"3em"}
+                    borderWidth={"2px"}
+                    fontSize={responsive("sm", "sm", "md")}
+                    type={"text"}
+                    value={lessonCreateData.title}
+                    onChange={(e) => handleChangeForLesson(e)}
+                    name={"title"}
+                    placeholder="Lesson Title"
+                    _focus={{
+                      border: "2px dashed #cfcfcf",
+                      boxShadow: "unset",
+                    }}
+                    _hover={{ border: "2px dashed #cfcfcf" }}
+                  />
+                </FormControl>
+                <FormControl w={"max-content"}>
+                  <Input
+                    type="file"
+                    name="video"
+                    accept="video/*"
+                    display={"none"}
+                    onChange={(e) => handleChangeForLessonVideo(e)}
+                    id="video"
+                  />
+                  <Button
+                    size={"sm"}
+                    variant={"outline"}
+                    bgColor={"var(--accent-color)"}
+                    color={"white"}
+                    fontSize={responsive("sm", "sm", "md")}
+                    border={"1px solid var(--accent-color)"}
+                    _hover={{
+                      bgColor: "var(--bg-color)",
+                    }}
+                  >
+                    <FormLabel
+                      h={"100%"}
+                      w={"100%"}
+                      display={"flex"}
+                      alignItems={"center"}
+                      htmlFor="video"
+                      m={0}
+                      _hover={{ color: "var(--accent-color)" }}
+                    >
+                      <Text
+                        fontWeight={500}
+                        opacity={0.9}
+                        fontSize={responsive("sm", "sm", "md")}
+                      >
+                        Select Your Video
+                      </Text>
+                    </FormLabel>
+                  </Button>
+                </FormControl>
+                <Text
+                  maxW={isMobile ? "70%" : "20%"}
+                  overflow={"hidden"}
+                  textOverflow={"ellipsis"}
+                  whiteSpace={"nowrap"}
+                  fontSize={responsive("sm", "sm", "md")}
+                >
+                  {lessonCreateData.video?.name}
+                </Text>
+              </Flex>
+
+              <Flex
+                align={"center"}
+                gap={isMobile ? ".5em" : "1em"}
+                flexDir={isMobile ? "column" : "row"}
+              >
+                <FormControl>
+                  <Textarea
+                    bgColor={"white"}
+                    borderWidth={"2px"}
+                    name={"description"}
+                    fontSize={responsive("sm", "sm", "md")}
+                    value={lessonCreateData.description}
+                    onChange={(e) => handleChangeForLesson(e)}
+                    h={"14em"}
+                    placeholder="Lesson Description"
+                    _focus={{
+                      border: "2px dashed #cfcfcf",
+                      boxShadow: "unset",
+                    }}
+                    _hover={{ border: "2px dashed #cfcfcf" }}
+                  ></Textarea>
+                </FormControl>
+                <FormControl>
+                  <Textarea
+                    bgColor={"white"}
+                    borderWidth={"2px"}
+                    fontSize={responsive("sm", "sm", "md")}
+                    name={"notes"}
+                    value={lessonCreateData.notes}
+                    onChange={(e) => handleChangeForLesson(e)}
+                    h={"14em"}
+                    placeholder="Lesson Notes"
+                    _focus={{
+                      border: "2px dashed #cfcfcf",
+                      boxShadow: "unset",
+                    }}
+                    _hover={{ border: "2px dashed #cfcfcf" }}
+                  ></Textarea>
+                </FormControl>
+              </Flex>
+            </Flex>
+          </GridItem>
+        )}
         <GridItem
-          rowSpan={20}
-          colSpan={1}
+          rowSpan={isMobile ? 15 : 20}
+          colSpan={isMobile ? 2 : 1}
           maxH={"50em"}
           display={"flex"}
           flexDir={"column"}
@@ -644,13 +872,13 @@ const CourseCreate = () => {
         >
           <Text
             fontWeight={"500"}
-            fontSize={responsive("", "md", "lg")}
+            fontSize={responsive("sm", "md", "lg")}
             w={"max-content"}
           >
             Created Lessons
           </Text>
           <Flex
-            mt={responsive("", ".5em", "1em")}
+            mt={responsive(".5em", ".5em", "1em")}
             align={"center"}
             gap={"1em"}
             flexDir={"column"}
@@ -666,14 +894,14 @@ const CourseCreate = () => {
                   bgColor="white"
                   flexDir={"column"}
                   gap={"1em"}
-                  p={responsive("", ".5em", "1em")}
+                  p={responsive(".5em", ".5em", "1em")}
                   borderRadius="10px"
                   w={"100%"}
                 >
                   <Flex align={"center"} justify={"space-between"} w={"100%"}>
                     <Text
                       fontWeight={500}
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                     >
                       {lesson.title}
                     </Text>
@@ -693,7 +921,7 @@ const CourseCreate = () => {
                     >
                       <CloseIcon
                         fontWeight={"bolder"}
-                        fontSize={responsive("", "2xs", "xs")}
+                        fontSize={responsive("2xs", "2xs", "xs")}
                       ></CloseIcon>
                     </Center>
                   </Flex>
@@ -706,7 +934,7 @@ const CourseCreate = () => {
                       }}
                       border={"2px dashed #cfcfcf"}
                       readOnly={true}
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                       fontWeight={500}
                       opacity={0.9}
                     >
@@ -715,7 +943,9 @@ const CourseCreate = () => {
                   </Box>
 
                   <Box>
-                    <Text mb={".5em"}>Notes</Text>
+                    <Text fontSize={responsive("sm", "sm", "md")} s mb={".5em"}>
+                      Notes
+                    </Text>
                     <Textarea
                       _focus={{
                         boxShadow: "none",
@@ -723,7 +953,7 @@ const CourseCreate = () => {
                       }}
                       border={"2px dashed #cfcfcf"}
                       readOnly={true}
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                       fontWeight={500}
                       opacity={0.9}
                     >
@@ -732,7 +962,7 @@ const CourseCreate = () => {
                   </Box>
                   <Box>
                     <Text
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                       my={".5em"}
                       fontWeight={500}
                       borderBottom={"2px dashed #cfcfcf"}
@@ -743,7 +973,7 @@ const CourseCreate = () => {
                       border
                       fontWeight={500}
                       opacity={0.9}
-                      fontSize={responsive("", "sm", "md")}
+                      fontSize={responsive("sm", "sm", "md")}
                     >
                       {lesson.video.name}
                     </Text>
@@ -752,152 +982,154 @@ const CourseCreate = () => {
               ))}
           </Flex>
         </GridItem>
-        <GridItem
-          rowSpan={10}
-          colSpan={2}
-          display={"flex"}
-          flexDir={"column"}
-          gap={"1em"}
-          p={"1em"}
-          borderRadius={"10px"}
-          bgColor={"var(--bg-color)"}
-          border={"2px dashed var(--secondary-color)"}
-        >
-          <Flex align={"center"} justify={"space-between"}>
-            <Text
-              fontWeight={"500"}
-              fontSize={responsive("", "md", "lg")}
-              w={"max-content"}
-            >
-              Create Lesson
-            </Text>
-            <Button
-              variant={"outline"}
-              bgColor={"var(--accent-color)"}
-              color={"white"}
-              onClick={() => addCreatedLessonList()}
-              fontSize={responsive("", "sm", "md")}
-              border={"1px solid var(--accent-color)"}
-              _hover={{
-                bgColor: "white",
-                color: "var(--accent-color)",
-              }}
-            >
-              Save
-            </Button>
-          </Flex>
-
-          <Flex
+        {!isMobile && (
+          <GridItem
+            rowSpan={10}
+            colSpan={2}
+            display={"flex"}
             flexDir={"column"}
             gap={"1em"}
-            w={"100%"}
-            mt={responsive("", ".5em", "1em")}
+            p={"1em"}
+            borderRadius={"10px"}
+            bgColor={"var(--bg-color)"}
+            border={"2px dashed var(--secondary-color)"}
           >
-            <Flex align={"center"} gap={"1em"} w={"100%"}>
-              <FormControl>
-                <Input
-                  bgColor={"white"}
-                  h={"3em"}
-                  borderWidth={"2px"}
-                  type={"text"}
-                  value={lessonCreateData.title}
-                  onChange={(e) => handleChangeForLesson(e)}
-                  name={"title"}
-                  placeholder="Lesson Title"
-                  _focus={{
-                    border: "2px dashed #cfcfcf",
-                    boxShadow: "unset",
-                  }}
-                  _hover={{ border: "2px dashed #cfcfcf" }}
-                />
-              </FormControl>
-              <FormControl w={"max-content"}>
-                <Input
-                  type="file"
-                  name="video"
-                  accept="video/*"
-                  display={"none"}
-                  onChange={(e) => handleChangeForLessonVideo(e)}
-                  id="video"
-                />
-                <Button
-                  variant={"outline"}
-                  bgColor={"var(--accent-color)"}
-                  color={"white"}
-                  fontSize={responsive("", "sm", "md")}
-                  border={"1px solid var(--accent-color)"}
-                  _hover={{
-                    bgColor: "var(--bg-color)",
-                  }}
-                >
-                  <FormLabel
-                    h={"100%"}
-                    w={"100%"}
-                    display={"flex"}
-                    alignItems={"center"}
-                    htmlFor="video"
-                    m={0}
-                    _hover={{ color: "var(--accent-color)" }}
-                  >
-                    <Text
-                      fontWeight={500}
-                      opacity={0.9}
-                      fontSize={responsive("", "sm", "md")}
-                    >
-                      Select Your Video
-                    </Text>
-                  </FormLabel>
-                </Button>
-              </FormControl>
+            <Flex align={"center"} justify={"space-between"}>
               <Text
-                maxW={"20%"}
-                overflow={"hidden"}
-                textOverflow={"ellipsis"}
-                whiteSpace={"nowrap"}
-                fontSize={responsive("", "sm", "md")}
+                fontWeight={"500"}
+                fontSize={responsive("", "md", "lg")}
+                w={"max-content"}
               >
-                {lessonCreateData.video?.name}
+                Create Lesson
               </Text>
+              <Button
+                variant={"outline"}
+                bgColor={"var(--accent-color)"}
+                color={"white"}
+                onClick={() => addCreatedLessonList()}
+                fontSize={responsive("", "sm", "md")}
+                border={"1px solid var(--accent-color)"}
+                _hover={{
+                  bgColor: "white",
+                  color: "var(--accent-color)",
+                }}
+              >
+                Save
+              </Button>
             </Flex>
 
-            <Flex align={"center"} gap={"1em"}>
-              <FormControl>
-                <Textarea
-                  bgColor={"white"}
-                  borderWidth={"2px"}
-                  name={"description"}
+            <Flex
+              flexDir={"column"}
+              gap={"1em"}
+              w={"100%"}
+              mt={responsive("", ".5em", "1em")}
+            >
+              <Flex align={"center"} gap={"1em"} w={"100%"}>
+                <FormControl>
+                  <Input
+                    bgColor={"white"}
+                    h={"3em"}
+                    borderWidth={"2px"}
+                    type={"text"}
+                    value={lessonCreateData.title}
+                    onChange={(e) => handleChangeForLesson(e)}
+                    name={"title"}
+                    placeholder="Lesson Title"
+                    _focus={{
+                      border: "2px dashed #cfcfcf",
+                      boxShadow: "unset",
+                    }}
+                    _hover={{ border: "2px dashed #cfcfcf" }}
+                  />
+                </FormControl>
+                <FormControl w={"max-content"}>
+                  <Input
+                    type="file"
+                    name="video"
+                    accept="video/*"
+                    display={"none"}
+                    onChange={(e) => handleChangeForLessonVideo(e)}
+                    id="video"
+                  />
+                  <Button
+                    variant={"outline"}
+                    bgColor={"var(--accent-color)"}
+                    color={"white"}
+                    fontSize={responsive("", "sm", "md")}
+                    border={"1px solid var(--accent-color)"}
+                    _hover={{
+                      bgColor: "var(--bg-color)",
+                    }}
+                  >
+                    <FormLabel
+                      h={"100%"}
+                      w={"100%"}
+                      display={"flex"}
+                      alignItems={"center"}
+                      htmlFor="video"
+                      m={0}
+                      _hover={{ color: "var(--accent-color)" }}
+                    >
+                      <Text
+                        fontWeight={500}
+                        opacity={0.9}
+                        fontSize={responsive("", "sm", "md")}
+                      >
+                        Select Your Video
+                      </Text>
+                    </FormLabel>
+                  </Button>
+                </FormControl>
+                <Text
+                  maxW={"20%"}
+                  overflow={"hidden"}
+                  textOverflow={"ellipsis"}
+                  whiteSpace={"nowrap"}
                   fontSize={responsive("", "sm", "md")}
-                  value={lessonCreateData.description}
-                  onChange={(e) => handleChangeForLesson(e)}
-                  h={"14em"}
-                  placeholder="Lesson Description"
-                  _focus={{
-                    border: "2px dashed #cfcfcf",
-                    boxShadow: "unset",
-                  }}
-                  _hover={{ border: "2px dashed #cfcfcf" }}
-                ></Textarea>
-              </FormControl>
-              <FormControl>
-                <Textarea
-                  bgColor={"white"}
-                  borderWidth={"2px"}
-                  fontSize={responsive("", "sm", "md")}
-                  name={"notes"}
-                  value={lessonCreateData.notes}
-                  onChange={(e) => handleChangeForLesson(e)}
-                  h={"14em"}
-                  placeholder="Lesson Notes"
-                  _focus={{
-                    border: "2px dashed #cfcfcf",
-                    boxShadow: "unset",
-                  }}
-                  _hover={{ border: "2px dashed #cfcfcf" }}
-                ></Textarea>
-              </FormControl>
+                >
+                  {lessonCreateData.video?.name}
+                </Text>
+              </Flex>
+
+              <Flex align={"center"} gap={"1em"}>
+                <FormControl>
+                  <Textarea
+                    bgColor={"white"}
+                    borderWidth={"2px"}
+                    name={"description"}
+                    fontSize={responsive("", "sm", "md")}
+                    value={lessonCreateData.description}
+                    onChange={(e) => handleChangeForLesson(e)}
+                    h={"14em"}
+                    placeholder="Lesson Description"
+                    _focus={{
+                      border: "2px dashed #cfcfcf",
+                      boxShadow: "unset",
+                    }}
+                    _hover={{ border: "2px dashed #cfcfcf" }}
+                  ></Textarea>
+                </FormControl>
+                <FormControl>
+                  <Textarea
+                    bgColor={"white"}
+                    borderWidth={"2px"}
+                    fontSize={responsive("", "sm", "md")}
+                    name={"notes"}
+                    value={lessonCreateData.notes}
+                    onChange={(e) => handleChangeForLesson(e)}
+                    h={"14em"}
+                    placeholder="Lesson Notes"
+                    _focus={{
+                      border: "2px dashed #cfcfcf",
+                      boxShadow: "unset",
+                    }}
+                    _hover={{ border: "2px dashed #cfcfcf" }}
+                  ></Textarea>
+                </FormControl>
+              </Flex>
             </Flex>
-          </Flex>
-        </GridItem>
+          </GridItem>
+        )}
       </Grid>
     </Box>
   );

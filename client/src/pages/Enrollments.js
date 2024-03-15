@@ -23,33 +23,12 @@ import { ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 import { useContext, useEffect, useState } from "react";
 import dataContext from "../utils/contextApi";
 import { Link } from "react-router-dom";
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
 import { unenrollCourse } from "../utils/data/UsersData";
 import { getCourses } from "../utils/data/CoursesData";
 import { deleteComment, updateComment } from "../utils/data/CommentData";
 const Enrollments = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  ChartJS.register(
-    ArcElement,
-    Tooltip,
-    Legend,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement
-  );
   const {
-    apiUrl,
     isMobile,
     isLaptop,
     setErrors,
@@ -67,33 +46,6 @@ const Enrollments = () => {
     } else {
       return desktop;
     }
-  };
-
-  const data = {
-    labels: ["Courses", "Lessons", "Enrollments", "Comments"],
-    datasets: [
-      {
-        label: "Count",
-        data: [
-          //   ownedCourses.length,
-          //   lessons.length,
-          //   enrollments.length,
-          //   comments.length,
-        ],
-        fill: false,
-        backgroundColor: "rgba(75,192,192,0.2)",
-        borderColor: "#47bb8e",
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const options = {
-    plugins: {
-      legend: {
-        display: false, // Label'i gizle
-      },
-    },
   };
 
   const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -292,16 +244,17 @@ const Enrollments = () => {
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent mx={isMobile && "1em"}>
           <ModalHeader>
             {`Are you sure you want to leave the ${selectedCourse?.title} course?`}
           </ModalHeader>
           <ModalBody>
             <ButtonGroup gap={"1em"}>
               <Button
+                size={isMobile ? "sm" : "md"}
                 border={"1px solid transparent"}
                 bgColor={"var(--secondary-color)"}
-                fontSize={responsive("", "sm", "md")}
+                fontSize={responsive("sm", "sm", "md")}
                 onClick={() => handleUnenrollSubmit()}
                 color={"white"}
                 _hover={{
@@ -313,9 +266,10 @@ const Enrollments = () => {
                 Yes
               </Button>
               <Button
+                size={isMobile ? "sm" : "md"}
                 border={"1px solid transparent"}
                 bgColor={"var(--accent-color)"}
-                fontSize={responsive("", "sm", "md")}
+                fontSize={responsive("sm", "sm", "md")}
                 onClick={() => onClose()}
                 color={"white"}
                 _hover={{
@@ -332,13 +286,14 @@ const Enrollments = () => {
       </Modal>
       <Box
         bgColor={"white"}
-        border={"2px dashed #cfcfcf"}
+        border={isMobile ? "unset" : "2px dashed #cfcfcf"}
         borderRadius={"10px"}
-        p={responsive("", "1em ", "2em")}
-        mx={responsive("", "8em", "10em")}
-        my={responsive("", "2em", "3em")}
+        p={responsive("1em", "1em ", "2em")}
+        mx={responsive("1em", "8em", "10em")}
+        my={responsive("2em", "2em", "3em")}
       >
         <Breadcrumb
+          fontSize={responsive("sm", "sm", "md")}
           spacing="8px"
           separator={<ChevronRightIcon color="gray.500" />}
         >
@@ -365,22 +320,22 @@ const Enrollments = () => {
           </BreadcrumbItem>
         </Breadcrumb>
         <Heading
-          mt={responsive("", "1em", "1.5em")}
+          mt={responsive("1em", "1em", "1.5em")}
           fontWeight={"600"}
-          fontSize={responsive("", "2xl", "3xl")}
+          fontSize={responsive("xl", "2xl", "3xl")}
           color={"var(--secondary-color)"}
         >
           Welcome {account?.username}
         </Heading>
         <Grid
-          mt={responsive("", "2em", "3em")}
+          mt={responsive("1em", "2em", "3em")}
           templateRows="repeat(auto-fill, minmax(1em, auto))"
           templateColumns={responsive(
             "1fr",
             "repeat(3, 1fr)",
             "repeat(3, 1fr)"
           )}
-          gap={10}
+          gap={isMobile ? 6 : 10}
         >
           <GridItem
             rowSpan={4}
@@ -397,7 +352,7 @@ const Enrollments = () => {
           >
             <Text
               fontWeight={"500"}
-              fontSize={responsive("", "md", "lg")}
+              fontSize={responsive("sm", "md", "lg")}
               w={"max-content"}
             >
               Last course
@@ -407,315 +362,79 @@ const Enrollments = () => {
                 <Flex
                   w={"100%"}
                   bgColor={"white"}
-                  p={responsive("", ".5em", "1em")}
+                  p={responsive(".5em", ".5em", "1em")}
                   borderRadius={"10px"}
-                  align={"center"}
-                  justify={"space-between"}
+                  gap={isMobile && ".5em"}
+                  flexDir={isMobile ? "column" : "row"}
+                  align={!isMobile && "center"}
+                  justify={!isMobile && "space-between"}
                 >
-                  <Text
-                    fontWeight={"500"}
-                    fontSize={responsive("", "sm", "md")}
-                    opacity={0.9}
-                  >
-                    {lastCourse.title}
-                  </Text>
-                  <Text
-                    textOverflow={"ellipsis"}
-                    whiteSpace={"nowrap"}
-                    overflow={"hidden"}
-                    fontWeight={500}
-                    maxW={responsive("", "10em", "12em")}
-                    fontSize={responsive("", "sm", "md")}
-                    opacity={0.9}
-                  >
-                    {lastCourse.description}
-                  </Text>
-                  <ButtonGroup>
-                    <Button
-                      as={Link}
-                      to={`/enrollments/course/${lastCourse.slug}`}
-                      variant={"outline"}
-                      bgColor={"var(--secondary-color)"}
-                      color={"white"}
-                      fontSize={responsive("", "sm", "md")}
-                      border={"1px solid var(--secondary-color)"}
-                      _hover={{
-                        bgColor: "white",
-                        color: "var(--secondary-color)",
-                      }}
-                    >
-                      view
-                    </Button>
-                  </ButtonGroup>
-                </Flex>
-              ) : (
-                <Text
-                  fontSize={responsive("", "sm", "md")}
-                  fontWeight={500}
-                  opacity={0.9}
-                >
-                  You are not enrolled in any course
-                </Text>
-              )}
-            </Flex>
-          </GridItem>
-          <GridItem
-            rowSpan={20}
-            colSpan={1}
-            maxH={"50em"}
-            display={"flex"}
-            flexDir={"column"}
-            gap={"1em"}
-            p={"1em"}
-            pr={0}
-            borderRadius={"10px"}
-            pb={"1em"}
-            bgColor={"var(--bg-color)"}
-            border={"2px dashed var(--secondary-color)"}
-          >
-            <Flex align={"center"} justify={"space-between"} mr={"1em"}>
-              <Text fontWeight={"500"} fontSize={responsive("", "md", "lg")}>
-                Your Comments
-              </Text>
-              <ButtonGroup>
-                {commentsEdit && (
-                  <Button
-                    variant={"outline"}
-                    onClick={() => {
-                      setCommentsEdit(!commentsEdit);
-                      commentsDeleteFunc();
-                      handleCommentsSubmit();
-                    }}
-                    bgColor={"var(--secondary-color)"}
-                    type={"submit"}
-                    color={"white"}
-                    fontSize={responsive("", "sm", "md")}
-                    border={"1px solid var(--secondary-color)"}
-                    _hover={{
-                      bgColor: "white",
-                      color: "var(--secondary-color)",
-                    }}
-                  >
-                    Save
-                  </Button>
-                )}
-                <Button
-                  variant={"outline"}
-                  onClick={() => {
-                    setCommentsEdit(!commentsEdit);
-                    setCommentDeleteList([]);
-                    updatedCommentTextListFunc();
-                  }}
-                  bgColor={"var(--accent-color)"}
-                  color={"white"}
-                  fontSize={responsive("", "sm", "md")}
-                  border={"1px solid var(--accent-color)"}
-                  _hover={{
-                    bgColor: "var(--bg-color)",
-                    color: "var(--accent-color)",
-                  }}
-                >
-                  {commentsEdit ? "Reset" : "Edit"}
-                </Button>
-              </ButtonGroup>
-            </Flex>
-            <Flex
-              maxH={"100%"}
-              overflow={"auto"}
-              pr={"1em"}
-              h={"100%"}
-              mt={responsive("", ".5em", ".5em")}
-              flexDir={"column"}
-              gap={"1em"}
-            >
-              {comments && comments.length > 0 ? (
-                comments.map((comment, index) => {
-                  const updatedComment = commentTextList.find((c) => {
-                    if (
-                      c.text !== comment.text &&
-                      c.commentId === comment._id
-                    ) {
-                      return c;
-                    } else {
-                      return null;
-                    }
-                  });
-                  return (
-                    !commentDeleteList.includes(comment) && (
-                      <Flex
-                        key={index}
-                        bgColor="white"
-                        p={responsive("", ".5em", "1em")}
-                        borderRadius="10px"
-                        justify="space-between"
-                        flexDir="column"
-                        gap="1em"
-                      >
-                        <Textarea
-                          border={"2px dashed #cfcfcf"}
-                          readOnly={!commentsEdit}
-                          value={
-                            updatedComment ? updatedComment.text : comment.text
-                          }
-                          _focus={{
-                            boxShadow: "none",
-                            border: "2px dashed #cfcfcf",
-                          }}
-                          onChange={(e) => {
-                            const updatedCommentTextList = [...commentTextList];
-                            const commentIndex =
-                              updatedCommentTextList.findIndex(
-                                (c) => c.commentId === comment._id
-                              );
-                            if (commentIndex !== -1) {
-                              updatedCommentTextList[commentIndex].text =
-                                e.target.value;
-                              setCommentTextList(updatedCommentTextList);
-                            }
-                          }}
-                        ></Textarea>
-                        <Flex align="center" justify="space-between">
-                          <Flex
-                            align={"center"}
-                            justify={"space-between"}
-                            w={"100%"}
-                          >
-                            <Flex align={"center"} gap={"1em"}>
-                              <Text
-                                textOverflow={"ellipsis"}
-                                whiteSpace={"nowrap"}
-                                overflow={"hidden"}
-                                fontWeight={500}
-                                maxW={responsive("", "10em", "12em")}
-                                fontSize={responsive("", "sm", "md")}
-                                opacity={0.9}
-                              >
-                                {comment.lesson?.title}
-                              </Text>
-                              <Flex
-                                fontSize={responsive("", "sm", "md")}
-                                fontWeight={500}
-                                opacity={0.9}
-                                color={"var(--accent-color)"}
-                                gap={".3em"}
-                                align={"center"}
-                              >
-                                <Text>{comment.point}</Text>
-                                <StarIcon
-                                  pos={"relative"}
-                                  bottom={"2px"}
-                                ></StarIcon>
-                              </Flex>
-                            </Flex>
-                            <Flex align={"center"} gap={"1em"}>
-                              <Text
-                                minW={"max-content"}
-                                fontWeight="500"
-                                opacity={0.9}
-                                fontSize={responsive("", "sm", "md")}
-                              >
-                                {getDate(comment.createdAt)}
-                              </Text>
-                              {commentsEdit && (
-                                <Button
-                                  variant="outline"
-                                  p=".5em"
-                                  minH="max-content"
-                                  minW="max-content"
-                                  onClick={() =>
-                                    handleCommentButtonClick(index, comment)
-                                  }
-                                  fontSize={responsive("", "sm", "md")}
-                                  _hover={{
-                                    bgColor: activeButtonIndices[index]
-                                      ? "var(--accent-color)"
-                                      : "unset",
-                                  }}
-                                  bgColor={
-                                    activeButtonIndices[index]
-                                      ? "var(--accent-color)"
-                                      : "unset"
-                                  }
-                                >
-                                  <i
-                                    className="fi fi-rr-trash"
-                                    style={{ position: "relative", top: "2px" }}
-                                  />
-                                </Button>
-                              )}
-                            </Flex>
-                          </Flex>
-                        </Flex>
+                  {isMobile ? (
+                    <>
+                      <Flex align={"center"} justify={"space-between"}>
+                        <Text
+                          fontWeight={"500"}
+                          fontSize={responsive("sm", "sm", "md")}
+                          opacity={0.9}
+                        >
+                          {lastCourse.title}
+                        </Text>
+                        <Text
+                          textOverflow={"ellipsis"}
+                          whiteSpace={"nowrap"}
+                          overflow={"hidden"}
+                          fontWeight={500}
+                          maxW={responsive("8em", "10em", "12em")}
+                          fontSize={responsive("sm", "sm", "md")}
+                          opacity={0.9}
+                        >
+                          {lastCourse.description}
+                        </Text>
                       </Flex>
-                    )
-                  );
-                })
-              ) : (
-                <Text
-                  fontSize={responsive("", "sm", "md")}
-                  fontWeight={"500"}
-                  opacity={"0.9"}
-                >
-                  You don't have any comment
-                </Text>
-              )}
-            </Flex>
-          </GridItem>
-          <GridItem
-            rowSpan={16}
-            colSpan={2}
-            display={"flex"}
-            flexDir={"column"}
-            maxH={responsive("", "35em", "37.5em")}
-            gap={"1em"}
-            p={"1em"}
-            borderRadius={"10px"}
-            pb={"1em"}
-            bgColor={"var(--bg-color)"}
-            border={"2px dashed var(--secondary-color)"}
-          >
-            <Text
-              fontWeight={"500"}
-              fontSize={responsive("", "md", "lg")}
-              w={"max-content"}
-            >
-              Your Courses
-            </Text>
-            <Flex flexDir={"column"} gap={"1em"} overflow={"auto"}>
-              {enrolledCourses.length > 0 &&
-              !enrolledCourses.some((course) => course === null) ? (
-                enrolledCourses.map((course, index) => (
-                  <Flex
-                    bgColor={"white"}
-                    p={responsive("", ".5em", "1em")}
-                    borderRadius={"10px"}
-                    key={index}
-                    align={"center"}
-                    justify={"space-between"}
-                    transition={"all .3s ease"}
-                  >
-                    <Text
-                      fontWeight={"500"}
-                      fontSize={responsive("", "sm", "md")}
-                      opacity={0.9}
-                    >
-                      {course.title}
-                    </Text>
-                    <Text
-                      textOverflow={"ellipsis"}
-                      whiteSpace={"nowrap"}
-                      overflow={"hidden"}
-                      fontWeight={500}
-                      maxW={responsive("", "10em", "12em")}
-                      fontSize={responsive("", "sm", "md")}
-                      opacity={0.9}
-                    >
-                      {course.description}
-                    </Text>
-                    <ButtonGroup>
+                      <Flex align={"center"} justify={"flex-end"}>
+                        <Button
+                          size={isMobile ? "sm" : "md"}
+                          s
+                          as={Link}
+                          to={`/enrollments/course/${lastCourse.slug}`}
+                          variant={"outline"}
+                          bgColor={"var(--secondary-color)"}
+                          color={"white"}
+                          fontSize={"sm"}
+                          border={"1px solid var(--secondary-color)"}
+                          _hover={{
+                            bgColor: "white",
+                            color: "var(--secondary-color)",
+                          }}
+                        >
+                          view
+                        </Button>
+                      </Flex>
+                    </>
+                  ) : (
+                    <>
+                      <Text
+                        fontWeight={"500"}
+                        fontSize={responsive("sm", "sm", "md")}
+                        opacity={0.9}
+                      >
+                        {lastCourse.title}
+                      </Text>
+                      <Text
+                        textOverflow={"ellipsis"}
+                        whiteSpace={"nowrap"}
+                        overflow={"hidden"}
+                        fontWeight={500}
+                        maxW={responsive("8em", "10em", "12em")}
+                        fontSize={responsive("sm", "sm", "md")}
+                        opacity={0.9}
+                      >
+                        {lastCourse.description}
+                      </Text>
                       <Button
+                        size={isMobile ? "sm" : "md"}
                         as={Link}
-                        to={`/enrollments/course/${course.slug}`}
+                        to={`/enrollments/course/${lastCourse.slug}`}
                         variant={"outline"}
                         bgColor={"var(--secondary-color)"}
                         color={"white"}
@@ -728,21 +447,380 @@ const Enrollments = () => {
                       >
                         view
                       </Button>
-                      <Button
-                        onClick={() => handleUnenroll(course)}
-                        variant={"outline"}
-                        bgColor={"var(--accent-color)"}
-                        color={"white"}
-                        fontSize={responsive("", "sm", "md")}
-                        border={"1px solid var(--accent-color)"}
-                        _hover={{
-                          bgColor: "white",
-                          color: "var(--accent-color)",
-                        }}
-                      >
-                        Unenroll
-                      </Button>
-                    </ButtonGroup>
+                    </>
+                  )}
+                </Flex>
+              ) : (
+                <Text
+                  fontSize={responsive("sm", "sm", "md")}
+                  fontWeight={500}
+                  opacity={0.9}
+                >
+                  You are not enrolled in any course
+                </Text>
+              )}
+            </Flex>
+          </GridItem>
+          {!isMobile && (
+            <GridItem
+              rowSpan={20}
+              colSpan={1}
+              maxH={"50em"}
+              display={"flex"}
+              flexDir={"column"}
+              gap={"1em"}
+              p={"1em"}
+              pr={0}
+              borderRadius={"10px"}
+              pb={"1em"}
+              bgColor={"var(--bg-color)"}
+              border={"2px dashed var(--secondary-color)"}
+            >
+              <Flex align={"center"} justify={"space-between"} mr={"1em"}>
+                <Text
+                  fontWeight={"500"}
+                  fontSize={responsive("sm", "md", "lg")}
+                >
+                  Your Comments
+                </Text>
+                <ButtonGroup>
+                  {commentsEdit && (
+                    <Button
+                      variant={"outline"}
+                      onClick={() => {
+                        setCommentsEdit(!commentsEdit);
+                        commentsDeleteFunc();
+                        handleCommentsSubmit();
+                      }}
+                      bgColor={"var(--secondary-color)"}
+                      type={"submit"}
+                      color={"white"}
+                      fontSize={responsive("", "sm", "md")}
+                      border={"1px solid var(--secondary-color)"}
+                      _hover={{
+                        bgColor: "white",
+                        color: "var(--secondary-color)",
+                      }}
+                    >
+                      Save
+                    </Button>
+                  )}
+                  <Button
+                    variant={"outline"}
+                    onClick={() => {
+                      setCommentsEdit(!commentsEdit);
+                      setCommentDeleteList([]);
+                      updatedCommentTextListFunc();
+                    }}
+                    bgColor={"var(--accent-color)"}
+                    color={"white"}
+                    fontSize={responsive("", "sm", "md")}
+                    border={"1px solid var(--accent-color)"}
+                    _hover={{
+                      bgColor: "var(--bg-color)",
+                      color: "var(--accent-color)",
+                    }}
+                  >
+                    {commentsEdit ? "Reset" : "Edit"}
+                  </Button>
+                </ButtonGroup>
+              </Flex>
+              <Flex
+                maxH={"100%"}
+                overflow={"auto"}
+                pr={"1em"}
+                h={"100%"}
+                mt={responsive("", ".5em", ".5em")}
+                flexDir={"column"}
+                gap={"1em"}
+              >
+                {comments && comments.length > 0 ? (
+                  comments.map((comment, index) => {
+                    const updatedComment = commentTextList.find((c) => {
+                      if (
+                        c.text !== comment.text &&
+                        c.commentId === comment._id
+                      ) {
+                        return c;
+                      } else {
+                        return null;
+                      }
+                    });
+                    return (
+                      !commentDeleteList.includes(comment) && (
+                        <Flex
+                          key={index}
+                          bgColor="white"
+                          p={responsive("", ".5em", "1em")}
+                          borderRadius="10px"
+                          justify="space-between"
+                          flexDir="column"
+                          gap="1em"
+                        >
+                          <Textarea
+                            border={"2px dashed #cfcfcf"}
+                            readOnly={!commentsEdit}
+                            value={
+                              updatedComment
+                                ? updatedComment.text
+                                : comment.text
+                            }
+                            _focus={{
+                              boxShadow: "none",
+                              border: "2px dashed #cfcfcf",
+                            }}
+                            onChange={(e) => {
+                              const updatedCommentTextList = [
+                                ...commentTextList,
+                              ];
+                              const commentIndex =
+                                updatedCommentTextList.findIndex(
+                                  (c) => c.commentId === comment._id
+                                );
+                              if (commentIndex !== -1) {
+                                updatedCommentTextList[commentIndex].text =
+                                  e.target.value;
+                                setCommentTextList(updatedCommentTextList);
+                              }
+                            }}
+                          ></Textarea>
+                          <Flex align="center" justify="space-between">
+                            <Flex
+                              align={"center"}
+                              justify={"space-between"}
+                              w={"100%"}
+                            >
+                              <Flex align={"center"} gap={"1em"}>
+                                <Text
+                                  textOverflow={"ellipsis"}
+                                  whiteSpace={"nowrap"}
+                                  overflow={"hidden"}
+                                  fontWeight={500}
+                                  maxW={responsive("", "10em", "12em")}
+                                  fontSize={responsive("", "sm", "md")}
+                                  opacity={0.9}
+                                >
+                                  {comment.lesson?.title}
+                                </Text>
+                                <Flex
+                                  fontSize={responsive("", "sm", "md")}
+                                  fontWeight={500}
+                                  opacity={0.9}
+                                  color={"var(--accent-color)"}
+                                  gap={".3em"}
+                                  align={"center"}
+                                >
+                                  <Text>{comment.point}</Text>
+                                  <StarIcon
+                                    pos={"relative"}
+                                    bottom={"2px"}
+                                  ></StarIcon>
+                                </Flex>
+                              </Flex>
+                              <Flex align={"center"} gap={"1em"}>
+                                <Text
+                                  minW={"max-content"}
+                                  fontWeight="500"
+                                  opacity={0.9}
+                                  fontSize={responsive("", "sm", "md")}
+                                >
+                                  {getDate(comment.createdAt)}
+                                </Text>
+                                {commentsEdit && (
+                                  <Button
+                                    variant="outline"
+                                    p=".5em"
+                                    minH="max-content"
+                                    minW="max-content"
+                                    onClick={() =>
+                                      handleCommentButtonClick(index, comment)
+                                    }
+                                    fontSize={responsive("", "sm", "md")}
+                                    _hover={{
+                                      bgColor: activeButtonIndices[index]
+                                        ? "var(--accent-color)"
+                                        : "unset",
+                                    }}
+                                    bgColor={
+                                      activeButtonIndices[index]
+                                        ? "var(--accent-color)"
+                                        : "unset"
+                                    }
+                                  >
+                                    <i
+                                      className="fi fi-rr-trash"
+                                      style={{
+                                        position: "relative",
+                                        top: "2px",
+                                      }}
+                                    />
+                                  </Button>
+                                )}
+                              </Flex>
+                            </Flex>
+                          </Flex>
+                        </Flex>
+                      )
+                    );
+                  })
+                ) : (
+                  <Text
+                    fontSize={responsive("", "sm", "md")}
+                    fontWeight={"500"}
+                    opacity={"0.9"}
+                  >
+                    You don't have any comment
+                  </Text>
+                )}
+              </Flex>
+            </GridItem>
+          )}
+          <GridItem
+            rowSpan={isMobile ? 15 : 16}
+            colSpan={2}
+            display={"flex"}
+            flexDir={"column"}
+            maxH={responsive("33em", "35em", "37.5em")}
+            gap={"1em"}
+            p={"1em"}
+            borderRadius={"10px"}
+            pb={"1em"}
+            bgColor={"var(--bg-color)"}
+            border={"2px dashed var(--secondary-color)"}
+          >
+            <Text
+              fontWeight={"500"}
+              fontSize={responsive("sm", "md", "lg")}
+              w={"max-content"}
+            >
+              Your Courses
+            </Text>
+            <Flex flexDir={"column"} gap={"1em"} overflow={"auto"}>
+              {enrolledCourses.length > 0 &&
+              !enrolledCourses.some((course) => course === null) ? (
+                enrolledCourses.map((course, index) => (
+                  <Flex
+                    bgColor={"white"}
+                    p={isMobile ? ".5em" : "1em"}
+                    borderRadius={"10px"}
+                    gap={isMobile && ".5em"}
+                    key={index}
+                    align={!isMobile && "center"}
+                    flexDir={isMobile ? "column" : "row"}
+                    justify={!isMobile && "space-between"}
+                    transition={"all .3s ease"}
+                  >
+                    {isMobile ? (
+                      <>
+                        <Flex align={"center"} justify={"space-between"}>
+                          <Text
+                            fontWeight={"500"}
+                            fontSize={"sm"}
+                            opacity={0.9}
+                          >
+                            {course.title}
+                          </Text>
+                          <Text
+                            textOverflow={"ellipsis"}
+                            whiteSpace={"nowrap"}
+                            overflow={"hidden"}
+                            fontWeight={500}
+                            maxW={"8em"}
+                            fontSize={"sm"}
+                            opacity={0.9}
+                          >
+                            {course.description}
+                          </Text>
+                        </Flex>
+                        <Flex justify={"flex-end"}>
+                          <ButtonGroup>
+                            <Button
+                              size={"sm"}
+                              as={Link}
+                              to={`/enrollments/course/${course.slug}`}
+                              variant={"outline"}
+                              bgColor={"var(--secondary-color)"}
+                              color={"white"}
+                              fontSize={"sm"}
+                              border={"1px solid var(--secondary-color)"}
+                              _hover={{
+                                bgColor: "white",
+                                color: "var(--secondary-color)",
+                              }}
+                            >
+                              view
+                            </Button>
+                            <Button
+                              size={"sm"}
+                              onClick={() => handleUnenroll(course)}
+                              variant={"outline"}
+                              bgColor={"var(--accent-color)"}
+                              color={"white"}
+                              fontSize={"sm"}
+                              border={"1px solid var(--accent-color)"}
+                              _hover={{
+                                bgColor: "white",
+                                color: "var(--accent-color)",
+                              }}
+                            >
+                              Unenroll
+                            </Button>
+                          </ButtonGroup>
+                        </Flex>
+                      </>
+                    ) : (
+                      <>
+                        <Text
+                          fontWeight={"500"}
+                          fontSize={responsive("", "sm", "md")}
+                          opacity={0.9}
+                        >
+                          {course.title}
+                        </Text>
+                        <Text
+                          textOverflow={"ellipsis"}
+                          whiteSpace={"nowrap"}
+                          overflow={"hidden"}
+                          fontWeight={500}
+                          maxW={responsive("", "10em", "12em")}
+                          fontSize={responsive("", "sm", "md")}
+                          opacity={0.9}
+                        >
+                          {course.description}
+                        </Text>
+                        <ButtonGroup>
+                          <Button
+                            as={Link}
+                            to={`/enrollments/course/${course.slug}`}
+                            variant={"outline"}
+                            bgColor={"var(--secondary-color)"}
+                            color={"white"}
+                            fontSize={responsive("", "sm", "md")}
+                            border={"1px solid var(--secondary-color)"}
+                            _hover={{
+                              bgColor: "white",
+                              color: "var(--secondary-color)",
+                            }}
+                          >
+                            view
+                          </Button>
+                          <Button
+                            onClick={() => handleUnenroll(course)}
+                            variant={"outline"}
+                            bgColor={"var(--accent-color)"}
+                            color={"white"}
+                            fontSize={responsive("", "sm", "md")}
+                            border={"1px solid var(--accent-color)"}
+                            _hover={{
+                              bgColor: "white",
+                              color: "var(--accent-color)",
+                            }}
+                          >
+                            Unenroll
+                          </Button>
+                        </ButtonGroup>
+                      </>
+                    )}
                   </Flex>
                 ))
               ) : (
@@ -756,6 +834,223 @@ const Enrollments = () => {
               )}
             </Flex>
           </GridItem>
+          {isMobile && (
+            <GridItem
+              rowSpan={15}
+              colSpan={2}
+              display={"flex"}
+              flexDir={"column"}
+              gap={"1em"}
+              p={"1em"}
+              pr={0}
+              borderRadius={"10px"}
+              pb={"1em"}
+              bgColor={"var(--bg-color)"}
+              border={"2px dashed var(--secondary-color)"}
+            >
+              <Flex align={"center"} justify={"space-between"} mr={"1em"}>
+                <Text
+                  fontWeight={"500"}
+                  fontSize={responsive("sm", "md", "lg")}
+                >
+                  Your Comments
+                </Text>
+                <ButtonGroup>
+                  {commentsEdit && (
+                    <Button
+                      size={"sm"}
+                      variant={"outline"}
+                      onClick={() => {
+                        setCommentsEdit(!commentsEdit);
+                        commentsDeleteFunc();
+                        handleCommentsSubmit();
+                      }}
+                      bgColor={"var(--secondary-color)"}
+                      type={"submit"}
+                      color={"white"}
+                      fontSize={responsive("sm", "sm", "md")}
+                      border={"1px solid var(--secondary-color)"}
+                      _hover={{
+                        bgColor: "white",
+                        color: "var(--secondary-color)",
+                      }}
+                    >
+                      Save
+                    </Button>
+                  )}
+                  <Button
+                    size={"sm"}
+                    variant={"outline"}
+                    onClick={() => {
+                      setCommentsEdit(!commentsEdit);
+                      setCommentDeleteList([]);
+                      updatedCommentTextListFunc();
+                    }}
+                    bgColor={"var(--accent-color)"}
+                    color={"white"}
+                    fontSize={responsive("sm", "sm", "md")}
+                    border={"1px solid var(--accent-color)"}
+                    _hover={{
+                      bgColor: "var(--bg-color)",
+                      color: "var(--accent-color)",
+                    }}
+                  >
+                    {commentsEdit ? "Reset" : "Edit"}
+                  </Button>
+                </ButtonGroup>
+              </Flex>
+              <Flex
+                maxH={"100%"}
+                overflow={"auto"}
+                pr={"1em"}
+                h={"100%"}
+                mt={responsive(".5em", ".5em", ".5em")}
+                flexDir={"column"}
+                gap={"1em"}
+              >
+                {comments && comments.length > 0 ? (
+                  comments.map((comment, index) => {
+                    const updatedComment = commentTextList.find((c) => {
+                      if (
+                        c.text !== comment.text &&
+                        c.commentId === comment._id
+                      ) {
+                        return c;
+                      } else {
+                        return null;
+                      }
+                    });
+                    return (
+                      !commentDeleteList.includes(comment) && (
+                        <Flex
+                          key={index}
+                          bgColor="white"
+                          p={responsive(".5em", ".5em", "1em")}
+                          borderRadius="10px"
+                          justify="space-between"
+                          flexDir="column"
+                          gap="1em"
+                        >
+                          <Textarea
+                            border={"2px dashed #cfcfcf"}
+                            readOnly={!commentsEdit}
+                            fontSize={"sm"}
+                            value={
+                              updatedComment
+                                ? updatedComment.text
+                                : comment.text
+                            }
+                            _focus={{
+                              boxShadow: "none",
+                              border: "2px dashed #cfcfcf",
+                            }}
+                            onChange={(e) => {
+                              const updatedCommentTextList = [
+                                ...commentTextList,
+                              ];
+                              const commentIndex =
+                                updatedCommentTextList.findIndex(
+                                  (c) => c.commentId === comment._id
+                                );
+                              if (commentIndex !== -1) {
+                                updatedCommentTextList[commentIndex].text =
+                                  e.target.value;
+                                setCommentTextList(updatedCommentTextList);
+                              }
+                            }}
+                          ></Textarea>
+                          <Flex align="center" justify="space-between">
+                            <Flex
+                              align={"center"}
+                              justify={"space-between"}
+                              w={"100%"}
+                            >
+                              <Flex align={"center"} gap={"1em"}>
+                                <Text
+                                  textOverflow={"ellipsis"}
+                                  whiteSpace={"nowrap"}
+                                  overflow={"hidden"}
+                                  fontWeight={500}
+                                  maxW={"6em"}
+                                  fontSize={"sm"}
+                                  opacity={0.9}
+                                >
+                                  {comment.lesson?.title}
+                                </Text>
+                                <Flex
+                                  fontSize={"sm"}
+                                  fontWeight={500}
+                                  opacity={0.9}
+                                  color={"var(--accent-color)"}
+                                  gap={".3em"}
+                                  align={"center"}
+                                >
+                                  <Text>{comment.point}</Text>
+                                  <StarIcon
+                                    pos={"relative"}
+                                    bottom={"2px"}
+                                  ></StarIcon>
+                                </Flex>
+                              </Flex>
+                              <Flex align={"center"} gap={"1em"}>
+                                <Text
+                                  minW={"max-content"}
+                                  fontWeight="500"
+                                  opacity={0.9}
+                                  fontSize={"sm"}
+                                >
+                                  {getDate(comment.createdAt)}
+                                </Text>
+                                {commentsEdit && (
+                                  <Button
+                                    size={"sm"}
+                                    variant="outline"
+                                    p=".5em"
+                                    minH="max-content"
+                                    minW="max-content"
+                                    onClick={() =>
+                                      handleCommentButtonClick(index, comment)
+                                    }
+                                    fontSize={"sm"}
+                                    _hover={{
+                                      bgColor: activeButtonIndices[index]
+                                        ? "var(--accent-color)"
+                                        : "unset",
+                                    }}
+                                    bgColor={
+                                      activeButtonIndices[index]
+                                        ? "var(--accent-color)"
+                                        : "unset"
+                                    }
+                                  >
+                                    <i
+                                      className="fi fi-rr-trash"
+                                      style={{
+                                        position: "relative",
+                                        top: "2px",
+                                      }}
+                                    />
+                                  </Button>
+                                )}
+                              </Flex>
+                            </Flex>
+                          </Flex>
+                        </Flex>
+                      )
+                    );
+                  })
+                ) : (
+                  <Text
+                    fontSize={responsive("sm", "sm", "md")}
+                    fontWeight={"500"}
+                    opacity={"0.9"}
+                  >
+                    You don't have any comment
+                  </Text>
+                )}
+              </Flex>
+            </GridItem>
+          )}
         </Grid>
       </Box>
     </>

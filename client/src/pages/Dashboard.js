@@ -168,7 +168,7 @@ const Dashboard = () => {
     });
 
     Promise.all(promises)
-      .then((updatedComments) => {
+      .then(async (updatedComments) => {
         // Tüm güncellenmiş yorumları aldıktan sonra commentTextList'i güncelleyin
         const updatedCommentTextList = commentTextList.map((comment) => {
           const updatedComment = updatedComments.find(
@@ -190,7 +190,11 @@ const Dashboard = () => {
           duration: 5000,
           isClosable: true,
         });
+        if (commentDeleteList.length > 0) {
+          await commentsDeleteFunc();
+        }
       })
+
       .catch((error) => {
         // Hata durumunda hatayı kaydedin
         setErrors([...errors, error]);
@@ -361,7 +365,7 @@ const Dashboard = () => {
             <Flex align={"center"} justify={"space-between"} mr={"1em"}>
               <Text
                 fontWeight={"500"}
-                fontSize={responsive("md", "md", "lg")}
+                fontSize={responsive("sm", "md", "lg")}
                 w={"max-content"}
               >
                 Your Courses
@@ -640,19 +644,14 @@ const Dashboard = () => {
           >
             <Text
               fontWeight={"500"}
-              fontSize={responsive("md", "md", "lg")}
+              fontSize={responsive("sm", "md", "lg")}
               w={"max-content"}
               mb={"1em"}
             >
               Instructor Summary
             </Text>
             <Box w={"100%"} h={"100%"}>
-              <Line
-                data={data}
-                options={options}
-                width={isMobile ? "150%" : "200%"}
-                height={"95%"}
-              />
+              <Line data={data} options={options} />
             </Box>
           </GridItem>
           <GridItem
@@ -853,7 +852,7 @@ const Dashboard = () => {
               justify={"space-between"}
               mr={!isMobile && "1em"}
             >
-              <Text fontWeight={"500"} fontSize={responsive("md", "md", "lg")}>
+              <Text fontWeight={"500"} fontSize={responsive("sm", "md", "lg")}>
                 Your Comments
               </Text>
               <ButtonGroup>
@@ -861,9 +860,8 @@ const Dashboard = () => {
                   <Button
                     size={isMobile ? "sm" : "md"}
                     variant={"outline"}
-                    onClick={() => {
+                    onClick={async () => {
                       setCommentsEdit(!commentsEdit);
-                      commentsDeleteFunc();
                       handleCommentsSubmit();
                     }}
                     bgColor={"var(--secondary-color)"}

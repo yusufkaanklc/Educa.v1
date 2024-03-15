@@ -90,7 +90,7 @@ const Instructors = () => {
                       justify={"space-between"}
                       h={"100%"}
                     >
-                      <Box>
+                      <Box position={"relative"}>
                         {instructor.image ? (
                           <Center
                             overflow={"hidden"}
