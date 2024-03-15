@@ -3,7 +3,7 @@ import axios from "axios";
 const deleteComment = async (courseSlug, lessonSlug, commentId) => {
   try {
     await axios.delete(
-      `/courses/${courseSlug}/lessons/${lessonSlug}/comments/${commentId}`
+      `/api/courses/${courseSlug}/lessons/${lessonSlug}/comments/${commentId}`
     );
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
@@ -22,7 +22,7 @@ const updateComment = async (
 ) => {
   try {
     const { data } = await axios.put(
-      `/courses/${courseSlug}/lessons/${lessonSlug}/comments/${commentId}`,
+      `/api/courses/${courseSlug}/lessons/${lessonSlug}/comments/${commentId}`,
       commentText
     );
     return data;
@@ -37,7 +37,7 @@ const updateComment = async (
 const addComment = async (courseSlug, lessonSlug, commentData) => {
   try {
     const { data } = await axios.post(
-      `/courses/${courseSlug}/lessons/${lessonSlug}/add-comment`,
+      `/api/courses/${courseSlug}/lessons/${lessonSlug}/add-comment`,
       commentData,
       {
         headers: {

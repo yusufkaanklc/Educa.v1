@@ -60,14 +60,14 @@ app.use(
 
 // Routes
 app.use(
-  "/admin",
+  "/api/admin",
   authMiddlewares.isLoggedIn,
   authMiddlewares.isAdmin,
   adminRouters
 );
-app.use("/users", userRouters);
-app.use("/courses", courseRouters);
-app.use("/categories", categoryRouters);
+app.use("/api/users", userRouters);
+app.use("/api/courses", courseRouters);
+app.use("/api/categories", categoryRouters);
 
 app.get("/public/uploads/:file", (req, res) => {
   const filePath = resolve(__dirname, "public", "uploads", req.params.file);

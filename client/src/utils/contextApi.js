@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 const dataContext = createContext();
 
 export const DataProvider = ({ children }) => {
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = "http://educa.ykaan.com.tr/";
   const [courses, setCourses] = useState([]);
   const [users, setUsers] = useState([]);
   const [account, setAccount] = useState(null);

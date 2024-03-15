@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const getCourses = async (titleQuery, categoryQuery) => {
-  let queryString = "/courses";
+  let queryString = "/api/courses";
 
   // Her iki sorgu parametresi de varsa
   if (titleQuery && categoryQuery) {
@@ -17,7 +17,7 @@ const getCourses = async (titleQuery, categoryQuery) => {
     (!categoryQuery || categoryQuery === "" || categoryQuery === "all")
   ) {
     // Herhangi bir sorgu yok
-    queryString = "/courses";
+    queryString = "/api/courses";
   }
 
   try {
@@ -34,7 +34,7 @@ const getCourses = async (titleQuery, categoryQuery) => {
 
 const getCourse = async (courseSlug) => {
   try {
-    const { data } = await axios.get(`/courses/${courseSlug}`);
+    const { data } = await axios.get(`/api/courses/${courseSlug}`);
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
@@ -47,7 +47,7 @@ const getCourse = async (courseSlug) => {
 
 const createCourse = async (courseData) => {
   try {
-    const { data } = await axios.post("/courses/add-course", courseData, {
+    const { data } = await axios.post("/api/courses/add-course", courseData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -64,7 +64,7 @@ const createCourse = async (courseData) => {
 
 const updateCourse = async (courseSlug, courseData) => {
   try {
-    const { data } = await axios.put(`/courses/${courseSlug}`, courseData, {
+    const { data } = await axios.put(`/api/courses/${courseSlug}`, courseData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -81,7 +81,7 @@ const updateCourse = async (courseSlug, courseData) => {
 
 const getCourseState = async (courseSlug) => {
   try {
-    const { data } = await axios.get(`/courses/${courseSlug}/state`);
+    const { data } = await axios.get(`/api/courses/${courseSlug}/state`);
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
@@ -95,7 +95,7 @@ const getCourseState = async (courseSlug) => {
 const updateCourseState = async (courseSlug) => {
   try {
     const { data } = await axios.put(
-      `/courses/${courseSlug}/lessons/lessonSlug/update-state?stateType=course`
+      `/api/courses/${courseSlug}/lessons/lessonSlug/update-state?stateType=course`
     );
     return data;
   } catch (error) {
@@ -108,7 +108,7 @@ const updateCourseState = async (courseSlug) => {
 };
 const deleteCourse = async (courseSlug) => {
   try {
-    const { data } = await axios.delete(`/courses/${courseSlug}`);
+    const { data } = await axios.delete(`/api/courses/${courseSlug}`);
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal

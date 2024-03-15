@@ -2,7 +2,7 @@ import axios from "axios";
 
 const getCategories = async (searchQuery) => {
   try {
-    let queryString = "/categories";
+    let queryString = "/api/categories";
     if (searchQuery !== "" && searchQuery)
       queryString = `/categories?categoryName=${searchQuery}`;
     const { data } = await axios.get(queryString);
@@ -18,7 +18,10 @@ const getCategories = async (searchQuery) => {
 
 const createCategories = async (categoryData) => {
   try {
-    const { data } = await axios.post("/categories/add-category", categoryData);
+    const { data } = await axios.post(
+      "/api/categories/add-category",
+      categoryData
+    );
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal

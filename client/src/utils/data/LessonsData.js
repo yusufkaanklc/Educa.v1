@@ -2,7 +2,7 @@ import axios from "axios";
 
 const getLessons = async (courseSlug) => {
   try {
-    const { data } = await axios.get(`/courses/${courseSlug}/lessons`);
+    const { data } = await axios.get(`/api/courses/${courseSlug}/lessons`);
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
@@ -16,7 +16,7 @@ const getLessons = async (courseSlug) => {
 const createLesson = async (courseSlug, lessonData) => {
   try {
     const { data } = await axios.post(
-      `/courses/${courseSlug}/add-lesson`,
+      `/api/courses/${courseSlug}/add-lesson`,
       lessonData,
       {
         headers: {
@@ -37,7 +37,7 @@ const createLesson = async (courseSlug, lessonData) => {
 const deleteLesson = async (courseSlug, lessonSlug) => {
   try {
     const { data } = await axios.delete(
-      `/courses/${courseSlug}/lessons/${lessonSlug}`
+      `/api/courses/${courseSlug}/lessons/${lessonSlug}`
     );
     return data;
   } catch (error) {
@@ -52,7 +52,7 @@ const deleteLesson = async (courseSlug, lessonSlug) => {
 const updateLesson = async (courseSlug, lessonSlug, lessonData) => {
   try {
     const { data } = await axios.put(
-      `/courses/${courseSlug}/lessons/${lessonSlug}`,
+      `/api/courses/${courseSlug}/lessons/${lessonSlug}`,
       lessonData,
       {
         headers: {
@@ -73,7 +73,7 @@ const updateLesson = async (courseSlug, lessonSlug, lessonData) => {
 const updateLessonState = async (courseSlug, lessonSlug, stateType) => {
   try {
     const { data } = await axios.put(
-      `/courses/${courseSlug}/lessons/${lessonSlug}/update-state?stateType=${stateType}`
+      `/api/courses/${courseSlug}/lessons/${lessonSlug}/update-state?stateType=${stateType}`
     );
     return data;
   } catch (error) {

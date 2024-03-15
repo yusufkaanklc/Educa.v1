@@ -2,7 +2,7 @@ import axios from "axios";
 
 const getUsers = async () => {
   try {
-    const { data } = await axios.get("/users/accounts");
+    const { data } = await axios.get("/api/users/accounts");
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
@@ -15,7 +15,7 @@ const getUsers = async () => {
 
 const registerUser = async (input) => {
   try {
-    const { data } = await axios.post("/users/register", input);
+    const { data } = await axios.post("/api/users/register", input);
     return data;
   } catch (error) {
     const errorList = [];
@@ -40,7 +40,7 @@ const registerUser = async (input) => {
 
 const loginUser = async (input) => {
   try {
-    const { data } = await axios.post("/users/login", input);
+    const { data } = await axios.post("/api/users/login", input);
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
@@ -65,7 +65,7 @@ const logout = async () => {
 
 const getAccount = async () => {
   try {
-    const { data } = await axios.get("/users/account");
+    const { data } = await axios.get("/api/users/account");
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
@@ -78,7 +78,7 @@ const getAccount = async () => {
 
 const updateAccount = async (input) => {
   try {
-    const { data } = await axios.put("/users/account", input, {
+    const { data } = await axios.put("/api/users/account", input, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -108,7 +108,7 @@ const updateAccount = async (input) => {
 
 const deleteAccount = async () => {
   try {
-    await axios.delete("users/account");
+    await axios.delete("/api/users/account");
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
     throw {
@@ -120,7 +120,7 @@ const deleteAccount = async () => {
 
 const enrollCourse = async (courseSlug) => {
   try {
-    const { data } = await axios.post(`/courses/${courseSlug}/enroll`);
+    const { data } = await axios.post(`/api/courses/${courseSlug}/enroll`);
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
@@ -132,7 +132,7 @@ const enrollCourse = async (courseSlug) => {
 };
 const unenrollCourse = async (courseSlug) => {
   try {
-    const { data } = await axios.post(`/courses/${courseSlug}/disenroll`);
+    const { data } = await axios.post(`/api/courses/${courseSlug}/disenroll`);
     return data;
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
