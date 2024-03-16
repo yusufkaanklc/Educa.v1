@@ -4,7 +4,7 @@ const getCategories = async (searchQuery) => {
   try {
     let queryString = "/api/categories";
     if (searchQuery !== "" && searchQuery)
-      queryString = `/categories?categoryName=${searchQuery}`;
+      queryString = `/api/categories?categoryName=${searchQuery}`;
     const { data } = await axios.get(queryString);
     return data;
   } catch (error) {

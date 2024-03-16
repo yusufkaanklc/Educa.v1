@@ -9,7 +9,7 @@ import session from "express-session";
 import connectMongo from "connect-mongodb-session";
 import authMiddlewares from "./middlewares/authMiddlewares.js";
 import fileUpload from "express-fileupload";
-import { dirname, resolve } from "node:path";
+import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 import { config } from "dotenv";
@@ -68,12 +68,13 @@ app.use(
 app.use("/api/users", userRouters);
 app.use("/api/courses", courseRouters);
 app.use("/api/categories", categoryRouters);
+app.use(
+  "/public/uploads",
+  express.static(path.join(__dirname, "public", "uploads"))
+);
 
-app.get("/public/uploads/:file", (req, res) => {
-  const filePath = resolve(__dirname, "public", "uploads", req.params.file);
-  res.sendFile(filePath, {
-    maxAge: 24 * 60 * 60 * 1000 * 30,
-  });
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 app.listen(5000, () => {
