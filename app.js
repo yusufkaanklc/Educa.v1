@@ -10,6 +10,7 @@ import connectMongo from "connect-mongodb-session";
 import authMiddlewares from "./middlewares/authMiddlewares.js";
 import fileUpload from "express-fileupload";
 import { dirname } from "node:path";
+import path from "path";
 import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 import { config } from "dotenv";

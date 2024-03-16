@@ -53,7 +53,7 @@ const loginUser = async (input) => {
 
 const logout = async () => {
   try {
-    await axios.get("/users/logout");
+    await axios.get("/api/users/logout");
   } catch (error) {
     // eslint-disable-next-line no-throw-literal
     throw {
