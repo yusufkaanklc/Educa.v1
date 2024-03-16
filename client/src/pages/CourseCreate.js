@@ -410,8 +410,34 @@ const CourseCreate = () => {
         mt={responsive("1em", "2em", "3em")}
         templateRows="repeat(auto-fill, minmax(1em, auto))"
         templateColumns={responsive("1fr", "repeat(3, 1fr)", "repeat(3, 1fr)")}
-        gap={10}
+        gap={isMobile ? 6 : 10}
       >
+        {isMobile && (
+          <GridItem colSpan={2} rowSpan={2}>
+            <Center
+              fontSize={responsive("sm", "md", "lg")}
+              fontWeight={"500"}
+              borderRadius={"10px"}
+              onClick={() => {
+                courseSlug
+                  ? handleLessonCreateSubmit(courseSlug)
+                  : handleCreateCourseSubmit();
+              }}
+              border={"2px dashed var(--secondary-color)"}
+              p={responsive(".5em", "1em", "1em")}
+              color={"white"}
+              bgColor={"var(--secondary-color)"}
+              transition={"all .3s ease"}
+              _hover={{
+                bgColor: "white",
+                color: "var(--secondary-color)",
+                cursor: "pointer",
+              }}
+            >
+              Create
+            </Center>
+          </GridItem>
+        )}
         <GridItem
           position={"relative"}
           rowSpan={10}

@@ -343,7 +343,7 @@ const Dashboard = () => {
             "repeat(auto-fill, minmax(1em, auto))"
           )}
           templateColumns={responsive(
-            "auto",
+            "1fr",
             "repeat(3, 1fr)",
             "repeat(3, 1fr)"
           )}
