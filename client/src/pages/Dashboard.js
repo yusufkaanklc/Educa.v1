@@ -294,9 +294,9 @@ const Dashboard = () => {
     <>
       <Box
         bgColor={"white"}
-        border={"2px dashed #cfcfcf"}
+        border={!isMobile && "2px dashed #cfcfcf"}
         borderRadius={"10px"}
-        p={responsive("1em", "1em ", "2em")}
+        p={responsive("", "1em ", "2em")}
         mx={responsive("1em", "8em", "10em")}
         my={responsive("2em", "2em", "3em")}
       >

@@ -182,8 +182,10 @@ const Enrollments = () => {
           duration: 5000,
           isClosable: true,
         });
+        if (commentDeleteList.length > 0) {
+          commentsDeleteFunc();
+        }
       })
-
       .catch((error) => {
         // Hata durumunda hatayı kaydedin
         setErrors([...errors, error]);
@@ -489,7 +491,7 @@ const Enrollments = () => {
                       variant={"outline"}
                       onClick={() => {
                         setCommentsEdit(!commentsEdit);
-                        commentsDeleteFunc();
+
                         handleCommentsSubmit();
                       }}
                       bgColor={"var(--secondary-color)"}
